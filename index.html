@@ -910,7 +910,18 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
         <h3 style="margin-top:16px" data-i18n="a_list"></h3>
         <p class="hint" id="acctStatus"></p>
         <p class="hint" id="acctScope"></p>
-        <div class="set-row"><button class="btn" id="btnRoster" data-i18n="a_refresh"></button></div>
+        <div class="set-row">
+          <button class="btn" id="btnRoster" data-i18n="a_refresh"></button>
+          <button class="btn" id="btnSyncNames" data-i18n="a_syncnames"></button>
+        </div>
+        <div class="set-row">
+          <label for="setAdminName" data-i18n="a_adminname"></label>
+          <select id="setAdminName">
+            <option value="0" data-i18n="a_adminname_off"></option>
+            <option value="1" data-i18n="a_adminname_on"></option>
+          </select>
+        </div>
+        <p class="hint" data-i18n="a_syncnames_hint"></p>
         <div id="acctList"></div>
         <div class="set-row" style="margin-top:12px">
           <button class="btn danger" id="btnRevokeAll" data-i18n="a_revoke"></button>
@@ -1476,7 +1487,7 @@ const DEFAULT_SETTINGS = {
   refreshMin:30, sort:'signal', filter:'all',
   planAmount:500, planMonthly:0, planProfile:'balanced',
   scanHours:3, trApp:1, mvPeriod:'d1', mvDir:'up',
-  staleMin:15, status:'all', fbUrl:'', fbKey:'', contactMail:'', guestOff:false, sortDir:'desc', adminMail:'',
+  staleMin:15, status:'all', fbUrl:'', fbKey:'', contactMail:'', guestOff:false, adminNameLogin:false, sortDir:'desc', adminMail:'',
   linkSrc:'tr', tvTemplate:'https://www.tradingview.com/chart/?symbol={sym}', dispCur:'auto',
   screen:null
 };
@@ -1485,6 +1496,10 @@ const DEFAULT_SETTINGS = {
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  a_syncnames:'Benutzernamen freischalten',
+  a_syncnames_done:'{n} Benutzernamen freigeschaltet, {s} übersprungen. Jetzt geht die Anmeldung auch mit Namen.',
+  a_syncnames_hint:'Konten, die vor dieser Funktion angelegt wurden, haben noch keinen Namens-Eintrag und können sich nur mit E-Mail anmelden. Ein Tipp auf „Benutzernamen freischalten" legt die fehlenden Einträge für alle an. Der Admin bleibt dabei absichtlich außen vor: der Eintrag verrät die Adresse hinter einem Namen, und deine Admin-Adresse soll ja privat bleiben. Wenn dir das egal ist oder dein Firebase-Konto ohnehin auf der Alias-Adresse läuft, kannst du es unten einschalten.',
+  a_adminname:'Admin per Benutzername', a_adminname_off:'nur E-Mail (privat)', a_adminname_on:'Name erlauben',
   fa_no_contact:'Es ist keine Kontakt-Adresse hinterlegt. Bitte den Admin auf anderem Weg erreichen.',
   fa_user_unknown:'Unbekannter Benutzername. Bitte den Benutzernamen genau so eingeben wie bei der Registrierung, oder die E-Mail-Adresse verwenden.',
   fa_no_profile:'Kein Zugang. Dieses Konto wurde entfernt oder ist nicht freigeschaltet.',
@@ -1705,6 +1720,10 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  a_syncnames:'Enable usernames',
+  a_syncnames_done:'{n} usernames enabled, {s} skipped. Signing in by name now works.',
+  a_syncnames_hint:'Accounts created before this feature have no name entry and can only sign in by e-mail. One tap on "Enable usernames" creates the missing entries for everyone. The admin is deliberately left out: an entry reveals the address behind a name, and your admin address is meant to stay private. If you do not mind, or your Firebase account already uses the alias address, switch it on below.',
+  a_adminname:'Admin by username', a_adminname_off:'e-mail only (private)', a_adminname_on:'allow name',
   fa_no_contact:'No contact address is configured. Please reach the admin another way.',
   fa_user_unknown:'Unknown username. Enter it exactly as at registration, or use the e-mail address instead.',
   fa_no_profile:'No access. This account was removed or is not enabled.',
@@ -2956,6 +2975,7 @@ function renderSettingsValues(){
   $('#setMail').value=settings.adminMail||'';
   $('#setContact').value=settings.contactMail||'';
   if($('#setGuestOff')) $('#setGuestOff').value=settings.guestOff?'1':'0';
+  if($('#setAdminName')) $('#setAdminName').value=settings.adminNameLogin?'1':'0';
   $('#setFb').value=settings.fbUrl||DEPLOY.fb||'';
   $('#setFbKey').value=settings.fbKey||DEPLOY.fbkey||'';
   if($('#hdCur')) $('#hdCur').value=settings.dispCur;
@@ -3453,7 +3473,7 @@ async function fbRegister(user, email, pw, pw2, code){
   try{ await fbAuthSet('/users/' + j.localId, {name:u, email:fbSession.email, at:Date.now()}); }
   catch(e){ return 'a_sync_fail'; }
   /* the admin is left out on purpose: no lookup entry, no exposed address */
-  if(!(await isAdminEmailAsync(fbSession.email))){
+  if(settings.adminNameLogin || !(await isAdminEmailAsync(fbSession.email))){
     try{ await fbAuthSet('/usernames/' + u, fbSession.email); }catch(e){}
   }
   return null;
@@ -3507,6 +3527,23 @@ function fbProjectId(){
 function fbUsersConsoleUrl(){
   const p = fbProjectId();
   return p ? 'https://console.firebase.google.com/project/' + p + '/authentication/users' : '';
+}
+/* Accounts created before the username lookup existed have no entry. The admin
+   may overwrite any name, so a single pass repairs the whole roster.         */
+async function syncUsernames(){
+  if(!fbSession) return {ok:0, skip:0};
+  let rows = [];
+  try{ rows = await fbRoster(); }catch(e){ return {ok:0, skip:0, err:true}; }
+  let ok = 0, skip = 0;
+  for(const r of rows){
+    const name = String(r.name||'').trim().toLowerCase();
+    if(!name || name.indexOf('@') >= 0){ skip++; continue; }
+    const isAdmin = await isAdminEmailAsync(r.email);
+    if(isAdmin && !settings.adminNameLogin){ skip++; continue; }   // keep admin address unlisted
+    try{ if(await fbAuthSet('/usernames/' + encodeURIComponent(name), r.email)) ok++; else skip++; }
+    catch(e){ skip++; }
+  }
+  return {ok, skip};
 }
 async function fbRoster(){
   const all = await fbAuthGet('/users');
@@ -3731,6 +3768,16 @@ function bindEvents(){
     saveSettings(); toast(t('saved')); refreshRoster();
   });
   $('#btnRoster').addEventListener('click', ()=>{ refreshRoster(); toast(t('a_refresh')); });
+  $('#btnSyncNames').addEventListener('click', async ()=>{
+    if(!fbAuthOn() || !fbSession){ toast(t('fa_no_session')); return; }
+    toast(t('fa_wait'));
+    const r = await syncUsernames();
+    toast(r.err ? t('fa_roster_fail')
+                : t('a_syncnames_done').replace('{n}', r.ok).replace('{s}', r.skip));
+  });
+  $('#setAdminName').addEventListener('change', e=>{
+    settings.adminNameLogin = e.target.value === '1'; saveSettings(); toast(t('saved'));
+  });
   $('#setFbKey').addEventListener('change', e=>{ settings.fbKey=e.target.value.trim(); saveSettings(); toast(t('saved')); refreshRoster(); });
   $('#btnFxTest').addEventListener('click', async ()=>{
     $('#fxDiagOut').textContent = t('fx_loading');
