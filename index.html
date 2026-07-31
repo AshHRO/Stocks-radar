@@ -561,6 +561,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
         <button class="chip" id="sortDir" title="">↓</button></span>
       </div>
 
+      <p class="hint hidden" id="guestNote" data-i18n="wl_local_note"></p>
       <div id="cardGrid"></div>
       <p id="emptyMsg" class="hidden" data-i18n="empty"></p>
     </section>
@@ -1042,6 +1043,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
         <a class="btn" id="dTV" target="_blank" rel="noopener">TradingView ↗</a>
         <button class="btn" id="dCopyIsin" data-i18n="copy_isin"></button>
         <button class="btn ghost" id="dRefreshOne" data-i18n="refresh"></button>
+        <button class="btn danger" id="dRemove" data-i18n="wl_remove"></button>
       </div>
       <p id="dStamp"></p>
     </div>
@@ -1502,6 +1504,9 @@ const DEFAULT_SETTINGS = {
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  wl_remove:'Von meiner Liste entfernen',
+  wl_remove_ask:'„{n}" von deiner Watchlist entfernen? Das betrifft nur deine eigene Liste.',
+  wl_local_note:'Als Gast bleibt deine Liste nur auf diesem Gerät. Mit einem Konto wandert sie mit.',
   sy_save:'Jetzt sichern', sy_load:'Vom Konto laden',
   sy_saved:'Watchlist und Einstellungen im Konto gesichert', sy_loaded:'Vom Konto geladen',
   sy_empty:'Für dieses Konto ist noch nichts gespeichert', sy_fail:'Sichern fehlgeschlagen',
@@ -1731,6 +1736,9 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  wl_remove:'Remove from my list',
+  wl_remove_ask:'Remove "{n}" from your watchlist? This only affects your own list.',
+  wl_local_note:'As a guest your list stays on this device. With an account it travels with you.',
   sy_save:'Save now', sy_load:'Load from account',
   sy_saved:'Watchlist and settings saved to your account', sy_loaded:'Loaded from your account',
   sy_empty:'Nothing stored for this account yet', sy_fail:'Saving failed',
@@ -3375,6 +3383,8 @@ function applyRoleUI(){
     const ov = document.querySelector('#tabbar [data-tab="overview"]');
     if(ov) ov.click();
   }
+  const note = $('#guestNote');
+  if(note) note.classList.toggle('hidden', !guestMode);
   const chip = $('#userChip');
   if(chip){
     chip.classList.toggle('hidden', guestMode || !currentUser || currentUser === 'admin');
@@ -3954,6 +3964,17 @@ function bindEvents(){
   $('#dTR').addEventListener('click',e=>{ e.preventDefault(); const a=assetBySym(detailSym); openWith('tr', a&&a.isin, detailSym); });
   $('#dTV').addEventListener('click',e=>{ e.preventDefault(); openWith('tv', null, detailSym); });
   $('#dRefreshOne').addEventListener('click',()=>refreshOne(detailSym));
+  $('#dRemove').addEventListener('click',()=>{
+    const a = assetBySym(detailSym); if(!a) return;
+    if(!confirm(t('wl_remove_ask').replace('{n}', a.name || a.sym))) return;
+    const i = watchlist.findIndex(x => x.sym === detailSym);
+    if(i < 0) return;
+    watchlist.splice(i, 1);
+    store.set('watchlist', watchlist);          // syncs to the account when signed in
+    delete analyses[detailSym];
+    closeDetail(); renderWl(); renderAll(); renderMovers(); renderScreen();
+    toast(t('removed'));
+  });
   let rsTo; window.addEventListener('resize',()=>{ clearTimeout(rsTo); rsTo=setTimeout(()=>{ renderCards(); renderMovers(); if(detailSym) drawDetail(); if(planState) drawPlanChart(); },150); });
   $('#btnPlan').addEventListener('click', renderPlan);
   $('#planOut').addEventListener('click',e=>{
