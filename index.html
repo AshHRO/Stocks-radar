@@ -781,6 +781,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
             <option value="GBP">GBP £</option><option value="CHF">CHF</option>
           </select>
         </div>
+        <p class="hint" id="fxNote"></p>
         <div class="set-row">
           <label for="setTv" data-i18n="s_tv"></label>
           <input type="text" id="setTv">
@@ -1437,6 +1438,9 @@ const DEFAULT_SETTINGS = {
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  fx_loading:'Wechselkurse werden geladen …',
+  fx_fail:'Wechselkurse nicht erreichbar. Die Beträge bleiben in der jeweiligen Handelswährung.',
+  fx_note:'Alle Beträge in {cur}, umgerechnet mit {src}. Der tatsächliche Handelspreis in dieser Währung kann leicht abweichen.',
   dl_btn:'Fertige Datei herunterladen',
   dl_ok:'index.html heruntergeladen - diese Datei jetzt bei GitHub hochladen und die alte ersetzen.',
   dl_local:'Das geht nur, wenn die Seite über eine Adresse läuft (GitHub Pages), nicht als lokale Datei. Dann bitte die Zeile von Hand ersetzen.',
@@ -1618,6 +1622,9 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  fx_loading:'Loading exchange rates …',
+  fx_fail:'Exchange rates unreachable. Amounts stay in their own trading currency.',
+  fx_note:'All amounts in {cur}, converted at {src}. The actual traded price in that currency can differ slightly.',
   dl_btn:'Download the finished file',
   dl_ok:'index.html downloaded - now upload this file to GitHub, replacing the old one.',
   dl_local:'This only works when the page runs from an address (GitHub Pages), not as a local file. Replace the line by hand in that case.',
@@ -1991,14 +1998,41 @@ function fmtPct(v, o={}){ const signed = o.signed !== false, d = o.d ?? 1;
 const FX_LIST = ['USD','GBP','CHF','DKK','SEK','NOK','JPY','HKD','KRW','CAD','AUD'];
 let fxRates = store.get('fx', {r:{EUR:1}, at:0});
 async function loadFx(force){
-  if(!force && fxRates.at && (Date.now()-fxRates.at) < 12*3600000) return;
-  const r = {EUR:1};
+  const have = Object.keys(fxRates.r || {}).length;
+  if(!force && fxRates.at && (Date.now()-fxRates.at) < 12*3600000 && have > 3) return true;
+  /* ECB daily reference rates: one request, sends CORS headers, so no proxy is
+     involved. The old path needed 11 calls through the flaky proxy and, when
+     they failed, stored nothing - switching currency then did nothing at all. */
+  try{
+    const j = await fetchJson('https://api.frankfurter.app/latest?from=EUR&to=' + FX_LIST.join(','), 9000);
+    if(j && j.rates && Object.keys(j.rates).length){
+      fxRates = {r: Object.assign({EUR:1}, j.rates), at: Date.now(), src: 'EZB/ECB ' + (j.date || '')};
+      try{ store.set('fx', fxRates); }catch(e){}
+      return true;
+    }
+  }catch(e){}
+  const r = {EUR:1};                                   // fallback: Yahoo pairs via proxy
   for(const c of FX_LIST){
     try{ const d = parseChart(await viaProxy(chartUrl('EUR'+c+'=X','5d'))); r[c] = d.c[d.c.length-1]; }
     catch(e){}
-    await sleep(120);
+    await sleep(100);
   }
-  if(Object.keys(r).length > 1){ fxRates = {r, at:Date.now()}; try{ store.set('fx', fxRates); }catch(e){} }
+  if(Object.keys(r).length > 1){
+    fxRates = {r, at:Date.now(), src:'Yahoo'};
+    try{ store.set('fx', fxRates); }catch(e){}
+    return true;
+  }
+  return false;
+}
+function fxReady(cur){
+  if(!cur || cur === 'auto') return true;
+  return isFinite((fxRates.r || {})[cur]);
+}
+function fxNoteText(){
+  const c = settings.dispCur;
+  if(!c || c === 'auto') return '';
+  if(!fxReady(c)) return t('fx_fail');
+  return t('fx_note').replace('{src}', fxRates.src || '?').replace('{cur}', c);
 }
 /* rates are "units per 1 EUR", so any pair goes through EUR */
 function convert(v, from, to){
@@ -2760,6 +2794,7 @@ function renderSettingsValues(){
   $('#setCur').value=settings.dispCur;
   $('#setMail').value=settings.adminMail||'';
   if($('#hdCur')) $('#hdCur').value=settings.dispCur;
+  if($('#fxNote')) $('#fxNote').textContent=fxNoteText();
   if($('#hdSrc')) $('#hdSrc').value=settings.linkSrc;
   $('#setStale').value=settings.staleMin;
   $('#setTrApp').value=String(settings.trApp);
@@ -3182,7 +3217,7 @@ function unlock(isGuest){
   $('#app').classList.remove('hidden');
   for(const asset of watchlist){ const s=seriesMap[asset.sym]; if(s) analyses[asset.sym]=analyze(asset,s); }
   applyLang(); applyGuestUI(); applyRoleUI(); scheduleAuto(); refreshAll();
-  if(settings.dispCur && settings.dispCur!=='auto') loadFx(false).then(()=>{ renderAll(); renderMovers(); renderScreen(); });
+  if(settings.dispCur && settings.dispCur!=='auto') loadFx(false).then(()=>{ if(window.__repaintMoney) window.__repaintMoney(); });
 }
 function lockNow(){
   store.del('authed'); $('#liPw').value=''; currentUser=''; isAdmin=true;
@@ -3342,10 +3377,26 @@ function bindEvents(){
   function applySrc(v){ settings.linkSrc=v; saveSettings();
     if($('#setSrc')) $('#setSrc').value=v; if($('#hdSrc')) $('#hdSrc').value=v;
     renderAll(); renderMovers(); renderScreen(); if(detailSym) fillDetail(); }
-  async function applyCur(v){ settings.dispCur=v; saveSettings();
-    if($('#setCur')) $('#setCur').value=v; if($('#hdCur')) $('#hdCur').value=v;
-    if(v!=='auto') await loadFx(false);
-    renderAll(); renderMovers(); renderScreen(); if(planState) renderPlan(); if(detailSym){ fillDetail(); drawDetail(); } }
+  function repaintMoney(){
+    renderAll(); renderMovers(); renderScreen();
+    if(planState) renderPlan();
+    if(detailSym){ fillDetail(); drawDetail(); }
+    const n = $('#fxNote'); if(n) n.textContent = fxNoteText();
+  }
+  window.__repaintMoney = repaintMoney;
+  async function applyCur(v){
+    settings.dispCur = v; saveSettings();
+    if($('#setCur')) $('#setCur').value = v;
+    if($('#hdCur')) $('#hdCur').value = v;
+    repaintMoney();                                  // instant, with whatever rates are cached
+    if(v === 'auto') return;
+    if(!fxReady(v)){
+      toast(t('fx_loading'));
+      const ok = await loadFx(false);
+      repaintMoney();
+      if(!ok || !fxReady(v)) toast(t('fx_fail'));
+    }
+  }
   $('#setSrc').addEventListener('change', e=>applySrc(e.target.value));
   $('#hdSrc').addEventListener('change', e=>applySrc(e.target.value));
   $('#setCur').addEventListener('change', e=>applyCur(e.target.value));
