@@ -1970,7 +1970,7 @@ let watchlist = store.get('watchlist', null) || DEFAULT_ASSETS.map(sym => ({...C
 let seriesMap = store.get('cache', {});
 let analyses = {};
 /* ---- deployment key: replace this line with the snippet from Settings > Publishing ---- */
-const DEPLOY = {salt:'', hash:'', gsec:'', inv:'', epoch:1};
+const DEPLOY = {salt:'aa08dd9c99c6466607e1e707c7bc515a', hash:'67d6b64fc0a060b161d5e1de874dac76b93214c1ee6d62b15cf0735512377a3c', gsec:'cdb15d11193ac0af7fd1e50feaf0d24e', inv:'9496106bae120322317edf397c96e250', epoch:1};
 
 let auth = store.get('auth', null) || (DEPLOY.hash ? {salt:DEPLOY.salt, hash:DEPLOY.hash, baked:true} : null);
 let guestMode = false, guestUntil = 0, guestTimer = null;
