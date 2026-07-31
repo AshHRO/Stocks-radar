@@ -457,7 +457,8 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
       <p class="lock-hint" data-i18n="dep_intro"></p>
       <textarea id="depOut" readonly rows="3"></textarea>
       <div class="lock-actions">
-        <button class="btn primary" id="btnDepCopy" data-i18n="dep_copy"></button>
+        <button class="btn primary" id="btnDepDl" data-i18n="dl_btn"></button>
+        <button class="btn" id="btnDepCopy" data-i18n="dep_copy"></button>
         <button class="lock-forgot" id="btnDepSkip" data-i18n="dep_later"></button>
       </div>
       <p class="hint" data-i18n="dep_steps"></p>
@@ -905,7 +906,11 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
 
       <div class="set-group">
         <h3 data-i18n="d_title"></h3>
-        <div class="set-row"><button class="btn" id="btnDeploy" data-i18n="d_make"></button></div>
+        <div class="set-row">
+          <button class="btn primary" id="btnDownloadCfg" data-i18n="dl_btn"></button>
+          <button class="btn" id="btnDeploy" data-i18n="d_make"></button>
+        </div>
+        <p class="hint" data-i18n="dl_hint"></p>
         <textarea id="deployArea" readonly data-i18n-ph="d_ph"></textarea>
         <p class="hint" data-i18n="d_hint"></p>
       </div>
@@ -1432,6 +1437,12 @@ const DEFAULT_SETTINGS = {
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  dl_btn:'Fertige Datei herunterladen',
+  dl_ok:'index.html heruntergeladen - diese Datei jetzt bei GitHub hochladen und die alte ersetzen.',
+  dl_local:'Das geht nur, wenn die Seite über eine Adresse läuft (GitHub Pages), nicht als lokale Datei. Dann bitte die Zeile von Hand ersetzen.',
+  dl_nomarker:'Die DEPLOY-Zeile wurde in der Datei nicht gefunden - bitte von Hand ersetzen.',
+  dl_fail:'Datei konnte nicht gelesen werden - bitte die Zeile von Hand ersetzen.',
+  dl_hint:'Der Knopf lädt diese Seite neu ein, setzt deinen Schlüssel an die richtige Stelle und gibt dir die fertige index.html zurück. Du musst also nichts von Hand im Quelltext ändern, sondern die heruntergeladene Datei nur noch bei GitHub hochladen.',
   dep_intro:'Passwort gesetzt. Ein letzter Schritt, sonst gilt dieses Passwort nur in diesem Browser:',
   dep_copy:'Zeile kopieren', dep_later:'Später, erstmal öffnen',
   dep_steps:'1. Zeile kopieren. 2. In index.html die Zeile ersetzen, die mit „const DEPLOY = " beginnt. 3. Datei neu hochladen. Danach funktioniert dieses Passwort in jedem Browser, und Einladungs- und Gast-Codes lassen sich überall prüfen.',
@@ -1607,6 +1618,12 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  dl_btn:'Download the finished file',
+  dl_ok:'index.html downloaded - now upload this file to GitHub, replacing the old one.',
+  dl_local:'This only works when the page runs from an address (GitHub Pages), not as a local file. Replace the line by hand in that case.',
+  dl_nomarker:'The DEPLOY line was not found in the file - please replace it by hand.',
+  dl_fail:'Could not read the file - please replace the line by hand.',
+  dl_hint:'The button re-reads this page, puts your key in the right place and hands back the finished index.html. So you never edit the source by hand - just upload the downloaded file to GitHub.',
   dep_intro:'Password set. One last step, otherwise this password only counts in this browser:',
   dep_copy:'Copy the line', dep_later:'Later, open it first',
   dep_steps:'1. Copy the line. 2. In index.html replace the line starting with "const DEPLOY = ". 3. Upload the file again. After that this password works in every browser, and invitation and guest codes can be verified anywhere.',
@@ -2994,6 +3011,26 @@ function deploySnippet(){
   return "const DEPLOY = {salt:'" + auth.salt + "', hash:'" + auth.hash
     + "', gsec:'" + gsec + "', inv:'" + isec + "', epoch:" + deployEpoch() + "};";
 }
+/* Fetches this very page, swaps the DEPLOY line for the real one and offers the
+   result as a download - so nobody has to hand-edit a 260 kB file.            */
+async function downloadConfigured(){
+  if(!auth) return 'g_nosec';
+  if(location.protocol === 'file:') return 'dl_local';
+  try{
+    const res = await fetch(location.href, {cache:'no-store'});
+    if(!res.ok) throw new Error('http ' + res.status);
+    let html = await res.text();
+    const re = /^const DEPLOY = \{[^{}]*\};/m;   // anchored: only the real declaration, never the builder string
+    if(!re.test(html)) return 'dl_nomarker';
+    html = html.replace(re, deploySnippet());
+    const url = URL.createObjectURL(new Blob([html], {type:'text/html'}));
+    const a = document.createElement('a');
+    a.href = url; a.download = 'index.html';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 8000);
+    return null;
+  }catch(e){ return 'dl_fail'; }
+}
 function bumpEpoch(){
   const next = deployEpoch() + 1;
   store.set('epoch', next);
@@ -3448,6 +3485,12 @@ function bindEvents(){
   });
   $('#btnCopyInvite').addEventListener('click',()=>{ const v=$('#invOut').value; if(v) copyText(v); });
   $('#btnDepCopy').addEventListener('click',()=>{ const v=$('#depOut').value; if(v) copyText(v); });
+  async function runDownload(){
+    const bad = await downloadConfigured();
+    toast(t(bad || 'dl_ok'));
+  }
+  $('#btnDepDl').addEventListener('click', runDownload);
+  $('#btnDownloadCfg').addEventListener('click', runDownload);
   $('#btnDepSkip').addEventListener('click',()=>{ $('#lockDeploy').classList.add('hidden'); unlock(); });
   $('#acctList').addEventListener('click',e=>{
     const rb=e.target.closest('[data-resetacct]');
