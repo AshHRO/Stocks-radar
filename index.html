@@ -219,6 +219,14 @@ canvas#dChart{display:block; width:100%; height:280px}
 textarea#backupArea{width:100%; min-height:110px; font-family:var(--mono); font-size:12px}
 .hint{font-size:12px; color:var(--faint); margin:6px 0 0}
 
+/* ============ Screener ============ */
+.sc-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(168px,1fr)); gap:9px; margin-bottom:12px}
+.sc-grid label{display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--faint); font-family:var(--mono)}
+.sc-grid select{width:100%; font-size:13.5px; text-transform:none; letter-spacing:0; font-family:var(--sans)}
+#scMeta{font-family:var(--mono); font-size:11px; color:var(--faint); margin:0 0 12px}
+#scList .mv-id .chips span{font-size:10.5px; padding:1px 5px}
+
 /* ============ Time travel ============ */
 .travel{margin:10px 0 2px}
 .travel-btns{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px}
@@ -229,6 +237,7 @@ textarea#backupArea{width:100%; min-height:110px; font-family:var(--mono); font-
 .badge.b-fresh{border-color:var(--up); color:var(--up); font-family:var(--mono)}
 
 /* ============ Guest ============ */
+#userChip{font-family:var(--mono); font-size:11px; color:var(--accent); border:1px solid var(--accent); border-radius:999px; padding:3px 9px; white-space:nowrap}
 #guestChip{font-family:var(--mono); font-size:11px; color:var(--warn); border:1px solid var(--warn); border-radius:999px; padding:3px 9px; white-space:nowrap}
 #lockGuest{border-top:1px solid var(--line); margin-top:18px; padding-top:14px}
 #lockGuest input{width:100%; padding:11px 12px; border-radius:var(--r-s); border:1px solid var(--line); background:var(--panel2); color:var(--ink); font-size:16px; font-family:var(--mono); letter-spacing:.08em; text-transform:uppercase}
@@ -378,13 +387,32 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
     </div>
 
     <div id="lockLogin" class="hidden">
+      <label for="liUser" data-i18n="a_user"></label>
+      <input type="text" id="liUser" autocomplete="username" spellcheck="false" placeholder="admin">
       <label for="liPw" data-i18n="pw"></label>
       <input type="password" id="liPw" autocomplete="current-password">
       <label class="lock-keep"><input type="checkbox" id="liKeep"> <span data-i18n="keep"></span></label>
       <p class="lock-err" id="liErr"></p>
       <div class="lock-actions">
         <button class="btn primary" id="btnLogin" data-i18n="unlock"></button>
+        <button class="lock-forgot" id="btnHaveInvite" data-i18n="a_have_invite"></button>
         <button class="lock-forgot" id="btnForgot" data-i18n="forgot"></button>
+      </div>
+    </div>
+
+    <div id="lockNew" class="hidden">
+      <label for="nwCode" data-i18n="a_invite"></label>
+      <input type="text" id="nwCode" autocomplete="off" spellcheck="false" placeholder="KXXXX-XXXXXXX-XXXXXX">
+      <label for="nwUser" data-i18n="a_user"></label>
+      <input type="text" id="nwUser" autocomplete="username" spellcheck="false">
+      <label for="nwPw" data-i18n="pw"></label>
+      <input type="password" id="nwPw" autocomplete="new-password">
+      <label for="nwPw2" data-i18n="pw2"></label>
+      <input type="password" id="nwPw2" autocomplete="new-password">
+      <p class="lock-err" id="nwErr"></p>
+      <div class="lock-actions">
+        <button class="btn primary" id="btnCreateAcct" data-i18n="a_create"></button>
+        <button class="lock-forgot" id="btnBackLogin" data-i18n="a_back"></button>
       </div>
     </div>
 
@@ -406,6 +434,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
         <h1>DEPOT·RADAR</h1>
         <small data-i18n="tagline"></small>
       </div>
+      <span id="userChip" class="hidden"></span>
       <span id="guestChip" class="hidden"></span>
       <span id="lastUpdate"></span>
       <button class="btn icon ghost" id="btnRefresh" title="Refresh">⟳</button>
@@ -418,6 +447,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
   <nav id="tabbar">
     <button class="tab on" data-tab="overview" data-i18n="tab_overview"></button>
     <button class="tab" data-tab="movers" data-i18n="tab_movers"></button>
+    <button class="tab" data-tab="screen" data-i18n="tab_screen"></button>
     <button class="tab" data-tab="plan" data-i18n="tab_plan"></button>
     <button class="tab" data-tab="universe" data-i18n="tab_universe"></button>
     <button class="tab" data-tab="learn" data-i18n="tab_learn"></button>
@@ -476,6 +506,95 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
       <div id="mvProgress" class="hidden"><i></i></div>
       <p id="mvMeta"></p>
       <div id="mvList"></div>
+    </section>
+
+    <!-- ---------- SCREENER ---------- -->
+    <section class="panel" id="panel-screen">
+      <p class="plan-intro" data-i18n="sc_intro"></p>
+      <div class="sc-grid">
+        <label><span data-i18n="sc_preset"></span>
+          <select id="scPreset">
+            <option value="trade" data-i18n="sc_p_trade"></option>
+            <option value="invest" data-i18n="sc_p_invest"></option>
+            <option value="breakout" data-i18n="sc_p_breakout"></option>
+            <option value="momentum" data-i18n="sc_p_momentum"></option>
+            <option value="custom" data-i18n="sc_p_custom"></option>
+          </select></label>
+        <label><span data-i18n="sc_type"></span>
+          <select id="scType">
+            <option value="all" data-i18n="f_all"></option>
+            <option value="stock" data-i18n="f_stock"></option>
+            <option value="etf" data-i18n="f_etf"></option>
+          </select></label>
+        <label><span data-i18n="sc_above"></span>
+          <select id="scAbove">
+            <option value="any" data-i18n="sc_any"></option>
+            <option value="sma20">SMA 20</option>
+            <option value="ema20">EMA 20</option>
+            <option value="sma50">SMA 50</option>
+            <option value="sma200">SMA 200</option>
+          </select></label>
+        <label><span data-i18n="sc_day"></span>
+          <select id="scDay">
+            <option value="any" data-i18n="sc_any"></option>
+            <option value="0">&gt; 0 %</option><option value="2">&gt; 2 %</option>
+            <option value="4">&gt; 4 %</option><option value="6">&gt; 6 %</option>
+          </select></label>
+        <label><span data-i18n="sc_month"></span>
+          <select id="scMonth">
+            <option value="any" data-i18n="sc_any"></option>
+            <option value="0">&gt; 0 %</option><option value="5">&gt; 5 %</option>
+            <option value="10">&gt; 10 %</option><option value="20">&gt; 20 %</option>
+          </select></label>
+        <label><span data-i18n="sc_rsi"></span>
+          <select id="scRsi">
+            <option value="any" data-i18n="sc_any"></option>
+            <option value="gt40">&gt; 40</option><option value="gt50">&gt; 50</option>
+            <option value="band">40 – 70</option><option value="lt30">&lt; 30</option>
+          </select></label>
+        <label><span data-i18n="sc_minp"></span>
+          <select id="scMinp">
+            <option value="any" data-i18n="sc_any"></option>
+            <option value="10">≥ 10</option><option value="20">≥ 20</option><option value="50">≥ 50</option>
+          </select></label>
+        <label><span data-i18n="sc_turn"></span>
+          <select id="scTurn">
+            <option value="any" data-i18n="sc_any"></option>
+            <option value="100000">≥ 100k</option><option value="500000">≥ 500k</option>
+            <option value="1000000">≥ 1 Mio</option><option value="5000000">≥ 5 Mio</option>
+          </select></label>
+        <label><span data-i18n="sc_mcap"></span>
+          <select id="scMcap">
+            <option value="any" data-i18n="sc_any"></option>
+            <option value="500000000">≥ 500 Mio</option><option value="2000000000">≥ 2 Mrd</option>
+            <option value="10000000000">≥ 10 Mrd</option><option value="100000000000">≥ 100 Mrd</option>
+          </select></label>
+        <label><span data-i18n="sc_mom"></span>
+          <select id="scMom">
+            <option value="any" data-i18n="sc_any"></option>
+            <option value="start" data-i18n="sc_mom_start"></option>
+          </select></label>
+        <label><span data-i18n="sc_sort"></span>
+          <select id="scSort">
+            <option value="d1" data-i18n="sc_s_d1"></option>
+            <option value="d5" data-i18n="sc_s_d5"></option>
+            <option value="d21" data-i18n="sc_s_d21"></option>
+            <option value="d63" data-i18n="sc_s_d63"></option>
+            <option value="d252" data-i18n="sc_s_d252"></option>
+            <option value="rsi">RSI</option>
+            <option value="turn" data-i18n="sc_s_turn"></option>
+            <option value="name" data-i18n="sort_name"></option>
+          </select></label>
+      </div>
+      <div class="mv-bar">
+        <button class="btn primary" id="btnScreen" data-i18n="sc_apply"></button>
+        <button class="btn ghost" id="btnScReset" data-i18n="sc_reset"></button>
+        <span class="spacer"></span>
+        <button class="btn icon ghost" id="btnScScan" title="Scan">⟳</button>
+      </div>
+      <p id="scMeta"></p>
+      <div id="scList"></div>
+      <p class="hint" data-i18n="sc_mcap_hint"></p>
     </section>
 
     <!-- ---------- PLAN ---------- -->
@@ -583,6 +702,25 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
           <input type="number" id="setScan" min="0" max="72" step="1">
         </div>
         <div class="set-row">
+          <label for="setSrc" data-i18n="s_src"></label>
+          <select id="setSrc">
+            <option value="tr" data-i18n="s_src_tr"></option>
+            <option value="tv" data-i18n="s_src_tv"></option>
+          </select>
+        </div>
+        <div class="set-row">
+          <label for="setCur" data-i18n="s_cur"></label>
+          <select id="setCur">
+            <option value="auto" data-i18n="s_cur_auto"></option>
+            <option value="EUR">EUR €</option><option value="USD">USD $</option>
+            <option value="GBP">GBP £</option><option value="CHF">CHF</option>
+          </select>
+        </div>
+        <div class="set-row">
+          <label for="setTv" data-i18n="s_tv"></label>
+          <input type="text" id="setTv">
+        </div>
+        <div class="set-row">
           <label for="setTr" data-i18n="s_tr"></label>
           <input type="text" id="setTr">
         </div>
@@ -639,6 +777,29 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
         <div class="set-row"><button class="btn" id="btnCheckCat" data-i18n="chk_go"></button></div>
         <p class="hint" id="chkOut"></p>
         <p class="hint" data-i18n="chk_hint"></p>
+      </div>
+
+      <div class="set-group">
+        <h3 data-i18n="a_title"></h3>
+        <div class="set-row">
+          <label for="invDur" data-i18n="a_dur"></label>
+          <select id="invDur">
+            <option value="60">1 h</option><option value="1440">24 h</option>
+            <option value="10080">7 Tage / days</option><option value="43200">30 Tage / days</option>
+          </select>
+          <button class="btn primary" id="btnMakeInvite" data-i18n="a_make"></button>
+        </div>
+        <div class="set-row">
+          <input type="text" id="invOut" readonly>
+          <button class="btn" id="btnCopyInvite" data-i18n="g_copy"></button>
+        </div>
+        <p class="hint" id="invInfo"></p>
+        <h3 style="margin-top:16px" data-i18n="a_list"></h3>
+        <div id="acctList"></div>
+        <div class="set-row" style="margin-top:12px">
+          <button class="btn danger" id="btnRevokeAll" data-i18n="a_revoke"></button>
+        </div>
+        <p class="hint" data-i18n="a_hint"></p>
       </div>
 
       <div class="set-group">
@@ -1180,13 +1341,45 @@ const DEFAULT_SETTINGS = {
   refreshMin:30, sort:'signal', filter:'all',
   planAmount:500, planMonthly:0, planProfile:'balanced',
   scanHours:3, trApp:1, mvPeriod:'d1', mvDir:'up',
-  staleMin:15, status:'all'
+  staleMin:15, status:'all',
+  linkSrc:'tr', tvTemplate:'https://www.tradingview.com/chart/?symbol={sym}', dispCur:'auto',
+  screen:null
 };
 
 /* ---------------- i18n ---------------- */
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  a_title:'Konten & Einladungen', a_dur:'Einladung gültig', a_make:'Einladung erzeugen',
+  a_list:'Konten auf diesem Gerät', a_none:'Auf diesem Gerät wurde noch kein Konto angelegt.',
+  a_since:'angelegt', a_revoke:'Alle Zugänge widerrufen',
+  a_user:'Benutzername', a_invite:'Einladungscode', a_create:'Konto anlegen',
+  a_have_invite:'Ich habe einen Einladungscode', a_back:'Zurück zur Anmeldung',
+  a_inv_bad:'Einladungscode ungültig', a_inv_expired:'Einladungscode abgelaufen',
+  a_revoked:'Dieser Einladungscode wurde widerrufen',
+  a_user_bad:'2 bis 20 Zeichen, nur a-z, 0-9, Punkt, Strich', a_user_taken:'Benutzername bereits vergeben',
+  a_created:'Konto angelegt, du kannst dich jetzt anmelden', a_login_bad:'Benutzername oder Passwort falsch',
+  a_inv_valid:'Einladung gültig bis {time}. Wer sie hat, kann bis dahin ein Konto anlegen.',
+  a_revoked_done:'Alle Zugänge widerrufen. Neuen Deploy-Schlüssel erzeugen und Datei neu hochladen, sonst gilt der Widerruf nur auf diesem Gerät.',
+  a_del_confirm:'Konto „{u}" auf diesem Gerät löschen?',
+  a_hint:'Ohne Einladungscode kann niemand ein Konto anlegen. Ehrlich zur Grenze: Konten liegen im Browser des jeweiligen Nutzers, nicht auf einem Server. Die Liste oben zeigt nur Konten auf DIESEM Gerät. „Alle Zugänge widerrufen" erhöht den Schlüssel-Zähler, damit werden alle bestehenden Konten und offenen Einladungen ungültig, sobald du den neuen Deploy-Schlüssel einbaust und die Datei neu hochlädst. Ein einzelnes Konto auf dem Gerät eines anderen lässt sich ohne Server nicht löschen.',
+  tab_screen:'Filter',
+  sc_intro:'Der komplette abgefragte Katalog, gefiltert nach messbaren Bedingungen. Voreinstellungen setzen alle Regler auf einmal, danach lässt sich jeder einzeln ändern. Alles rechnet auf den Kursdaten des letzten Jahres.',
+  sc_preset:'Voreinstellung', sc_p_trade:'Traden (Monate)', sc_p_invest:'Investieren (Jahre)',
+  sc_p_breakout:'Ausbruch heute', sc_p_momentum:'Momentum beginnt', sc_p_custom:'Eigene',
+  sc_type:'Typ', sc_above:'Kurs über', sc_day:'Heute', sc_month:'1 Monat', sc_rsi:'RSI (14)',
+  sc_minp:'Mindestkurs', sc_turn:'Umsatz/Tag', sc_mcap:'Marktkapitalisierung', sc_mom:'Momentum',
+  sc_sort:'Sortieren nach', sc_any:'egal', sc_mom_start:'fängt an zu steigen',
+  sc_s_d1:'Tagesänderung', sc_s_d5:'1 Woche', sc_s_d21:'1 Monat', sc_s_d63:'3 Monate', sc_s_d252:'1 Jahr', sc_s_turn:'Umsatz',
+  sc_apply:'Filtern', sc_reset:'Zurücksetzen',
+  sc_meta:'{n} Treffer von {total} abgefragten Werten · Stand {time}',
+  sc_none:'Kein Wert erfüllt alle Bedingungen. Einzelne Regler lockern.',
+  sc_needscan:'Noch keine Kursdaten. Erst im Tab „Top" abfragen oder hier auf ⟳ tippen.',
+  sc_loading_mcap:'Marktkapitalisierung wird geladen …',
+  sc_mcap_hint:'Marktkapitalisierung steht nicht in der Kurs-Schnittstelle und wird nur bei Bedarf einzeln nachgeladen, für höchstens 60 Treffer. Klappt das nicht, bleibt der Filter wirkungslos statt falsch zu filtern.',
+  s_src:'Verlinken auf', s_src_tr:'Trade Republic', s_src_tv:'TradingView',
+  s_tv:'TradingView-Link (mit {sym})', s_cur:'Anzeigewährung', s_cur_auto:'Wie gehandelt',
+  open_src:'Öffnen',
   fresh:'AKTUELL',
   st_all:'Alle', st_new:'Aktuell', st_old:'Alt', st_demo:'Demo',
   sort_updated:'Zuletzt aktualisiert', sort_oldest:'Am längsten nicht aktualisiert',
@@ -1310,6 +1503,36 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  a_title:'Accounts & invitations', a_dur:'Invitation valid', a_make:'Create invitation',
+  a_list:'Accounts on this device', a_none:'No account has been created on this device yet.',
+  a_since:'created', a_revoke:'Revoke all access',
+  a_user:'Username', a_invite:'Invitation code', a_create:'Create account',
+  a_have_invite:'I have an invitation code', a_back:'Back to sign in',
+  a_inv_bad:'Invitation code invalid', a_inv_expired:'Invitation code expired',
+  a_revoked:'This invitation code has been revoked',
+  a_user_bad:'2 to 20 characters, only a-z, 0-9, dot, dash', a_user_taken:'Username already taken',
+  a_created:'Account created, you can sign in now', a_login_bad:'Wrong username or password',
+  a_inv_valid:'Invitation valid until {time}. Anyone holding it can create an account until then.',
+  a_revoked_done:'All access revoked. Create a new deployment key and re-upload the file, otherwise the revocation only applies on this device.',
+  a_del_confirm:'Delete account "{u}" on this device?',
+  a_hint:'Nobody can create an account without an invitation code. Straight about the limit: accounts live in each user\'s own browser, not on a server. The list above only shows accounts on THIS device. "Revoke all access" raises the key counter, which invalidates every existing account and open invitation once you paste the new deployment key and re-upload. Deleting one single account on someone else\'s device is not possible without a server.',
+  tab_screen:'Screener',
+  sc_intro:'The whole fetched catalogue, filtered on measurable conditions. Presets move every control at once, then you can change each one. Everything is computed on the last year of prices.',
+  sc_preset:'Preset', sc_p_trade:'Trade (months)', sc_p_invest:'Invest (years)',
+  sc_p_breakout:'Breakout today', sc_p_momentum:'Momentum starting', sc_p_custom:'Custom',
+  sc_type:'Type', sc_above:'Price above', sc_day:'Today', sc_month:'1 month', sc_rsi:'RSI (14)',
+  sc_minp:'Minimum price', sc_turn:'Turnover/day', sc_mcap:'Market cap', sc_mom:'Momentum',
+  sc_sort:'Sort by', sc_any:'any', sc_mom_start:'starting to rise',
+  sc_s_d1:'Daily change', sc_s_d5:'1 week', sc_s_d21:'1 month', sc_s_d63:'3 months', sc_s_d252:'1 year', sc_s_turn:'Turnover',
+  sc_apply:'Filter', sc_reset:'Reset',
+  sc_meta:'{n} matches out of {total} fetched assets · as of {time}',
+  sc_none:'Nothing meets every condition. Loosen a control or two.',
+  sc_needscan:'No price data yet. Fetch in the "Top" tab first, or tap ⟳ here.',
+  sc_loading_mcap:'Loading market caps …',
+  sc_mcap_hint:'Market cap is not in the price endpoint and is fetched separately only when asked for, for at most 60 matches. If that fails the filter stays inactive rather than filtering wrongly.',
+  s_src:'Link to', s_src_tr:'Trade Republic', s_src_tv:'TradingView',
+  s_tv:'TradingView link (with {sym})', s_cur:'Display currency', s_cur_auto:'As traded',
+  open_src:'Open',
   fresh:'CURRENT',
   st_all:'All', st_new:'Current', st_old:'Old', st_demo:'Demo',
   sort_updated:'Last updated', sort_oldest:'Longest without update',
@@ -1604,7 +1827,7 @@ let watchlist = store.get('watchlist', null) || DEFAULT_ASSETS.map(sym => ({...C
 let seriesMap = store.get('cache', {});
 let analyses = {};
 /* ---- deployment key: replace this line with the snippet from Settings > Publishing ---- */
-const DEPLOY = {salt:'', hash:'', gsec:''};
+const DEPLOY = {salt:'', hash:'', gsec:'', inv:'', epoch:1};
 
 let auth = store.get('auth', null) || (DEPLOY.hash ? {salt:DEPLOY.salt, hash:DEPLOY.hash, baked:true} : null);
 let guestMode = false, guestUntil = 0, guestTimer = null;
@@ -1622,9 +1845,32 @@ function fmtPct(v, o={}){ const signed = o.signed !== false, d = o.d ?? 1;
   if(v==null || !isFinite(v)) return '–';
   const s = signed && v > 0 ? '+' : '';
   return settings.lang==='de' ? s+fmtNum(v,d)+' %' : s+fmtNum(v,d)+'%'; }
-function fmtMoney(v, cur){ if(v==null || !isFinite(v)) return '–';
-  try{ return v.toLocaleString(locale(), {style:'currency', currency:cur||'EUR'}); }
-  catch(e){ return fmtNum(v,2)+' '+(cur||''); } }
+const FX_LIST = ['USD','GBP','CHF','DKK','SEK','NOK','JPY','HKD','KRW','CAD','AUD'];
+let fxRates = store.get('fx', {r:{EUR:1}, at:0});
+async function loadFx(force){
+  if(!force && fxRates.at && (Date.now()-fxRates.at) < 12*3600000) return;
+  const r = {EUR:1};
+  for(const c of FX_LIST){
+    try{ const d = parseChart(await viaProxy(chartUrl('EUR'+c+'=X','5d'))); r[c] = d.c[d.c.length-1]; }
+    catch(e){}
+    await sleep(120);
+  }
+  if(Object.keys(r).length > 1){ fxRates = {r, at:Date.now()}; try{ store.set('fx', fxRates); }catch(e){} }
+}
+/* rates are "units per 1 EUR", so any pair goes through EUR */
+function convert(v, from, to){
+  if(!from || !to || from === to) return v;
+  const R = fxRates.r || {}, a = R[from], b = R[to];
+  if(!isFinite(a) || !isFinite(b) || !a) return null;
+  return v / a * b;
+}
+function fmtMoney(v, cur){
+  if(v==null || !isFinite(v)) return '–';
+  let c = cur || 'EUR';
+  const want = (settings.dispCur && settings.dispCur !== 'auto') ? settings.dispCur : null;
+  if(want && want !== c){ const x = convert(v, c, want); if(x != null){ v = x; c = want; } }
+  try{ return v.toLocaleString(locale(), {style:'currency', currency:c}); }
+  catch(e){ return fmtNum(v,2)+' '+c; } }
 function fmtTime(ts){ if(!ts) return '–'; return new Date(ts).toLocaleString(locale(), {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'}); }
 
 /* ---------------- data layer (Yahoo via CORS proxy) ---------------- */
@@ -1662,12 +1908,15 @@ function parseChart(j){
   const r = j && j.chart && j.chart.result && j.chart.result[0];
   if(!r) throw new Error('no result');
   const ts = r.timestamp || [];
-  const cl = (((r.indicators||{}).quote||[])[0]||{}).close || [];
-  const tArr = [], cArr = [];
-  for(let i=0;i<ts.length;i++){ if(cl[i]!=null && isFinite(cl[i])){ tArr.push(ts[i]*1000); cArr.push(cl[i]); } }
+  const q = (((r.indicators||{}).quote||[])[0]||{});
+  const cl = q.close || [], vl = q.volume || [];
+  const tArr = [], cArr = [], vArr = [];
+  for(let i=0;i<ts.length;i++){
+    if(cl[i]!=null && isFinite(cl[i])){ tArr.push(ts[i]*1000); cArr.push(cl[i]); vArr.push(isFinite(vl[i])?vl[i]:0); }
+  }
   if(cArr.length < 10) throw new Error('too few points');
   const meta = r.meta || {};
-  return {t:tArr, c:cArr, cur: meta.currency || 'EUR', name: meta.shortName || meta.longName || null};
+  return {t:tArr, c:cArr, v:vArr, cur: meta.currency || 'EUR', name: meta.shortName || meta.longName || null};
 }
 async function fetchSeries(sym){
   const j = await viaProxy(chartUrl(sym));
@@ -1728,6 +1977,25 @@ function linregLog(c,N){
   let ssTot=0, ssRes=0;
   for(let i=0;i<n;i++){ const f=inter+slope*i; ssTot+=(y[i]-my)*(y[i]-my); ssRes+=(y[i]-f)*(y[i]-f); }
   return {slope, r2: ssTot? 1-ssRes/ssTot : 0, annualPct:(Math.exp(slope*252)-1)*100};
+}
+function emaLast(c, n){
+  if(c.length < n) return null;
+  const k = 2/(n+1);
+  let e = c.slice(0, n).reduce((s,v)=>s+v, 0)/n;
+  for(let i=n; i<c.length; i++) e = c[i]*k + e*(1-k);
+  return e;
+}
+/* average daily turnover = price x shares, in the asset's own currency */
+function turnover(c, v, n){
+  if(!v || !v.length) return null;
+  const m = Math.min(n, c.length, v.length);
+  if(m < 5) return null;
+  let s = 0, cnt = 0;
+  for(let i=c.length-m; i<c.length; i++){
+    const vi = v[i + v.length - c.length];
+    if(isFinite(vi) && vi > 0){ s += c[i]*vi; cnt++; }
+  }
+  return cnt ? s/cnt : null;
 }
 function high52(c){ const m=Math.min(c.length,252); let hi=-Infinity; for(let i=c.length-m;i<c.length;i++) hi=Math.max(hi,c[i]); return hi; }
 function projection(c){
@@ -1976,7 +2244,7 @@ function cardHtml(asset){
       <p class="autoline mono">${autoLine(a)}</p>
       <div class="card-actions">
         <button class="btn ghost act-detail">${t('details')}</button>
-        <a class="btn ghost act-tr" target="_blank" rel="noopener" href="${asset.isin?escHtml(trUrl(asset.isin)):'#'}" data-isin="${escHtml(asset.isin||'')}">TR ↗</a>
+        <a class="btn ghost act-tr" target="_blank" rel="noopener" href="${escHtml(assetUrl(asset.isin, asset.sym))}" data-isin="${escHtml(asset.isin||'')}">${settings.linkSrc==='tv'?'TV':'TR'} ↗</a>
         <button class="btn ghost act-one" title="${t('refresh')}">⟳</button>
       </div>
       <p class="card-stamp">${t('card_stamp').replace('{time}', fmtTime(a.fetchedAt)).replace('{src}', sourceTxt(a))}</p>
@@ -2111,7 +2379,7 @@ function fillDetail(){
      <span><i style="background:${cssVar('--sma50')}"></i>SMA 50</span>
      <span><i style="background:${cssVar('--sma200')}"></i>SMA 200</span>
      <span><i style="background:${hexA(a2,0.55)}"></i>${settings.lang==='de'?'Projektion ±1σ':'Projection ±1σ'}</span>`;
-  const tr=$('#dTR'); tr.textContent=t('open_tr');
+  const tr=$('#dTR'); tr.textContent = settings.linkSrc==='tv' ? 'TradingView ↗' : t('open_tr');
   if(asset.isin){ tr.href=trUrl(asset.isin); tr.removeAttribute('data-noisin'); }
   else { tr.href='#'; tr.setAttribute('data-noisin','1'); }
   const sl=$('#dTravel'), last=s.c.length-1;
@@ -2321,7 +2589,7 @@ function applyLang(){
   md.textContent=t(md.dataset.i18n);
   md.classList.toggle('on', settings.mvDir==='up');
   $$('#panel-movers .chip[data-per]').forEach(x=>x.classList.toggle('on', x.dataset.per===settings.mvPeriod));
-  renderSettingsValues(); renderPlanInputs(); renderWl(); renderUniCat(); renderUniverse(); renderAll(); renderMovers();
+  renderSettingsValues(); renderPlanInputs(); renderWl(); renderAccounts(); renderUniCat(); renderUniverse(); renderAll(); renderMovers(); renderScreen();
   if(planState) renderPlan();
   if(detailSym){ fillDetail(); drawDetail(); }
 }
@@ -2338,6 +2606,9 @@ function renderSettingsValues(){
   $('#setRefresh').value=settings.refreshMin;
   $('#setTr').value=settings.trTemplate;
   $('#setScan').value=settings.scanHours;
+  $('#setSrc').value=settings.linkSrc;
+  $('#setTv').value=settings.tvTemplate;
+  $('#setCur').value=settings.dispCur;
   $('#setStale').value=settings.staleMin;
   $('#setTrApp').value=String(settings.trApp);
   $('#sortSel').value=settings.sort;
@@ -2452,6 +2723,112 @@ async function doBulkAdd(){
 }
 
 /* =====================================================================
+   ACCOUNTS — invite-only, verified offline against the deployed key
+   Honest boundary: accounts live in each visitor's own browser. The admin
+   can refuse new ones (invite required) and invalidate every existing one
+   (epoch bump + re-upload), but cannot reach into someone else's device to
+   delete a single account. That needs a server.
+   ===================================================================== */
+let accounts = store.get('accounts', {});
+let isAdmin = true;
+let currentUser = '';
+
+function invSecret(){ return DEPLOY.inv || store.get('isec','') || ''; }
+function ensureInvSecret(){
+  let s = store.get('isec','');
+  if(!s){ s = randomSalt(); store.set('isec', s); }
+  return DEPLOY.inv || s;
+}
+function deployEpoch(){ return Math.max(1, +DEPLOY.epoch || 0, +store.get('epoch',0) || 0); }
+
+async function makeInvite(mins){
+  const sec = invSecret(); if(!sec) return null;
+  const ep = deployEpoch(), exp = Date.now() + Math.max(1,mins)*60000;
+  const body = ep.toString(36).toUpperCase() + '-' + exp.toString(36).toUpperCase();
+  const sig = (await sha256(sec + ':' + body)).slice(0,6).toUpperCase();
+  return {code: 'K' + body + '-' + sig, exp, ep};
+}
+/* > 0 expiry ms | 0 invalid | -1 expired | -2 revoked by an epoch bump */
+async function checkInvite(raw){
+  const sec = invSecret(); if(!sec) return 0;
+  let s = String(raw||'').trim().toUpperCase().replace(/\s+/g,'');
+  if(s.charAt(0) !== 'K') return 0;
+  const parts = s.slice(1).split('-');
+  if(parts.length !== 3) return 0;
+  const body = parts[0] + '-' + parts[1];
+  const sig = (await sha256(sec + ':' + body)).slice(0,6).toUpperCase();
+  if(sig !== parts[2]) return 0;
+  const ep = parseInt(parts[0],36), exp = parseInt(parts[1],36);
+  if(!isFinite(ep) || !isFinite(exp) || ep <= 0) return 0;
+  if(ep < deployEpoch()) return -2;
+  if(exp <= Date.now()) return -1;
+  return exp;
+}
+async function createAccount(user, pw, pw2, code){
+  const r = await checkInvite(code);
+  if(r === -2) return 'a_revoked';
+  if(r === -1) return 'a_inv_expired';
+  if(!r) return 'a_inv_bad';
+  const u = String(user||'').trim().toLowerCase();
+  if(!/^[a-z0-9._-]{2,20}$/.test(u)) return 'a_user_bad';
+  if(u === 'admin' || accounts[u]) return 'a_user_taken';
+  if(String(pw||'').length < 4) return 'pw_short';
+  if(pw !== pw2) return 'pw_mismatch';
+  const salt = randomSalt();
+  accounts[u] = {salt, hash: await sha256(salt + ':' + pw), epoch: deployEpoch(), at: Date.now()};
+  store.set('accounts', accounts);
+  return null;
+}
+async function verifyLogin(user, pw){
+  const u = String(user||'').trim().toLowerCase();
+  if(!u || u === 'admin'){
+    if(!auth) return null;
+    if((await sha256(auth.salt + ':' + pw)) === auth.hash) return {user:'admin', admin:true};
+    return null;
+  }
+  const a = accounts[u];
+  if(!a) return null;
+  if((a.epoch || 0) < deployEpoch()){          // invalidated by a redeploy
+    delete accounts[u]; store.set('accounts', accounts); return null;
+  }
+  if((await sha256(a.salt + ':' + pw)) !== a.hash) return null;
+  return {user:u, admin:false};
+}
+function accountRows(){
+  return Object.keys(accounts).sort().map(u => ({user:u, at:accounts[u].at, epoch:accounts[u].epoch}));
+}
+function renderAccounts(){
+  const box = $('#acctList'); if(!box) return;
+  const rows = accountRows();
+  box.innerHTML = rows.length
+    ? rows.map(r => `<div class="wl-item"><div class="grow"><b>${escHtml(r.user)}</b><br>
+        <span class="mono">${t('a_since')} ${fmtTime(r.at)}</span></div>
+        <button class="btn danger" data-delacct="${escHtml(r.user)}">${t('remove')}</button></div>`).join('')
+    : `<p class="hint">${t('a_none')}</p>`;
+}
+function bumpEpoch(){
+  const next = deployEpoch() + 1;
+  store.set('epoch', next);
+  for(const u of Object.keys(accounts)) if((accounts[u].epoch||0) < next) delete accounts[u];
+  store.set('accounts', accounts);
+  return next;
+}
+function applyRoleUI(){
+  const restricted = guestMode || !isAdmin;
+  const st = document.querySelector('#tabbar [data-tab="settings"]');
+  if(st) st.classList.toggle('hidden', restricted);
+  if(restricted && $('#panel-settings').classList.contains('on')){
+    const ov = document.querySelector('#tabbar [data-tab="overview"]');
+    if(ov) ov.click();
+  }
+  const chip = $('#userChip');
+  if(chip){
+    chip.classList.toggle('hidden', guestMode || !currentUser || currentUser === 'admin');
+    chip.textContent = currentUser;
+  }
+}
+
+/* =====================================================================
    GUEST ACCESS — self-contained, time-limited codes (no server)
    code = base36(expiry) + '-' + first 6 hex of sha256(secret + ':' + body)
    Anyone holding a valid code gets in until it expires. Verifiable offline
@@ -2531,6 +2908,8 @@ function showLock(){
   $('#lockLogin').classList.toggle('hidden',setup);
   $('#lockHint').textContent=t(setup?'lock_setup_hint':'lock_login_hint');
   $('#lockGuest').classList.toggle('hidden', !guestSecret());
+  $('#lockNew').classList.add('hidden');
+  $('#btnHaveInvite').classList.toggle('hidden', setup || !invSecret());
   setTimeout(()=>{ (setup?$('#suPw'):$('#liPw')).focus(); },50);
 }
 async function doSetup(){
@@ -2541,16 +2920,18 @@ async function doSetup(){
   const salt=randomSalt();
   auth={salt, hash: await sha256(salt+':'+p)};
   store.set('auth',auth);
-  ensureGuestSecret();
+  ensureGuestSecret(); ensureInvSecret();
+  isAdmin=true; currentUser='admin';
   if($('#suKeep').checked) store.set('authed',1);
   unlock();
 }
 async function doLogin(){
-  const p=$('#liPw').value, err=$('#liErr');
-  const h=await sha256(auth.salt+':'+p);
-  if(h!==auth.hash){ err.textContent=t('pw_wrong'); $('#liPw').select(); return; }
+  const u=$('#liUser').value, p=$('#liPw').value, err=$('#liErr');
+  const res=await verifyLogin(u,p);
+  if(!res){ err.textContent = (u && u.trim().toLowerCase()!=='admin') ? t('a_login_bad') : t('pw_wrong'); $('#liPw').select(); return; }
   err.textContent=''; $('#liPw').value='';
-  if($('#liKeep').checked) store.set('authed',1);
+  isAdmin=res.admin; currentUser=res.user;
+  if($('#liKeep').checked) store.set('authed', {u:res.user, admin:res.admin});
   unlock();
 }
 function unlock(isGuest){
@@ -2558,10 +2939,11 @@ function unlock(isGuest){
   $('#lockScreen').classList.add('hidden');
   $('#app').classList.remove('hidden');
   for(const asset of watchlist){ const s=seriesMap[asset.sym]; if(s) analyses[asset.sym]=analyze(asset,s); }
-  applyLang(); applyGuestUI(); scheduleAuto(); refreshAll();
+  applyLang(); applyGuestUI(); applyRoleUI(); scheduleAuto(); refreshAll();
+  if(settings.dispCur && settings.dispCur!=='auto') loadFx(false).then(()=>{ renderAll(); renderMovers(); renderScreen(); });
 }
 function lockNow(){
-  store.del('authed'); $('#liPw').value='';
+  store.del('authed'); $('#liPw').value=''; currentUser=''; isAdmin=true;
   if(guestMode){ endGuest(); return; }
   closeDetail(); showLock();
 }
@@ -2587,6 +2969,7 @@ function bindEvents(){
     $$('.panel').forEach(p=>p.classList.toggle('on', p.id==='panel-'+b.dataset.tab));
     if(b.dataset.tab==='movers'){ Object.keys(scanData.items||{}).length ? scanUniverse(false) : renderMovers(); }
     if(b.dataset.tab==='plan' && !planState) renderPlan();
+    if(b.dataset.tab==='screen') renderScreen();
   }));
   $$('.controls .chip[data-filter]').forEach(ch=>ch.addEventListener('click',()=>{
     settings.filter=ch.dataset.filter; saveSettings();
@@ -2607,7 +2990,7 @@ function bindEvents(){
     const art=e.target.closest('article[data-sym]'); if(!art) return;
     const sym=art.dataset.sym;
     const tr=e.target.closest('.act-tr');
-    if(tr){ e.preventDefault(); openTR(tr.dataset.isin, sym); return; }
+    if(tr){ e.preventDefault(); openAsset(tr.dataset.isin, sym); return; }
     const one=e.target.closest('.act-one');
     if(one){ e.stopPropagation(); one.classList.add('spin');
       refreshOne(sym).then(()=>{ const b=$('#cardGrid').querySelector(`article[data-sym="${CSS.escape(sym)}"] .act-one`); if(b) b.classList.remove('spin'); });
@@ -2632,7 +3015,7 @@ function bindEvents(){
     const a=assetBySym(detailSym);
     if(a&&a.isin) copyText(a.isin); else toast(t('need_isin'));
   });
-  $('#dTR').addEventListener('click',e=>{ e.preventDefault(); const a=assetBySym(detailSym); openTR(a&&a.isin, detailSym); });
+  $('#dTR').addEventListener('click',e=>{ e.preventDefault(); const a=assetBySym(detailSym); openAsset(a&&a.isin, detailSym); });
   $('#dRefreshOne').addEventListener('click',()=>refreshOne(detailSym));
   let rsTo; window.addEventListener('resize',()=>{ clearTimeout(rsTo); rsTo=setTimeout(()=>{ renderCards(); renderMovers(); if(detailSym) drawDetail(); if(planState) drawPlanChart(); },150); });
   $('#btnPlan').addEventListener('click', renderPlan);
@@ -2743,6 +3126,47 @@ function bindEvents(){
     } else parts.push(t('chk_needscan'));
     $('#chkOut').innerHTML = parts.join('<br>');
   });
+  $('#btnHaveInvite').addEventListener('click',()=>{
+    $('#lockLogin').classList.add('hidden'); $('#lockGuest').classList.add('hidden');
+    $('#lockNew').classList.remove('hidden'); $('#nwCode').focus();
+  });
+  $('#btnBackLogin').addEventListener('click',()=>{
+    $('#lockNew').classList.add('hidden'); $('#lockLogin').classList.remove('hidden');
+    $('#lockGuest').classList.toggle('hidden', !guestSecret());
+  });
+  $('#btnCreateAcct').addEventListener('click', async ()=>{
+    const err=$('#nwErr');
+    const bad = await createAccount($('#nwUser').value, $('#nwPw').value, $('#nwPw2').value, $('#nwCode').value);
+    if(bad){ err.textContent=t(bad); return; }
+    err.textContent='';
+    const u=$('#nwUser').value.trim().toLowerCase();
+    $('#nwCode').value=$('#nwPw').value=$('#nwPw2').value=$('#nwUser').value='';
+    $('#btnBackLogin').click();
+    $('#liUser').value=u; $('#liPw').focus();
+    toast(t('a_created'));
+  });
+  $('#nwPw2').addEventListener('keydown',e=>{ if(e.key==='Enter') $('#btnCreateAcct').click(); });
+  $('#liUser').addEventListener('keydown',e=>{ if(e.key==='Enter') $('#liPw').focus(); });
+  $('#btnMakeInvite').addEventListener('click', async ()=>{
+    if(!auth){ toast(t('g_nosec')); return; }
+    ensureInvSecret();
+    const r = await makeInvite(+$('#invDur').value||1440);
+    if(!r){ toast(t('g_nosec')); return; }
+    $('#invOut').value=r.code;
+    $('#invInfo').textContent=t('a_inv_valid').replace('{time}', fmtTime(r.exp));
+  });
+  $('#btnCopyInvite').addEventListener('click',()=>{ const v=$('#invOut').value; if(v) copyText(v); });
+  $('#acctList').addEventListener('click',e=>{
+    const b=e.target.closest('[data-delacct]'); if(!b) return;
+    const u=b.dataset.delacct;
+    if(confirm(t('a_del_confirm').replace('{u}',u))){
+      delete accounts[u]; store.set('accounts',accounts); renderAccounts(); toast(t('removed'));
+    }
+  });
+  $('#btnRevokeAll').addEventListener('click',()=>{
+    if(!confirm(t('a_revoke')+'?')) return;
+    bumpEpoch(); renderAccounts(); $('#btnDeploy').click(); toast(t('a_revoked_done'));
+  });
   $('#btnGuest').addEventListener('click', redeemGuestCode);
   $('#gCode').addEventListener('keydown',e=>{ if(e.key==='Enter') redeemGuestCode(); });
   $('#btnMakeGuest').addEventListener('click', async()=>{
@@ -2757,7 +3181,9 @@ function bindEvents(){
   $('#btnDeploy').addEventListener('click',()=>{
     if(!auth){ toast(t('g_nosec')); return; }
     const sec = ensureGuestSecret();
-    $('#deployArea').value = "const DEPLOY = {salt:'"+auth.salt+"', hash:'"+auth.hash+"', gsec:'"+sec+"'};";
+    const isec = ensureInvSecret();
+    $('#deployArea').value = "const DEPLOY = {salt:'"+auth.salt+"', hash:'"+auth.hash
+      + "', gsec:'"+sec+"', inv:'"+isec+"', epoch:"+deployEpoch()+"};";
     $('#deployArea').select();
   });
   $('#uniSearch').addEventListener('input', renderUniverse);
@@ -2843,11 +3269,9 @@ async function scanUniverse(force){
       if(scanAbort){ queue.length = 0; break; }
       const u = queue.shift();
       try{
-        const j = await viaProxy(chartUrl(u.sym, '3mo'));
+        const j = await viaProxy(chartUrl(u.sym, '1y'));
         const d = parseChart(j), c = d.c;
-        items[u.sym] = {p:c[c.length-1], cur:d.cur||'EUR', yname:d.name||'',
-          d1:pctBack(c,1), d5:pctBack(c,5), d21:pctBack(c,21),
-          vol:annVol(c), spark:c.slice(-30).map(v=>Math.round(v*100)/100), at:Date.now()};
+        items[u.sym] = scanItem(d);
         ok++;
       }catch(e){ failed.push(u); /* skipped on purpose: never fake a mover with demo data */ }
       done++; tick();
@@ -2862,11 +3286,9 @@ async function scanUniverse(force){
       if(scanAbort) break;
       await sleep(300);
       try{
-        const j = await viaProxy(chartUrl(u.sym, '3mo'));
+        const j = await viaProxy(chartUrl(u.sym, '1y'));
         const d = parseChart(j), c = d.c;
-        items[u.sym] = {p:c[c.length-1], cur:d.cur||'EUR', yname:d.name||'',
-          d1:pctBack(c,1), d5:pctBack(c,5), d21:pctBack(c,21),
-          vol:annVol(c), spark:c.slice(-30).map(v=>Math.round(v*100)/100), at:Date.now()};
+        items[u.sym] = scanItem(d);
         ok++; tick();
       }catch(e){}
     }
@@ -2888,6 +3310,27 @@ function median(a){
 }
 /* ETFs and single stocks are ranked in separate leagues: a broad index fund
    moving 1.5% is a big day, a single stock moving 1.5% is a Tuesday. */
+/* one place that turns a fetched series into the row the app works with */
+function daysAboveSma(c, n){
+  const s = smaSeries(c, n); let k = 0;
+  for(let i=c.length-1; i>=0; i--){ if(s[i]!=null && c[i]>s[i]) k++; else break; }
+  return k;
+}
+function scanItem(d){
+  const c = d.c, r2 = v => v==null ? null : Math.round(v*10000)/10000;
+  return {
+    p:c[c.length-1], cur:d.cur||'EUR', yname:d.name||'',
+    d1:pctBack(c,1), d5:pctBack(c,5), d21:pctBack(c,21), d63:pctBack(c,63), d252:pctBack(c,252),
+    vol:annVol(c),
+    sma20:r2(smaLast(c,20)), sma50:r2(smaLast(c,50)), sma200:r2(smaLast(c,200)),
+    ema20:r2(emaLast(c,20)),
+    rsi:rsi14(c),
+    turn:turnover(c, d.v, 20),
+    above20:daysAboveSma(c,20), hi52:r2(high52(c)), n:c.length,
+    spark:c.slice(-30).map(v=>Math.round(v*100)/100),
+    at:Date.now()
+  };
+}
 function moverRows(type, limit){
   const per = settings.mvPeriod, dir = settings.mvDir;
   const rows = SCAN_LIST().filter(u => u.type===type)
@@ -2957,6 +3400,166 @@ function renderMovers(){
     const cv=list.querySelector(`.mv-row[data-sym="${CSS.escape(x.u.sym)}"] canvas`);
     if(cv && x.m.spark) drawSpark(cv, x.m.spark, x.m[per]>=0 ? cssVar('--up') : cssVar('--down'));
   });
+}
+
+/* =====================================================================
+   SCREENER — filter the scanned universe on measurable conditions
+   ===================================================================== */
+const SCREEN_PRESETS = {
+  trade:  {type:'stock', above:'ema20', day:'any', month:'5',  rsi:'gt40', minp:'10', minturn:'500000', mom:'any',   mcap:'any', sort:'d21'},
+  invest: {type:'all',   above:'sma200', day:'any', month:'any', rsi:'any',  minp:'10', minturn:'500000', mom:'any',   mcap:'any', sort:'d252'},
+  breakout:{type:'stock', above:'sma20', day:'4',   month:'any', rsi:'band', minp:'10', minturn:'500000', mom:'any',   mcap:'any', sort:'d1'},
+  momentum:{type:'stock', above:'sma20', day:'any', month:'0',  rsi:'band', minp:'10', minturn:'500000', mom:'start', mcap:'any', sort:'d5'}
+};
+const SCREEN_DEFAULT = Object.assign({preset:'trade'}, SCREEN_PRESETS.trade);
+const SCREEN_FIELDS = {scPreset:'preset', scType:'type', scAbove:'above', scDay:'day', scMonth:'month',
+  scRsi:'rsi', scMinp:'minp', scTurn:'minturn', scMcap:'mcap', scMom:'mom', scSort:'sort'};
+let mcapCache = store.get('mcap', {});
+let screenBusy = false;
+
+/* "starting to rise": the short-term structure has turned up, but not long ago,
+   and momentum is not yet exhausted. Deliberately excludes names that have been
+   running for months - those are already priced in.                            */
+function momentumStart(m){
+  return m.sma20!=null && m.sma50!=null && m.rsi!=null && m.d21!=null
+    && m.p > m.sma20 && m.sma20 > m.sma50
+    && m.above20 >= 2 && m.above20 <= 25
+    && m.rsi >= 45 && m.rsi <= 72
+    && m.d21 > 0;
+}
+function screenFilters(){ return Object.assign({}, SCREEN_DEFAULT, settings.screen || {}); }
+function screenRows(){
+  const f = screenFilters();
+  const items = (scanData && scanData.items) || {};
+  const out = [];
+  for(const u of SCAN_LIST()){
+    const m = items[u.sym];
+    if(!m) continue;
+    if(f.type !== 'all' && u.type !== f.type) continue;
+    if(f.above !== 'any'){ const ref = m[f.above]; if(ref == null || !(m.p > ref)) continue; }
+    if(f.day !== 'any'   && !(m.d1  != null && m.d1  > +f.day))   continue;
+    if(f.month !== 'any' && !(m.d21 != null && m.d21 > +f.month)) continue;
+    if(f.rsi !== 'any'){
+      const r = m.rsi; if(r == null) continue;
+      if(f.rsi === 'gt40' && !(r > 40)) continue;
+      if(f.rsi === 'gt50' && !(r > 50)) continue;
+      if(f.rsi === 'band' && !(r >= 40 && r <= 70)) continue;
+      if(f.rsi === 'lt30' && !(r < 30)) continue;
+    }
+    if(f.minp !== 'any'    && !(m.p >= +f.minp)) continue;
+    if(f.minturn !== 'any' && !(m.turn != null && m.turn >= +f.minturn)) continue;
+    if(f.mom === 'start'   && !momentumStart(m)) continue;
+    if(f.mcap !== 'any'){ const mc = mcapCache[u.sym]; if(!(mc != null && mc >= +f.mcap)) continue; }
+    out.push({u, m});
+  }
+  const key = f.sort;
+  const val = x => key === 'name' ? 0 : (x.m[key] != null ? x.m[key] : -1e15);
+  out.sort((a,b) => key === 'name'
+    ? (a.u.name||a.u.sym).localeCompare(b.u.name||b.u.sym)
+    : val(b) - val(a));
+  return out;
+}
+/* market cap is not in the chart endpoint, so it is fetched only for the rows
+   that already survived every other filter - and only when actually asked for */
+async function loadMcaps(rows){
+  const todo = rows.filter(x => mcapCache[x.u.sym] === undefined).slice(0, 60);
+  if(!todo.length) return 0;
+  screenBusy = true; renderScreen();
+  let got = 0;
+  for(const x of todo){
+    try{
+      const j = await viaProxy('https://query1.finance.yahoo.com/v10/finance/quoteSummary/'
+        + encodeURIComponent(x.u.sym) + '?modules=price');
+      const res = j && j.quoteSummary && j.quoteSummary.result && j.quoteSummary.result[0];
+      const raw = res && res.price && res.price.marketCap && res.price.marketCap.raw;
+      mcapCache[x.u.sym] = isFinite(raw) ? raw : null;
+      if(isFinite(raw)) got++;
+    }catch(e){ mcapCache[x.u.sym] = null; }
+    await sleep(160);
+  }
+  try{ store.set('mcap', mcapCache); }catch(e){}
+  screenBusy = false;
+  return got;
+}
+function fmtBig(v){
+  if(v == null) return '–';
+  const a = Math.abs(v);
+  if(a >= 1e12) return fmtNum(v/1e12,2)+' '+(settings.lang==='de'?'Bio.':'tn');
+  if(a >= 1e9)  return fmtNum(v/1e9,2)+' '+(settings.lang==='de'?'Mrd.':'bn');
+  if(a >= 1e6)  return fmtNum(v/1e6,1)+' '+(settings.lang==='de'?'Mio.':'m');
+  if(a >= 1e3)  return fmtNum(v/1e3,0)+'k';
+  return fmtNum(v,0);
+}
+function screenRowHtml(x, idx){
+  const m = x.m, u = x.u;
+  const inWl = watchlist.some(w => w.sym === u.sym);
+  const risk = riskTierOf(m.vol, u.type);
+  const mc = mcapCache[u.sym];
+  const chips = [
+    ['1T', m.d1], ['1W', m.d5], ['1M', m.d21]
+  ].map(([l,v]) => `<span>${l} <b class="${triCls(v)}">${fmtPct(v)}</b></span>`).join('');
+  const extra = [
+    m.rsi != null ? 'RSI '+fmtNum(m.rsi,0) : null,
+    m.turn != null ? (settings.lang==='de'?'Umsatz ':'Turnover ')+fmtBig(m.turn) : null,
+    mc != null ? (settings.lang==='de'?'MK ':'Cap ')+fmtBig(mc) : null,
+    m.above20 ? (settings.lang==='de'?m.above20+' T über SMA20':m.above20+'d above SMA20') : null
+  ].filter(Boolean).join(' · ');
+  return `<div class="mv-row" data-sym="${escHtml(u.sym)}">
+    <span class="mv-rank">${idx+1}</span>
+    <div class="mv-id"><b>${escHtml(u.name||u.sym)}</b>
+      <span>${escHtml(u.sym)} · ${u.type==='etf'?t('t_etf'):t('t_stock')} · ${escHtml(LABELS.risk[risk][settings.lang].replace(/^(Risiko|Risk): /,''))}</span>
+      <div class="chips mono" style="margin-top:5px">${chips}</div>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--faint)">${escHtml(extra)}</span></div>
+    <canvas class="mv-spark"></canvas>
+    <div class="mv-num"><b>${fmtMoney(m.p, m.cur)}</b>
+      <span>${m.vol!=null?fmtPct(m.vol,{signed:false,d:0}):'–'}</span></div>
+    <div class="mv-act">
+      <button class="mv-add${inWl?' in':''}" ${inWl?'disabled':''} title="${inWl?t('mv_inwl'):t('mv_add')}">${inWl?'✓':'+'}</button>
+      <a href="${escHtml(assetUrl(u.isin, u.sym))}" data-isin="${escHtml(u.isin||'')}" data-sym="${escHtml(u.sym)}" title="${t('open_src')}" target="_blank" rel="noopener">↗</a>
+    </div></div>`;
+}
+function renderScreen(){
+  const box = $('#scList'), meta = $('#scMeta');
+  const f = screenFilters();
+  Object.keys(SCREEN_FIELDS).forEach(id => { const el = $('#'+id); if(el) el.value = f[SCREEN_FIELDS[id]]; });
+  if(!Object.keys((scanData && scanData.items) || {}).length){
+    meta.textContent = t('sc_needscan'); box.innerHTML = ''; return;
+  }
+  const rows = screenRows();
+  const scanned = Object.keys(scanData.items).length;
+  meta.textContent = screenBusy
+    ? t('sc_loading_mcap')
+    : t('sc_meta').replace('{n}', rows.length).replace('{total}', scanned).replace('{time}', fmtTime(scanData.at));
+  if(!rows.length){ box.innerHTML = `<div class="plan-empty">${t('sc_none')}</div>`; return; }
+  box.innerHTML = rows.slice(0,40).map(screenRowHtml).join('');
+  rows.slice(0,40).forEach(x => {
+    const cv = box.querySelector(`.mv-row[data-sym="${CSS.escape(x.u.sym)}"] canvas`);
+    if(cv && x.m.spark) drawSpark(cv, x.m.spark, (x.m.d21||0) >= 0 ? cssVar('--up') : cssVar('--down'));
+  });
+}
+
+/* ---------------- link targets: Trade Republic or TradingView ---------------- */
+const TV_EXCH = {'.DE':'XETR','.F':'FWB','.CO':'OMXCOP','.ST':'OMXSTO','.OL':'OSL','.HE':'OMXHEX',
+  '.PA':'EURONEXT','.AS':'EURONEXT','.BR':'EURONEXT','.LS':'EURONEXT','.MI':'MIL','.MC':'BME',
+  '.SW':'SIX','.VI':'VIE','.L':'LSE','.T':'TSE','.HK':'HKEX','.KS':'KRX','.TO':'TSX','.AX':'ASX','.SI':'SGX'};
+function tvSymbol(sym){
+  const s = String(sym||''), i = s.lastIndexOf('.');
+  if(i < 0) return s;                       // plain US tickers resolve on their own
+  const ex = TV_EXCH[s.slice(i)];
+  return ex ? ex + ':' + s.slice(0,i) : s.slice(0,i);
+}
+function tvUrl(sym){
+  return (settings.tvTemplate || 'https://www.tradingview.com/chart/?symbol={sym}')
+    .replace('{sym}', encodeURIComponent(tvSymbol(sym)));
+}
+function assetUrl(isin, sym){
+  if(settings.linkSrc === 'tv' && sym) return tvUrl(sym);
+  if(isin) return trUrl(isin);
+  return sym ? tvUrl(sym) : '#';
+}
+function openAsset(isin, sym){
+  if(settings.linkSrc === 'tv' && sym){ window.open(tvUrl(sym), '_blank', 'noopener'); return; }
+  openTR(isin, sym);
 }
 
 /* ---------------- Trade Republic deep link ---------------- */
@@ -3269,7 +3872,15 @@ bindEvents();
 applyLang();
 const gRec = store.get('guest', null);
 if(gRec && gRec.until > Date.now() && guestSecret()){ guestUntil = gRec.until; unlock(true); }
-else { store.del('guest'); if(auth && store.get('authed',0)) unlock(); else showLock(); }
+else {
+  store.del('guest');
+  const keep = store.get('authed', 0);
+  if(auth && keep){
+    if(keep && keep.u){ isAdmin = !!keep.admin; currentUser = keep.u; }
+    else { isAdmin = true; currentUser = 'admin'; }
+    unlock();
+  } else showLock();
+}
 </script>
 </body>
 </html>
