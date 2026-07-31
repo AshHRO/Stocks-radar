@@ -889,6 +889,11 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
           <input type="text" id="setMail" inputmode="email" spellcheck="false">
         </div>
         <div class="set-row">
+          <label for="setContact" data-i18n="s_contact"></label>
+          <input type="text" id="setContact" inputmode="email" spellcheck="false" placeholder="z.B. depot@duck.com">
+        </div>
+        <p class="hint" data-i18n="s_contact_hint"></p>
+        <div class="set-row">
           <input type="text" id="resetOut" readonly>
           <button class="btn" id="btnCopyReset" data-i18n="g_copy"></button>
         </div>
@@ -915,6 +920,13 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
 
       <div class="set-group">
         <h3 data-i18n="g_title"></h3>
+        <div class="set-row">
+          <label for="setGuestOff" data-i18n="s_guest_off"></label>
+          <select id="setGuestOff">
+            <option value="0" data-i18n="s_guest_on_v"></option>
+            <option value="1" data-i18n="s_guest_off_v"></option>
+          </select>
+        </div>
         <div class="set-row">
           <label for="gDur" data-i18n="g_dur"></label>
           <select id="gDur">
@@ -1464,7 +1476,7 @@ const DEFAULT_SETTINGS = {
   refreshMin:30, sort:'signal', filter:'all',
   planAmount:500, planMonthly:0, planProfile:'balanced',
   scanHours:3, trApp:1, mvPeriod:'d1', mvDir:'up',
-  staleMin:15, status:'all', fbUrl:'', fbKey:'', sortDir:'desc', adminMail:'nsubugaashiraf50@gmail.com',
+  staleMin:15, status:'all', fbUrl:'', fbKey:'', contactMail:'', guestOff:false, sortDir:'desc', adminMail:'nsubugaashiraf50@gmail.com',
   linkSrc:'tr', tvTemplate:'https://www.tradingview.com/chart/?symbol={sym}', dispCur:'auto',
   screen:null
 };
@@ -1473,6 +1485,13 @@ const DEFAULT_SETTINGS = {
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  fa_no_profile:'Kein Zugang. Dieses Konto wurde entfernt oder ist nicht freigeschaltet.',
+  fa_removed:'Dieses Konto wurde vom Admin entfernt.',
+  fa_del_confirm:'Konto entfernen? Der Zugang ist sofort gesperrt. Danach öffnet sich die Firebase-Konsole, wo du den Login endgültig löschen kannst, damit sich die Adresse wieder neu registrieren kann.',
+  fa_mail_maybe:'Falls zu dieser Adresse ein Konto besteht, ist eine E-Mail unterwegs.',
+  s_contact:'Kontakt-E-Mail für Nutzer',
+  s_contact_hint:'Die Admin-E-Mail oben ist deine Firebase-Kennung und wird niemandem angezeigt. Der Knopf „Admin anschreiben" nutzt die Kontakt-Adresse hier. Trage dort am besten eine Weiterleitung ein, etwa von DuckDuckGo Email Protection, addy.io oder SimpleLogin: die leitet an dein echtes Postfach weiter, ohne es preiszugeben, und lässt sich abschalten, falls jemand sie missbraucht.',
+  s_guest_off:'Zugang ohne Konto', s_guest_on_v:'Gast-Codes erlaubt', s_guest_off_v:'nur mit Konto',
   fa_mode_local:'Lokaler Modus: Konten liegen nur in diesem Browser.',
   fa_no_session:'Du bist als lokaler Admin angemeldet, nicht über Firebase. Deshalb gibt es keinen Token, mit dem die Kontenliste gelesen werden könnte.',
   fa_not_admin:'Über Firebase angemeldet als {m}. Das ist nicht die Admin-E-Mail, deshalb bleibt die Liste gesperrt.',
@@ -1491,7 +1510,7 @@ de:{
   fa_need_mail:'Bitte die E-Mail-Adresse eintragen', fa_off:'Nur mit Firebase-Anmeldung möglich',
   fa_use_mail:'Mit Firebase läuft das Zurücksetzen per E-Mail. Oben auf „Reset-Mail schicken" tippen.',
   fa_roster_fail:'Kontenliste nicht lesbar. Bist du mit der Admin-E-Mail angemeldet und passen die Datenbank-Regeln?',
-  fa_del_ok:'Konto aus der Datenbank entfernt. In der Firebase-Konsole unter Authentication zusätzlich den Login löschen.',
+  fa_del_ok:'Zugang gesperrt. In der Firebase-Konsole unter Authentication zusätzlich den Login löschen, sonst meldet die App bei erneuter Registrierung „E-Mail hat schon ein Konto".',
   a_scope_fb:'Alle Konten aus Firebase. Anlegen, Anmelden und Zurücksetzen laufen über Firebase Authentication.',
   a_scope_all:'Alle Konten aus der gemeinsamen Datenbank.',
   a_scope_local:'Nur Konten aus diesem Browser. Für eine gemeinsame Liste unten eine Datenbank-Adresse eintragen.',
@@ -1684,6 +1703,13 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  fa_no_profile:'No access. This account was removed or is not enabled.',
+  fa_removed:'This account was removed by the admin.',
+  fa_del_confirm:'Remove account? Access is blocked immediately. The Firebase console then opens so you can delete the login itself, which frees the address to register again.',
+  fa_mail_maybe:'If an account exists for that address, an e-mail is on its way.',
+  s_contact:'Contact e-mail for users',
+  s_contact_hint:'The admin e-mail above is your Firebase identity and is never shown to anyone. The "E-mail the admin" button uses the contact address here. Best put a forwarding address there, e.g. DuckDuckGo Email Protection, addy.io or SimpleLogin: it forwards to your real inbox without revealing it, and can be switched off if someone abuses it.',
+  s_guest_off:'Access without an account', s_guest_on_v:'guest codes allowed', s_guest_off_v:'accounts only',
   fa_mode_local:'Local mode: accounts live in this browser only.',
   fa_no_session:'You are signed in as local admin, not through Firebase. So there is no token to read the account list with.',
   fa_not_admin:'Signed in via Firebase as {m}. That is not the admin e-mail, so the list stays locked.',
@@ -1702,7 +1728,7 @@ en:{
   fa_need_mail:'Please enter the e-mail address', fa_off:'Only available with Firebase sign-in',
   fa_use_mail:'With Firebase, resetting runs by e-mail. Tap "Send reset e-mail" above.',
   fa_roster_fail:'Cannot read the account list. Are you signed in with the admin e-mail, and do the database rules match?',
-  fa_del_ok:'Account removed from the database. Also delete the login under Authentication in the Firebase console.',
+  fa_del_ok:'Access blocked. Also delete the login under Authentication in the Firebase console, otherwise re-registering reports "e-mail already has an account".',
   a_scope_fb:'All accounts from Firebase. Sign-up, sign-in and reset run through Firebase Authentication.',
   a_scope_all:'All accounts from the shared database.',
   a_scope_local:'Only accounts from this browser. Enter a database address below for a shared list.',
@@ -2924,6 +2950,8 @@ function renderSettingsValues(){
   $('#setTv').value=settings.tvTemplate;
   $('#setCur').value=settings.dispCur;
   $('#setMail').value=settings.adminMail||'';
+  $('#setContact').value=settings.contactMail||'';
+  if($('#setGuestOff')) $('#setGuestOff').value=settings.guestOff?'1':'0';
   $('#setFb').value=settings.fbUrl||DEPLOY.fb||'';
   $('#setFbKey').value=settings.fbKey||DEPLOY.fbkey||'';
   if($('#hdCur')) $('#hdCur').value=settings.dispCur;
@@ -3413,9 +3441,27 @@ async function fbLogin(email, pw){
   try{ j = await fbSignIn(String(email||'').trim().toLowerCase(), pw); }
   catch(e){ return {err: fbErrKey(e.code)}; }
   fbSaveSession(j);
-  let name = fbSession.email;
-  try{ const p = await fbAuthGet('/users/' + j.localId); if(p && p.name) name = p.name; }catch(e){}
-  return {user:name, admin:isAdminEmail(fbSession.email), email:fbSession.email};
+  const admin = isAdminEmail(fbSession.email);
+  /* The profile is the membership record. Deleting it must actually lock the
+     person out - previously a missing profile was tolerated and they got in. */
+  let prof = null;
+  try{ prof = await fbAuthGet('/users/' + j.localId); }
+  catch(e){
+    if(!admin){ fbSession = null; store.del('fbsess'); return {err:'fa_no_profile'}; }
+  }
+  if(!prof && !admin){
+    fbSession = null; store.del('fbsess');
+    return {err:'fa_removed'};
+  }
+  return {user:(prof && prof.name) || fbSession.email, admin, email:fbSession.email};
+}
+function fbProjectId(){
+  const m = String(fbBase()||'').match(/https:\/\/([^.]+?)-default-rtdb\./);
+  return m ? m[1] : '';
+}
+function fbUsersConsoleUrl(){
+  const p = fbProjectId();
+  return p ? 'https://console.firebase.google.com/project/' + p + '/authentication/users' : '';
 }
 async function fbRoster(){
   const all = await fbAuthGet('/users');
@@ -3433,7 +3479,10 @@ async function fbRoster(){
 const PERMA = 4102444800000;                 // 2100-01-01, stands for "no expiry"
 function isPerma(exp){ return exp >= PERMA - 1; }
 function expLabel(exp){ return isPerma(exp) ? t('g_perma') : fmtTime(exp); }
-function guestSecret(){ return DEPLOY.gsec || store.get('gsec','') || ''; }
+function guestSecret(){
+  if(settings.guestOff) return '';        // admin disabled account-free access
+  return DEPLOY.gsec || store.get('gsec','') || '';
+}
 function ensureGuestSecret(){
   let s = store.get('gsec','');
   if(!s){ s = randomSalt(); store.set('gsec', s); }
@@ -3593,7 +3642,7 @@ function bindEvents(){
   $('#btnForgot').addEventListener('click', ()=>{
     $('#lockLogin').classList.add('hidden'); $('#lockGuest').classList.add('hidden');
     $('#lockReset').classList.remove('hidden');
-    const mail = settings.adminMail || '';
+    const mail = settings.contactMail || settings.adminMail || '';
     const a = $('#mailAdmin');
     a.href = 'mailto:' + encodeURIComponent(mail)
       + '?subject=' + encodeURIComponent(t('r_mail_subject'))
@@ -3610,8 +3659,9 @@ function bindEvents(){
     if(!fbAuthOn()){ err.textContent = t('fa_off'); return; }
     if(who.indexOf('@') < 0){ err.textContent = t('fa_need_mail'); return; }
     err.textContent = t('fa_wait');
-    try{ await fbSendReset(who); err.textContent=''; toast(t('fa_mail_sent')); }
-    catch(e){ err.textContent = t(fbErrKey(e.code)); }
+    try{ await fbSendReset(who); }catch(e){}
+    err.textContent = '';                 // same answer either way: no e-mail enumeration
+    toast(t('fa_mail_maybe'));
   });
   $('#btnDoReset').addEventListener('click', async ()=>{
     const err = $('#rsErr');
@@ -3628,6 +3678,8 @@ function bindEvents(){
   $('#rsPw2').addEventListener('keydown', e=>{ if(e.key==='Enter') $('#btnDoReset').click(); });
   $('#btnCopyReset').addEventListener('click', ()=>{ const v=$('#resetOut').value; if(v) copyText(v); });
   $('#setMail').addEventListener('change', e=>{ settings.adminMail=e.target.value.trim(); saveSettings(); toast(t('saved')); });
+  $('#setContact').addEventListener('change', e=>{ settings.contactMail=e.target.value.trim(); saveSettings(); toast(t('saved')); });
+  $('#setGuestOff').addEventListener('change', e=>{ settings.guestOff = e.target.value==='1'; saveSettings(); toast(t('saved')); });
   $('#setFb').addEventListener('change', e=>{
     settings.fbUrl = e.target.value.trim().replace(/\/+$/,''); e.target.value = settings.fbUrl;
     saveSettings(); toast(t('saved')); refreshRoster();
@@ -3953,9 +4005,12 @@ function bindEvents(){
     }
     const du=e.target.closest('[data-deluid]');
     if(du){
-      if(confirm(t('a_del_confirm').replace('{u}', du.dataset.deluid))){
+      if(confirm(t('fa_del_confirm'))){
         fbAuthDel('/users/' + du.dataset.deluid).then(ok=>{
-          refreshRoster(); toast(t(ok ? 'fa_del_ok' : 'a_del_local'));
+          refreshRoster();
+          toast(t(ok ? 'fa_del_ok' : 'a_del_local'));
+          const url = fbUsersConsoleUrl();
+          if(ok && url) window.open(url, '_blank', 'noopener');
         });
       }
       return;
