@@ -251,6 +251,9 @@ textarea#backupArea{width:100%; min-height:110px; font-family:var(--mono); font-
 .chip-sep{width:1px; height:22px; background:var(--line); margin:0 3px}
 .badge.b-fresh{border-color:var(--up); color:var(--up); font-family:var(--mono)}
 
+.ok-dot,.warn-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:middle}
+.ok-dot{background:var(--up)} .warn-dot{background:var(--warn)}
+
 /* ============ Guest ============ */
 #userChip{font-family:var(--mono); font-size:11px; color:var(--accent); border:1px solid var(--accent); border-radius:999px; padding:3px 9px; white-space:nowrap}
 #guestChip{font-family:var(--mono); font-size:11px; color:var(--warn); border:1px solid var(--warn); border-radius:999px; padding:3px 9px; white-space:nowrap}
@@ -900,6 +903,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
         </div>
         <p class="hint" data-i18n="s_fb_hint"></p>
         <h3 style="margin-top:16px" data-i18n="a_list"></h3>
+        <p class="hint" id="acctStatus"></p>
         <p class="hint" id="acctScope"></p>
         <div class="set-row"><button class="btn" id="btnRoster" data-i18n="a_refresh"></button></div>
         <div id="acctList"></div>
@@ -1469,6 +1473,12 @@ const DEFAULT_SETTINGS = {
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  fa_mode_local:'Lokaler Modus: Konten liegen nur in diesem Browser.',
+  fa_no_session:'Du bist als lokaler Admin angemeldet, nicht über Firebase. Deshalb gibt es keinen Token, mit dem die Kontenliste gelesen werden könnte.',
+  fa_not_admin:'Über Firebase angemeldet als {m}. Das ist nicht die Admin-E-Mail, deshalb bleibt die Liste gesperrt.',
+  fa_is_admin:'Über Firebase angemeldet als {m}. Admin-Rechte aktiv.',
+  fa_howto:'So kommst du an die Liste: 1. Oben in diesem Bereich einen Einladungscode erzeugen (Dauer „unbegrenzt"). 2. App sperren (Schloss oben rechts). 3. „Ich habe einen Einladungscode" antippen. 4. Mit Benutzername, deiner Admin-E-Mail und einem Passwort ab 6 Zeichen registrieren. 5. Mit dieser E-Mail anmelden. Dein bisheriger Eintrag „ash" war ein rein lokales Konto und ist Firebase unbekannt.',
+  fa_rules_hint:'Die Anmeldung hat geklappt, aber die Datenbank verweigert das Lesen. Prüfe in der Firebase-Konsole unter Realtime Database › Regeln, dass die E-Mail in den Regeln genau deiner Admin-E-Mail entspricht, und dass die Regeln veröffentlicht wurden.',
   fx_test:'Kurse jetzt testen', fx_set:'Kurs setzen', fx_manual:'manuell eingetragen',
   fx_man_bad:'Bitte einen Kurs größer als 0 eintragen',
   fx_man_hint:'„Kurse jetzt testen" probiert alle Quellen einzeln durch, direkt und über den Proxy, und zeigt für jede das Ergebnis. Falls in deinem Netz alle blockiert sind: Kurs von Hand eintragen, zum Beispiel USD 1,0842 für „1 Euro sind 1,0842 Dollar". Danach rechnet die App sofort damit, ganz ohne Internet-Abfrage.',
@@ -1674,6 +1684,12 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  fa_mode_local:'Local mode: accounts live in this browser only.',
+  fa_no_session:'You are signed in as local admin, not through Firebase. So there is no token to read the account list with.',
+  fa_not_admin:'Signed in via Firebase as {m}. That is not the admin e-mail, so the list stays locked.',
+  fa_is_admin:'Signed in via Firebase as {m}. Admin rights active.',
+  fa_howto:'How to get the list: 1. Create an invitation code above (duration "no expiry"). 2. Lock the app (padlock, top right). 3. Tap "I have an invitation code". 4. Register with a username, your admin e-mail and a password of at least 6 characters. 5. Sign in with that e-mail. Your existing "ash" entry was a purely local account and Firebase knows nothing about it.',
+  fa_rules_hint:'Sign-in worked but the database refuses to read. In the Firebase console under Realtime Database › Rules, check that the e-mail in the rules matches your admin e-mail exactly, and that the rules were published.',
   fx_test:'Test rates now', fx_set:'Set rate', fx_manual:'entered by hand',
   fx_man_bad:'Please enter a rate greater than 0',
   fx_man_hint:'"Test rates now" tries every source one by one, directly and through the proxy, and shows the result for each. If everything is blocked on your network: type a rate by hand, e.g. USD 1.0842 meaning "1 euro is 1.0842 dollars". The app then converts with it straight away, no lookup needed.',
@@ -3161,18 +3177,34 @@ async function verifyLogin(user, pw){
 function accountRows(){
   return Object.keys(accounts).sort().map(u => ({user:u, at:accounts[u].at, epoch:accounts[u].epoch}));
 }
+function authStatusHtml(){
+  if(!fbAuthOn()) return `<span class="ok-dot"></span>` + t('fa_mode_local');
+  if(!fbSession || !fbSession.email)
+    return `<span class="warn-dot"></span>` + t('fa_no_session');
+  if(!isAdminEmail(fbSession.email))
+    return `<span class="warn-dot"></span>` + t('fa_not_admin').replace('{m}', escHtml(fbSession.email));
+  return `<span class="ok-dot"></span>` + t('fa_is_admin').replace('{m}', escHtml(fbSession.email));
+}
 async function refreshRoster(){
+  const st = $('#acctStatus'); if(st) st.innerHTML = authStatusHtml();
   if(fbAuthOn()){
     const box = $('#acctList');
+    const sc = $('#acctScope'); if(sc) sc.textContent = t('a_scope_fb');
+    if(!fbSession || !fbSession.email){        // local-admin fallback: no token to read with
+      box.innerHTML = `<div class="plan-empty" style="text-align:left">${t('fa_howto')}</div>`;
+      return;
+    }
     try{
       const rows = await fbRoster();
-      const sc = $('#acctScope'); if(sc) sc.textContent = t('a_scope_fb');
       box.innerHTML = rows.length ? rows.map(r =>
         `<div class="wl-item"><div class="grow"><b>${escHtml(r.name)}</b><br>
           <span class="mono">${escHtml(r.email)} · ${t('a_since')} ${fmtTime(r.at)}</span></div>
           <button class="btn danger" data-deluid="${escHtml(r.uid)}">${t('remove')}</button></div>`).join('')
         : `<p class="hint">${t('a_none')}</p>`;
-    }catch(e){ box.innerHTML = `<p class="hint" style="color:var(--warn)">${t('fa_roster_fail')}</p>`; }
+    }catch(e){
+      box.innerHTML = `<p class="hint" style="color:var(--warn)">${t('fa_roster_fail')}</p>`
+        + `<div class="plan-empty" style="text-align:left;margin-top:10px">${t('fa_rules_hint')}</div>`;
+    }
     return;
   }
   if(!fbOn()) return;
@@ -3185,6 +3217,8 @@ async function refreshRoster(){
 }
 function renderAccounts(){
   const box = $('#acctList'); if(!box) return;
+  const st = $('#acctStatus'); if(st) st.innerHTML = authStatusHtml();
+  if(fbAuthOn()){ refreshRoster(); return; }     // Firebase is the source of truth
   const scope = $('#acctScope');
   if(scope) scope.textContent = t(fbOn() ? 'a_scope_all' : 'a_scope_local');
   const rows = accountRows();
