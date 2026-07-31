@@ -56,6 +56,11 @@ button{font-family:inherit}
 .lock-err{color:var(--down); font-size:13px; min-height:18px; margin:8px 0 0}
 .lock-actions{margin-top:14px; display:flex; flex-direction:column; gap:10px}
 .lock-forgot{background:none;border:none;color:var(--faint);font-size:12.5px;cursor:pointer;text-decoration:underline;padding:4px}
+.pw-wrap{position:relative; display:block; flex:1; min-width:150px}
+.pw-wrap input{width:100%; padding-right:38px}
+.pw-eye{position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none;
+  color:var(--faint); cursor:pointer; font-size:15px; padding:4px 6px; line-height:1}
+.pw-eye:hover{color:var(--accent)}
 
 /* ============ Buttons ============ */
 .btn{display:inline-flex; align-items:center; justify-content:center; gap:6px; cursor:pointer; border-radius:var(--r-s);
@@ -394,9 +399,9 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
 
     <div id="lockSetup" class="hidden">
       <label for="suPw" data-i18n="pw"></label>
-      <input type="password" id="suPw" autocomplete="new-password">
+      <span class="pw-wrap"><input type="password" id="suPw" autocomplete="new-password"><button type="button" class="pw-eye" data-eye="suPw" title="">&#128065;</button></span>
       <label for="suPw2" data-i18n="pw2"></label>
-      <input type="password" id="suPw2" autocomplete="new-password">
+      <span class="pw-wrap"><input type="password" id="suPw2" autocomplete="new-password"><button type="button" class="pw-eye" data-eye="suPw2" title="">&#128065;</button></span>
       <label class="lock-keep"><input type="checkbox" id="suKeep" checked> <span data-i18n="keep"></span></label>
       <p class="lock-err" id="suErr"></p>
       <div class="lock-actions">
@@ -408,7 +413,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
       <label for="liUser" data-i18n="a_ident"></label>
       <input type="text" id="liUser" autocomplete="username" spellcheck="false" placeholder="admin">
       <label for="liPw" data-i18n="pw"></label>
-      <input type="password" id="liPw" autocomplete="current-password">
+      <span class="pw-wrap"><input type="password" id="liPw" autocomplete="current-password"><button type="button" class="pw-eye" data-eye="liPw" title="">&#128065;</button></span>
       <label class="lock-keep"><input type="checkbox" id="liKeep"> <span data-i18n="keep"></span></label>
       <p class="lock-err" id="liErr"></p>
       <div class="lock-actions">
@@ -426,9 +431,9 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
       <label for="nwMail" data-i18n="a_email"></label>
       <input type="text" id="nwMail" autocomplete="email" spellcheck="false" inputmode="email">
       <label for="nwPw" data-i18n="pw"></label>
-      <input type="password" id="nwPw" autocomplete="new-password">
+      <span class="pw-wrap"><input type="password" id="nwPw" autocomplete="new-password"><button type="button" class="pw-eye" data-eye="nwPw" title="">&#128065;</button></span>
       <label for="nwPw2" data-i18n="pw2"></label>
-      <input type="password" id="nwPw2" autocomplete="new-password">
+      <span class="pw-wrap"><input type="password" id="nwPw2" autocomplete="new-password"><button type="button" class="pw-eye" data-eye="nwPw2" title="">&#128065;</button></span>
       <p class="lock-err" id="nwErr"></p>
       <div class="lock-actions">
         <button class="btn primary" id="btnCreateAcct" data-i18n="a_create"></button>
@@ -442,12 +447,13 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
       <label for="rsCode" data-i18n="r_code"></label>
       <input type="text" id="rsCode" spellcheck="false" placeholder="RXXXXXXX-XXXXXX">
       <label for="rsPw" data-i18n="pw_new"></label>
-      <input type="password" id="rsPw" autocomplete="new-password">
+      <span class="pw-wrap"><input type="password" id="rsPw" autocomplete="new-password"><button type="button" class="pw-eye" data-eye="rsPw" title="">&#128065;</button></span>
       <label for="rsPw2" data-i18n="pw_new2"></label>
-      <input type="password" id="rsPw2" autocomplete="new-password">
+      <span class="pw-wrap"><input type="password" id="rsPw2" autocomplete="new-password"><button type="button" class="pw-eye" data-eye="rsPw2" title="">&#128065;</button></span>
       <p class="lock-err" id="rsErr"></p>
       <div class="lock-actions">
-        <button class="btn primary" id="btnDoReset" data-i18n="r_apply"></button>
+        <button class="btn primary" id="btnSendMailReset" data-i18n="fa_send_mail"></button>
+        <button class="btn" id="btnDoReset" data-i18n="r_apply"></button>
         <a class="btn ghost" id="mailAdmin" href="#" data-i18n="r_mail"></a>
         <button class="lock-forgot" id="btnBackLogin2" data-i18n="a_back"></button>
       </div>
@@ -781,7 +787,21 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
             <option value="GBP">GBP £</option><option value="CHF">CHF</option>
           </select>
         </div>
+        <div class="set-row">
+          <button class="btn" id="btnFxTest" data-i18n="fx_test"></button>
+          <select id="fxManCur">
+            <option value="USD">USD</option><option value="GBP">GBP</option>
+            <option value="CHF">CHF</option><option value="DKK">DKK</option>
+            <option value="JPY">JPY</option><option value="HKD">HKD</option>
+            <option value="KRW">KRW</option><option value="CAD">CAD</option>
+            <option value="AUD">AUD</option><option value="SEK">SEK</option><option value="NOK">NOK</option>
+          </select>
+          <input type="number" id="fxManRate" step="0.0001" min="0" placeholder="1,0842" style="max-width:120px">
+          <button class="btn" id="btnFxMan" data-i18n="fx_set"></button>
+        </div>
         <p class="hint" id="fxNote"></p>
+        <p class="hint" id="fxDiagOut" style="font-family:var(--mono);font-size:11px"></p>
+        <p class="hint" data-i18n="fx_man_hint"></p>
         <div class="set-row">
           <label for="setTv" data-i18n="s_tv"></label>
           <input type="text" id="setTv">
@@ -828,9 +848,9 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
 
       <div class="set-group">
         <h3 data-i18n="s_security"></h3>
-        <div class="set-row"><label data-i18n="pw_old"></label><input type="password" id="pwOld"></div>
-        <div class="set-row"><label data-i18n="pw_new"></label><input type="password" id="pwNew"></div>
-        <div class="set-row"><label data-i18n="pw_new2"></label><input type="password" id="pwNew2"></div>
+        <div class="set-row"><label data-i18n="pw_old"></label><span class="pw-wrap"><input type="password" id="pwOld"><button type="button" class="pw-eye" data-eye="pwOld" title="">&#128065;</button></span></div>
+        <div class="set-row"><label data-i18n="pw_new"></label><span class="pw-wrap"><input type="password" id="pwNew"><button type="button" class="pw-eye" data-eye="pwNew" title="">&#128065;</button></span></div>
+        <div class="set-row"><label data-i18n="pw_new2"></label><span class="pw-wrap"><input type="password" id="pwNew2"><button type="button" class="pw-eye" data-eye="pwNew2" title="">&#128065;</button></span></div>
         <div class="set-row">
           <button class="btn" id="btnChangePw" data-i18n="pw_change"></button>
           <button class="btn danger" id="btnResetApp" data-i18n="s_reset"></button>
@@ -870,7 +890,18 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
           <button class="btn" id="btnCopyReset" data-i18n="g_copy"></button>
         </div>
         <p class="hint" id="resetInfo"></p>
+        <div class="set-row">
+          <label for="setFb" data-i18n="s_fb"></label>
+          <input type="text" id="setFb" spellcheck="false" placeholder="https://xxx-default-rtdb.europe-west1.firebasedatabase.app">
+        </div>
+        <div class="set-row">
+          <label for="setFbKey" data-i18n="s_fbkey"></label>
+          <input type="text" id="setFbKey" spellcheck="false" placeholder="AIza…">
+        </div>
+        <p class="hint" data-i18n="s_fb_hint"></p>
         <h3 style="margin-top:16px" data-i18n="a_list"></h3>
+        <p class="hint" id="acctScope"></p>
+        <div class="set-row"><button class="btn" id="btnRoster" data-i18n="a_refresh"></button></div>
         <div id="acctList"></div>
         <div class="set-row" style="margin-top:12px">
           <button class="btn danger" id="btnRevokeAll" data-i18n="a_revoke"></button>
@@ -1429,7 +1460,7 @@ const DEFAULT_SETTINGS = {
   refreshMin:30, sort:'signal', filter:'all',
   planAmount:500, planMonthly:0, planProfile:'balanced',
   scanHours:3, trApp:1, mvPeriod:'d1', mvDir:'up',
-  staleMin:15, status:'all', sortDir:'desc', adminMail:'nsubugaashiraf50@gmail.com',
+  staleMin:15, status:'all', fbUrl:'', fbKey:'', sortDir:'desc', adminMail:'nsubugaashiraf50@gmail.com',
   linkSrc:'tr', tvTemplate:'https://www.tradingview.com/chart/?symbol={sym}', dispCur:'auto',
   screen:null
 };
@@ -1438,6 +1469,27 @@ const DEFAULT_SETTINGS = {
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  fx_test:'Kurse jetzt testen', fx_set:'Kurs setzen', fx_manual:'manuell eingetragen',
+  fx_man_bad:'Bitte einen Kurs größer als 0 eintragen',
+  fx_man_hint:'„Kurse jetzt testen" probiert alle Quellen einzeln durch, direkt und über den Proxy, und zeigt für jede das Ergebnis. Falls in deinem Netz alle blockiert sind: Kurs von Hand eintragen, zum Beispiel USD 1,0842 für „1 Euro sind 1,0842 Dollar". Danach rechnet die App sofort damit, ganz ohne Internet-Abfrage.',
+  fa_local_admin:'Als lokaler Admin angemeldet (ohne Firebase). Für die Kontenliste mit der Admin-E-Mail über Firebase anmelden.',
+  s_fbkey:'Firebase Web-API-Key',
+  fa_wait:'Einen Moment …', fa_badlogin:'E-Mail oder Passwort falsch', fa_exists:'Diese E-Mail hat schon ein Konto',
+  fa_weak:'Passwort zu kurz (mindestens 6 Zeichen)', fa_throttled:'Zu viele Versuche, bitte später erneut',
+  fa_disabled:'Dieses Konto wurde gesperrt', fa_generic:'Anmeldung fehlgeschlagen',
+  fa_send_mail:'Reset-Mail schicken', fa_mail_sent:'E-Mail verschickt. Link im Postfach öffnen und neues Passwort setzen.',
+  fa_need_mail:'Bitte die E-Mail-Adresse eintragen', fa_off:'Nur mit Firebase-Anmeldung möglich',
+  fa_use_mail:'Mit Firebase läuft das Zurücksetzen per E-Mail. Oben auf „Reset-Mail schicken" tippen.',
+  fa_roster_fail:'Kontenliste nicht lesbar. Bist du mit der Admin-E-Mail angemeldet und passen die Datenbank-Regeln?',
+  fa_del_ok:'Konto aus der Datenbank entfernt. In der Firebase-Konsole unter Authentication zusätzlich den Login löschen.',
+  a_scope_fb:'Alle Konten aus Firebase. Anlegen, Anmelden und Zurücksetzen laufen über Firebase Authentication.',
+  a_scope_all:'Alle Konten aus der gemeinsamen Datenbank.',
+  a_scope_local:'Nur Konten aus diesem Browser. Für eine gemeinsame Liste unten eine Datenbank-Adresse eintragen.',
+  a_refresh:'Liste neu laden', a_del_all:'Konto überall gelöscht', a_del_local:'Nur auf diesem Gerät gelöscht',
+  a_sync_fail:'Konto konnte nicht in der Datenbank gespeichert werden',
+  s_fb:'Firebase-Datenbank (optional)',
+  s_fb_hint:'Ohne Adresse bleibt alles wie bisher: Konten liegen im Browser des jeweiligen Nutzers und du siehst nur deine eigenen. Mit einer Firebase-Realtime-Database-Adresse siehst du als Admin alle Konten, kannst sie wirklich löschen, und Nutzer können sich auf jedem Gerät anmelden. Achtung: eine offene Datenbank ist für jeden lesbar, dort landen Benutzername, E-Mail und der Passwort-Hash. Also Regeln setzen und keine wichtigen Passwörter wiederverwenden.',
+  pw_show:'Passwort anzeigen',
   fx_loading:'Wechselkurse werden geladen …',
   fx_fail:'Wechselkurse nicht erreichbar. Die Beträge bleiben in der jeweiligen Handelswährung.',
   fx_note:'Alle Beträge in {cur}, umgerechnet mit {src}. Der tatsächliche Handelspreis in dieser Währung kann leicht abweichen.',
@@ -1622,6 +1674,27 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  fx_test:'Test rates now', fx_set:'Set rate', fx_manual:'entered by hand',
+  fx_man_bad:'Please enter a rate greater than 0',
+  fx_man_hint:'"Test rates now" tries every source one by one, directly and through the proxy, and shows the result for each. If everything is blocked on your network: type a rate by hand, e.g. USD 1.0842 meaning "1 euro is 1.0842 dollars". The app then converts with it straight away, no lookup needed.',
+  fa_local_admin:'Signed in as local admin (without Firebase). For the account list, sign in with the admin e-mail via Firebase.',
+  s_fbkey:'Firebase Web API key',
+  fa_wait:'One moment …', fa_badlogin:'Wrong e-mail or password', fa_exists:'That e-mail already has an account',
+  fa_weak:'Password too short (at least 6 characters)', fa_throttled:'Too many attempts, try again later',
+  fa_disabled:'This account has been disabled', fa_generic:'Sign-in failed',
+  fa_send_mail:'Send reset e-mail', fa_mail_sent:'E-mail sent. Open the link in your inbox and set a new password.',
+  fa_need_mail:'Please enter the e-mail address', fa_off:'Only available with Firebase sign-in',
+  fa_use_mail:'With Firebase, resetting runs by e-mail. Tap "Send reset e-mail" above.',
+  fa_roster_fail:'Cannot read the account list. Are you signed in with the admin e-mail, and do the database rules match?',
+  fa_del_ok:'Account removed from the database. Also delete the login under Authentication in the Firebase console.',
+  a_scope_fb:'All accounts from Firebase. Sign-up, sign-in and reset run through Firebase Authentication.',
+  a_scope_all:'All accounts from the shared database.',
+  a_scope_local:'Only accounts from this browser. Enter a database address below for a shared list.',
+  a_refresh:'Reload list', a_del_all:'Account deleted everywhere', a_del_local:'Deleted on this device only',
+  a_sync_fail:'Account could not be saved to the database',
+  s_fb:'Firebase database (optional)',
+  s_fb_hint:'Without an address everything stays as before: accounts live in each user\'s browser and you only see your own. With a Firebase Realtime Database address you see every account as admin, can really delete them, and users can sign in on any device. Careful: an open database is readable by anyone, and it holds username, e-mail and the password hash. So set rules, and never reuse an important password.',
+  pw_show:'Show password',
   fx_loading:'Loading exchange rates …',
   fx_fail:'Exchange rates unreachable. Amounts stay in their own trading currency.',
   fx_note:'All amounts in {cur}, converted at {src}. The actual traded price in that currency can differ slightly.',
@@ -1977,7 +2050,7 @@ let watchlist = store.get('watchlist', null) || DEFAULT_ASSETS.map(sym => ({...C
 let seriesMap = store.get('cache', {});
 let analyses = {};
 /* ---- deployment key: replace this line with the snippet from Settings > Publishing ---- */
-const DEPLOY = {salt:'aa08dd9c99c6466607e1e707c7bc515a', hash:'67d6b64fc0a060b161d5e1de874dac76b93214c1ee6d62b15cf0735512377a3c', gsec:'cdb15d11193ac0af7fd1e50feaf0d24e', inv:'9496106bae120322317edf397c96e250', epoch:1};
+const DEPLOY = {salt:'aa08dd9c99c6466607e1e707c7bc515a', hash:'67d6b64fc0a060b161d5e1de874dac76b93214c1ee6d62b15cf0735512377a3c', gsec:'cdb15d11193ac0af7fd1e50feaf0d24e', inv:'9496106bae120322317edf397c96e250', epoch:1, fb:'https://stocks-2026-default-rtdb.europe-west1.firebasedatabase.app', fbkey:'AIzaSyCyxItwm8vZppbYWWMAg6kqosBMgtPXO5E'};
 
 let auth = store.get('auth', null) || (DEPLOY.hash ? {salt:DEPLOY.salt, hash:DEPLOY.hash, baked:true} : null);
 let guestMode = false, guestUntil = 0, guestTimer = null;
@@ -1997,22 +2070,51 @@ function fmtPct(v, o={}){ const signed = o.signed !== false, d = o.d ?? 1;
   return settings.lang==='de' ? s+fmtNum(v,d)+' %' : s+fmtNum(v,d)+'%'; }
 const FX_LIST = ['USD','GBP','CHF','DKK','SEK','NOK','JPY','HKD','KRW','CAD','AUD'];
 let fxRates = store.get('fx', {r:{EUR:1}, at:0});
+let fxDiag = [];
 async function loadFx(force){
   const have = Object.keys(fxRates.r || {}).length;
   if(!force && fxRates.at && (Date.now()-fxRates.at) < 12*3600000 && have > 3) return true;
-  /* ECB daily reference rates: one request, sends CORS headers, so no proxy is
-     involved. The old path needed 11 calls through the flaky proxy and, when
-     they failed, stored nothing - switching currency then did nothing at all. */
-  try{
-    const j = await fetchJson('https://api.frankfurter.app/latest?from=EUR&to=' + FX_LIST.join(','), 9000);
-    if(j && j.rates && Object.keys(j.rates).length){
-      fxRates = {r: Object.assign({EUR:1}, j.rates), at: Date.now(), src: 'EZB/ECB ' + (j.date || '')};
-      try{ store.set('fx', fxRates); }catch(e){}
-      return true;
+  const want = FX_LIST.map(c=>c.toUpperCase());
+  /* Several independent hosts. The previous single source (api.frankfurter.app)
+     moved to .dev, and when it stopped answering the app silently kept showing
+     the traded currency, which looked like a broken dropdown.                 */
+  const sources = [
+    {url:'https://api.frankfurter.dev/v1/latest?base=EUR&symbols=' + want.join(','),
+     parse:j => j && j.rates ? {r:j.rates, src:'EZB/ECB ' + (j.date||'')} : null},
+    {url:'https://api.frankfurter.app/latest?from=EUR&to=' + want.join(','),
+     parse:j => j && j.rates ? {r:j.rates, src:'EZB/ECB ' + (j.date||'')} : null},
+    {url:'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/eur.json',
+     parse:j => {
+       const m = j && j.eur; if(!m) return null;
+       const r = {}; want.forEach(c => { const v = m[c.toLowerCase()]; if(isFinite(v)) r[c] = v; });
+       return Object.keys(r).length ? {r, src:'currency-api ' + (j.date||'')} : null;
+     }},
+    {url:'https://open.er-api.com/v6/latest/EUR',
+     parse:j => {
+       const m = j && j.rates; if(!m) return null;
+       const r = {}; want.forEach(c => { if(isFinite(m[c])) r[c] = m[c]; });
+       return Object.keys(r).length ? {r, src:'er-api'} : null;
+     }}
+  ];
+  fxDiag = [];
+  for(const s of sources){
+    const host = s.url.replace(/^https?:\/\//,'').split('/')[0];
+    for(const mode of ['direkt','proxy']){
+      try{
+        const j = (mode === 'direkt') ? await fetchJson(s.url, 8000) : await viaProxy(s.url);
+        const out = s.parse(j);
+        if(out){
+          fxRates = {r: Object.assign({EUR:1}, out.r), at: Date.now(), src: out.src};
+          try{ store.set('fx', fxRates); }catch(e){}
+          fxDiag.push({host, mode, ok:true, msg: Object.keys(out.r).length + ' Kurse'});
+          return true;
+        }
+        fxDiag.push({host, mode, ok:false, msg:'unerwartete Antwort'});
+      }catch(e){ fxDiag.push({host, mode, ok:false, msg: String(e && e.message || e).slice(0,60)}); }
     }
-  }catch(e){}
-  const r = {EUR:1};                                   // fallback: Yahoo pairs via proxy
-  for(const c of FX_LIST){
+  }
+  const r = {EUR:1};                                   // last resort: Yahoo pairs via proxy
+  for(const c of want){
     try{ const d = parseChart(await viaProxy(chartUrl('EUR'+c+'=X','5d'))); r[c] = d.c[d.c.length-1]; }
     catch(e){}
     await sleep(100);
@@ -2027,6 +2129,19 @@ async function loadFx(force){
 function fxReady(cur){
   if(!cur || cur === 'auto') return true;
   return isFinite((fxRates.r || {})[cur]);
+}
+function setManualRate(cur, rate){
+  const c = String(cur||'').toUpperCase(), v = +rate;
+  if(!c || !isFinite(v) || v <= 0) return false;
+  const r = Object.assign({EUR:1}, fxRates.r || {});
+  r[c] = v;
+  fxRates = {r, at: Date.now(), src: t('fx_manual')};
+  try{ store.set('fx', fxRates); }catch(e){}
+  return true;
+}
+function fxDiagHtml(){
+  if(!fxDiag.length) return '';
+  return fxDiag.map(d => (d.ok ? '✓ ' : '✗ ') + d.host + ' (' + d.mode + '): ' + d.msg).join('<br>');
 }
 function fxNoteText(){
   const c = settings.dispCur;
@@ -2793,6 +2908,8 @@ function renderSettingsValues(){
   $('#setTv').value=settings.tvTemplate;
   $('#setCur').value=settings.dispCur;
   $('#setMail').value=settings.adminMail||'';
+  $('#setFb').value=settings.fbUrl||DEPLOY.fb||'';
+  $('#setFbKey').value=settings.fbKey||DEPLOY.fbkey||'';
   if($('#hdCur')) $('#hdCur').value=settings.dispCur;
   if($('#fxNote')) $('#fxNote').textContent=fxNoteText();
   if($('#hdSrc')) $('#hdSrc').value=settings.linkSrc;
@@ -2983,6 +3100,7 @@ async function applyReset(user, code, pw, pw2){
   const salt = randomSalt();
   accounts[key] = Object.assign({}, accounts[key], {salt, hash: await sha256(salt + ':' + pw)});
   store.set('accounts', accounts);
+  if(fbOn()){ try{ await fbSet('/dr_accounts/' + key, accounts[key]); }catch(e){} }
   return null;
 }
 /* accepts either the username or the registered e-mail */
@@ -3009,6 +3127,7 @@ async function createAccount(user, email, pw, pw2, code){
   const salt = randomSalt();
   accounts[u] = {salt, hash: await sha256(salt + ':' + pw), email: em, epoch: deployEpoch(), at: Date.now()};
   store.set('accounts', accounts);
+  if(fbOn()){ try{ await fbSet('/dr_accounts/' + u, accounts[u]); }catch(e){ return 'a_sync_fail'; } }
   return null;
 }
 async function verifyLogin(user, pw){
@@ -3018,7 +3137,19 @@ async function verifyLogin(user, pw){
     if((await sha256(auth.salt + ':' + pw)) === auth.hash) return {user:'admin', admin:true};
     return null;
   }
-  const key = accountKey(u);
+  let key = accountKey(u);
+  if(fbOn()){
+    try{
+      const hit = await fbFind(u);
+      if(!hit){                                   // admin deleted it, or never existed
+        if(key){ delete accounts[key]; store.set('accounts', accounts); }
+        return null;
+      }
+      key = hit.key;
+      accounts[key] = hit.rec;                    // lets a new device sign in
+      store.set('accounts', accounts);
+    }catch(e){ /* offline: fall back to the local copy */ }
+  }
   const a = accounts[key];
   if(!a) return null;
   if((a.epoch || 0) < deployEpoch()){          // invalidated by a redeploy
@@ -3030,8 +3161,32 @@ async function verifyLogin(user, pw){
 function accountRows(){
   return Object.keys(accounts).sort().map(u => ({user:u, at:accounts[u].at, epoch:accounts[u].epoch}));
 }
+async function refreshRoster(){
+  if(fbAuthOn()){
+    const box = $('#acctList');
+    try{
+      const rows = await fbRoster();
+      const sc = $('#acctScope'); if(sc) sc.textContent = t('a_scope_fb');
+      box.innerHTML = rows.length ? rows.map(r =>
+        `<div class="wl-item"><div class="grow"><b>${escHtml(r.name)}</b><br>
+          <span class="mono">${escHtml(r.email)} · ${t('a_since')} ${fmtTime(r.at)}</span></div>
+          <button class="btn danger" data-deluid="${escHtml(r.uid)}">${t('remove')}</button></div>`).join('')
+        : `<p class="hint">${t('a_none')}</p>`;
+    }catch(e){ box.innerHTML = `<p class="hint" style="color:var(--warn)">${t('fa_roster_fail')}</p>`; }
+    return;
+  }
+  if(!fbOn()) return;
+  try{
+    const all = await fbGet('/dr_accounts');
+    accounts = all || {};
+    store.set('accounts', accounts);
+  }catch(e){}
+  renderAccounts();
+}
 function renderAccounts(){
   const box = $('#acctList'); if(!box) return;
+  const scope = $('#acctScope');
+  if(scope) scope.textContent = t(fbOn() ? 'a_scope_all' : 'a_scope_local');
   const rows = accountRows();
   box.innerHTML = rows.length
     ? rows.map(r => `<div class="wl-item"><div class="grow"><b>${escHtml(r.user)}</b><br>
@@ -3040,11 +3195,44 @@ function renderAccounts(){
         <button class="btn danger" data-delacct="${escHtml(r.user)}">${t('remove')}</button></div>`).join('')
     : `<p class="hint">${t('a_none')}</p>`;
 }
+/* Optional shared roster. Without a URL everything stays exactly as before:
+   accounts local to each browser. With one, the admin sees every account and
+   can really delete them, and users can sign in from any device.            */
+function fbBase(){ return String(DEPLOY.fb || settings.fbUrl || '').replace(/\/+$/,''); }
+function fbOn(){ return !!fbBase(); }
+async function fbGet(path){
+  const b = fbBase(); if(!b) return null;
+  const r = await fetch(b + path + '.json', {cache:'no-store'});
+  if(!r.ok) throw new Error('http ' + r.status);
+  return await r.json();
+}
+async function fbSet(path, data){
+  const b = fbBase(); if(!b) return false;
+  const r = await fetch(b + path + '.json',
+    {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+  return r.ok;
+}
+async function fbDel(path){
+  const b = fbBase(); if(!b) return false;
+  return (await fetch(b + path + '.json', {method:'DELETE'})).ok;
+}
+async function fbFind(ident){
+  const all = await fbGet('/dr_accounts');
+  if(!all) return null;
+  const s = String(ident||'').trim().toLowerCase();
+  if(all[s]) return {key:s, rec:all[s]};
+  for(const k of Object.keys(all)){
+    if(String(all[k].email||'').toLowerCase() === s) return {key:k, rec:all[k]};
+  }
+  return null;
+}
 function deploySnippet(){
   if(!auth) return '';
   const gsec = ensureGuestSecret(), isec = ensureInvSecret();
   return "const DEPLOY = {salt:'" + auth.salt + "', hash:'" + auth.hash
-    + "', gsec:'" + gsec + "', inv:'" + isec + "', epoch:" + deployEpoch() + "};";
+    + "', gsec:'" + gsec + "', inv:'" + isec + "', epoch:" + deployEpoch()
+    + ", fb:'" + (settings.fbUrl || DEPLOY.fb || '')
+    + "', fbkey:'" + (settings.fbKey || DEPLOY.fbkey || '') + "'};";
 }
 /* Fetches this very page, swaps the DEPLOY line for the real one and offers the
    result as a download - so nobody has to hand-edit a 260 kB file.            */
@@ -3086,6 +3274,120 @@ function applyRoleUI(){
     chip.classList.toggle('hidden', guestMode || !currentUser || currentUser === 'admin');
     chip.textContent = currentUser;
   }
+}
+
+/* =====================================================================
+   FIREBASE AUTH (REST, no SDK) — proper accounts, closed database
+   Signs in against Google Identity Toolkit and talks to the Realtime
+   Database with the resulting ID token, so rules can require auth.
+   Enabled only when both a Web API key and a database URL are present;
+   otherwise the local invite system from before stays in charge.
+   ===================================================================== */
+function fbKey(){ return String(DEPLOY.fbkey || settings.fbKey || '').trim(); }
+function fbAuthOn(){ return !!(fbKey() && fbBase()); }
+let fbSession = store.get('fbsess', null);
+
+async function fbIdent(method, body){
+  const r = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:' + method
+      + '?key=' + encodeURIComponent(fbKey()),
+    {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+  const j = await r.json().catch(()=>({}));
+  if(!r.ok){
+    const code = (j.error && j.error.message) || 'UNKNOWN';
+    const err = new Error(code); err.code = code; throw err;
+  }
+  return j;
+}
+function fbErrKey(code){
+  const c = String(code||'');
+  if(c.indexOf('EMAIL_EXISTS') === 0) return 'fa_exists';
+  if(c.indexOf('EMAIL_NOT_FOUND') === 0 || c.indexOf('INVALID_PASSWORD') === 0
+     || c.indexOf('INVALID_LOGIN_CREDENTIALS') === 0) return 'fa_badlogin';
+  if(c.indexOf('WEAK_PASSWORD') === 0) return 'fa_weak';
+  if(c.indexOf('INVALID_EMAIL') === 0) return 'a_mail_bad';
+  if(c.indexOf('TOO_MANY_ATTEMPTS') === 0) return 'fa_throttled';
+  if(c.indexOf('USER_DISABLED') === 0) return 'fa_disabled';
+  return 'fa_generic';
+}
+function fbSaveSession(j){
+  fbSession = {idToken:j.idToken, refreshToken:j.refreshToken, uid:j.localId,
+               email:String(j.email||'').toLowerCase(), at:Date.now()};
+  store.set('fbsess', fbSession);
+  return fbSession;
+}
+/* ID tokens last an hour; refresh silently when they are close to expiring */
+async function fbToken(){
+  if(!fbSession) return '';
+  if(Date.now() - fbSession.at < 50*60000) return fbSession.idToken;
+  try{
+    const r = await fetch('https://securetoken.googleapis.com/v1/token?key=' + encodeURIComponent(fbKey()),
+      {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+       body:'grant_type=refresh_token&refresh_token=' + encodeURIComponent(fbSession.refreshToken)});
+    const j = await r.json();
+    if(j.id_token){
+      fbSession = Object.assign({}, fbSession,
+        {idToken:j.id_token, refreshToken:j.refresh_token || fbSession.refreshToken, at:Date.now()});
+      store.set('fbsess', fbSession);
+    }
+  }catch(e){}
+  return fbSession.idToken;
+}
+async function fbAuthGet(path){
+  const tok = await fbToken();
+  const r = await fetch(fbBase() + path + '.json?auth=' + encodeURIComponent(tok), {cache:'no-store'});
+  if(!r.ok) throw new Error('http ' + r.status);
+  return await r.json();
+}
+async function fbAuthSet(path, data){
+  const tok = await fbToken();
+  const r = await fetch(fbBase() + path + '.json?auth=' + encodeURIComponent(tok),
+    {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+  return r.ok;
+}
+async function fbAuthDel(path){
+  const tok = await fbToken();
+  return (await fetch(fbBase() + path + '.json?auth=' + encodeURIComponent(tok), {method:'DELETE'})).ok;
+}
+function isAdminEmail(mail){
+  const a = String(settings.adminMail||'').trim().toLowerCase();
+  return !!a && String(mail||'').trim().toLowerCase() === a;
+}
+/* registration still needs a valid invite; Firebase itself cannot enforce that */
+async function fbRegister(user, email, pw, pw2, code){
+  const r = await checkInvite(code);
+  if(r === -2) return 'a_revoked';
+  if(r === -1) return 'a_inv_expired';
+  if(!r) return 'a_inv_bad';
+  const u = String(user||'').trim().toLowerCase();
+  if(!/^[a-z0-9._-]{2,20}$/.test(u)) return 'a_user_bad';
+  if(String(pw||'').length < 6) return 'fa_weak';
+  if(pw !== pw2) return 'pw_mismatch';
+  let j;
+  try{ j = await fbSignUp(String(email||'').trim().toLowerCase(), pw); }
+  catch(e){ return fbErrKey(e.code); }
+  fbSaveSession(j);
+  try{ await fbAuthSet('/users/' + j.localId, {name:u, email:fbSession.email, at:Date.now()}); }
+  catch(e){ return 'a_sync_fail'; }
+  return null;
+}
+async function fbSignUp(email, pw){ return fbIdent('signUp', {email, password:pw, returnSecureToken:true}); }
+async function fbSignIn(email, pw){ return fbIdent('signInWithPassword', {email, password:pw, returnSecureToken:true}); }
+async function fbSendReset(email){ return fbIdent('sendOobCode', {requestType:'PASSWORD_RESET', email:String(email||'').trim().toLowerCase()}); }
+
+async function fbLogin(email, pw){
+  let j;
+  try{ j = await fbSignIn(String(email||'').trim().toLowerCase(), pw); }
+  catch(e){ return {err: fbErrKey(e.code)}; }
+  fbSaveSession(j);
+  let name = fbSession.email;
+  try{ const p = await fbAuthGet('/users/' + j.localId); if(p && p.name) name = p.name; }catch(e){}
+  return {user:name, admin:isAdminEmail(fbSession.email), email:fbSession.email};
+}
+async function fbRoster(){
+  const all = await fbAuthGet('/users');
+  if(!all) return [];
+  return Object.keys(all).map(uid => ({uid, name:all[uid].name || '?', email:all[uid].email || '', at:all[uid].at || 0}))
+    .sort((a,b) => (a.name||'').localeCompare(b.name||''));
 }
 
 /* =====================================================================
@@ -3204,6 +3506,27 @@ async function doSetup(){
 }
 async function doLogin(){
   const u=$('#liUser').value, p=$('#liPw').value, err=$('#liErr');
+  if(fbAuthOn()){
+    err.textContent = t('fa_wait');
+    const r = await fbLogin(u, p);
+    if(!r.err){
+      err.textContent=''; $('#liPw').value='';
+      isAdmin = r.admin; currentUser = r.user;
+      if($('#liKeep').checked) store.set('authed', {u:r.user, admin:r.admin, fb:1});
+      unlock(); return;
+    }
+    /* Firebase said no. Fall back to the built-in admin password so the owner
+       can always get in - needed to issue the first invite code, and to
+       recover if Firebase is misconfigured or unreachable.                  */
+    const local = await verifyLogin(u, p);
+    if(local && local.admin){
+      err.textContent=''; $('#liPw').value='';
+      isAdmin = true; currentUser = local.user;
+      if($('#liKeep').checked) store.set('authed', {u:local.user, admin:true});
+      unlock(); toast(t('fa_local_admin')); return;
+    }
+    err.textContent = t(r.err); $('#liPw').select(); return;
+  }
   const res=await verifyLogin(u,p);
   if(!res){ err.textContent = (u && u.trim().toLowerCase()!=='admin') ? t('a_login_bad') : t('pw_wrong'); $('#liPw').select(); return; }
   err.textContent=''; $('#liPw').value='';
@@ -3248,8 +3571,17 @@ function bindEvents(){
     $('#lockReset').classList.add('hidden'); $('#lockLogin').classList.remove('hidden');
     $('#lockGuest').classList.toggle('hidden', !guestSecret());
   });
+  $('#btnSendMailReset').addEventListener('click', async ()=>{
+    const err = $('#rsErr'), who = $('#rsUser').value.trim();
+    if(!fbAuthOn()){ err.textContent = t('fa_off'); return; }
+    if(who.indexOf('@') < 0){ err.textContent = t('fa_need_mail'); return; }
+    err.textContent = t('fa_wait');
+    try{ await fbSendReset(who); err.textContent=''; toast(t('fa_mail_sent')); }
+    catch(e){ err.textContent = t(fbErrKey(e.code)); }
+  });
   $('#btnDoReset').addEventListener('click', async ()=>{
     const err = $('#rsErr');
+    if(fbAuthOn()){ err.textContent = t('fa_use_mail'); return; }
     const bad = await applyReset($('#rsUser').value, $('#rsCode').value, $('#rsPw').value, $('#rsPw2').value);
     if(bad){ err.textContent = t(bad); return; }
     err.textContent = '';
@@ -3262,6 +3594,36 @@ function bindEvents(){
   $('#rsPw2').addEventListener('keydown', e=>{ if(e.key==='Enter') $('#btnDoReset').click(); });
   $('#btnCopyReset').addEventListener('click', ()=>{ const v=$('#resetOut').value; if(v) copyText(v); });
   $('#setMail').addEventListener('change', e=>{ settings.adminMail=e.target.value.trim(); saveSettings(); toast(t('saved')); });
+  $('#setFb').addEventListener('change', e=>{
+    settings.fbUrl = e.target.value.trim().replace(/\/+$/,''); e.target.value = settings.fbUrl;
+    saveSettings(); toast(t('saved')); refreshRoster();
+  });
+  $('#btnRoster').addEventListener('click', ()=>{ refreshRoster(); toast(t('a_refresh')); });
+  $('#setFbKey').addEventListener('change', e=>{ settings.fbKey=e.target.value.trim(); saveSettings(); toast(t('saved')); refreshRoster(); });
+  $('#btnFxTest').addEventListener('click', async ()=>{
+    $('#fxDiagOut').textContent = t('fx_loading');
+    const ok = await loadFx(true);
+    $('#fxDiagOut').innerHTML = fxDiagHtml() || t('fx_fail');
+    if(window.__repaintMoney) window.__repaintMoney();
+    toast(t(ok ? 'saved' : 'fx_fail'));
+  });
+  $('#btnFxMan').addEventListener('click', ()=>{
+    const c = $('#fxManCur').value, v = $('#fxManRate').value.replace(',','.');
+    if(!setManualRate(c, v)){ toast(t('fx_man_bad')); return; }
+    if(settings.dispCur === 'auto'){ settings.dispCur = c; saveSettings();
+      if($('#setCur')) $('#setCur').value = c; if($('#hdCur')) $('#hdCur').value = c; }
+    if(window.__repaintMoney) window.__repaintMoney();
+    toast(t('saved'));
+  });
+  document.addEventListener('click', e=>{
+    const eye = e.target.closest('.pw-eye'); if(!eye) return;
+    e.preventDefault();
+    const inp = document.getElementById(eye.dataset.eye); if(!inp) return;
+    const show = inp.type === 'password';
+    inp.type = show ? 'text' : 'password';
+    eye.style.color = show ? 'var(--accent)' : '';
+    inp.focus();
+  });
   [['#suPw2',doSetup],['#liPw',doLogin]].forEach(([sel,fn])=>{
     $(sel).addEventListener('keydown',e=>{ if(e.key==='Enter') fn(); });
   });
@@ -3515,7 +3877,9 @@ function bindEvents(){
   });
   $('#btnCreateAcct').addEventListener('click', async ()=>{
     const err=$('#nwErr');
-    const bad = await createAccount($('#nwUser').value, $('#nwMail').value, $('#nwPw').value, $('#nwPw2').value, $('#nwCode').value);
+    const bad = fbAuthOn()
+      ? await fbRegister($('#nwUser').value, $('#nwMail').value, $('#nwPw').value, $('#nwPw2').value, $('#nwCode').value)
+      : await createAccount($('#nwUser').value, $('#nwMail').value, $('#nwPw').value, $('#nwPw2').value, $('#nwCode').value);
     if(bad){ err.textContent=t(bad); return; }
     err.textContent='';
     const u=$('#nwUser').value.trim().toLowerCase();
@@ -3553,10 +3917,21 @@ function bindEvents(){
       });
       return;
     }
+    const du=e.target.closest('[data-deluid]');
+    if(du){
+      if(confirm(t('a_del_confirm').replace('{u}', du.dataset.deluid))){
+        fbAuthDel('/users/' + du.dataset.deluid).then(ok=>{
+          refreshRoster(); toast(t(ok ? 'fa_del_ok' : 'a_del_local'));
+        });
+      }
+      return;
+    }
     const b=e.target.closest('[data-delacct]'); if(!b) return;
     const u=b.dataset.delacct;
     if(confirm(t('a_del_confirm').replace('{u}',u))){
-      delete accounts[u]; store.set('accounts',accounts); renderAccounts(); toast(t('removed'));
+      delete accounts[u]; store.set('accounts',accounts);
+      if(fbOn()) fbDel('/dr_accounts/' + u).then(ok=>{ renderAccounts(); toast(t(ok?'a_del_all':'a_del_local')); });
+      else { renderAccounts(); toast(t('a_del_local')); }
     }
   });
   $('#btnRevokeAll').addEventListener('click',()=>{
