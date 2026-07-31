@@ -1476,7 +1476,7 @@ const DEFAULT_SETTINGS = {
   refreshMin:30, sort:'signal', filter:'all',
   planAmount:500, planMonthly:0, planProfile:'balanced',
   scanHours:3, trApp:1, mvPeriod:'d1', mvDir:'up',
-  staleMin:15, status:'all', fbUrl:'', fbKey:'', contactMail:'', guestOff:false, sortDir:'desc', adminMail:'nsubugaashiraf50@gmail.com',
+  staleMin:15, status:'all', fbUrl:'', fbKey:'', contactMail:'', guestOff:false, sortDir:'desc', adminMail:'',
   linkSrc:'tr', tvTemplate:'https://www.tradingview.com/chart/?symbol={sym}', dispCur:'auto',
   screen:null
 };
@@ -1485,6 +1485,8 @@ const DEFAULT_SETTINGS = {
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  fa_no_contact:'Es ist keine Kontakt-Adresse hinterlegt. Bitte den Admin auf anderem Weg erreichen.',
+  fa_user_unknown:'Unbekannter Benutzername. Bitte den Benutzernamen genau so eingeben wie bei der Registrierung, oder die E-Mail-Adresse verwenden.',
   fa_no_profile:'Kein Zugang. Dieses Konto wurde entfernt oder ist nicht freigeschaltet.',
   fa_removed:'Dieses Konto wurde vom Admin entfernt.',
   fa_del_confirm:'Konto entfernen? Der Zugang ist sofort gesperrt. Danach öffnet sich die Firebase-Konsole, wo du den Login endgültig löschen kannst, damit sich die Adresse wieder neu registrieren kann.',
@@ -1703,6 +1705,8 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  fa_no_contact:'No contact address is configured. Please reach the admin another way.',
+  fa_user_unknown:'Unknown username. Enter it exactly as at registration, or use the e-mail address instead.',
   fa_no_profile:'No access. This account was removed or is not enabled.',
   fa_removed:'This account was removed by the admin.',
   fa_del_confirm:'Remove account? Access is blocked immediately. The Firebase console then opens so you can delete the login itself, which frees the address to register again.',
@@ -2092,7 +2096,7 @@ let watchlist = store.get('watchlist', null) || DEFAULT_ASSETS.map(sym => ({...C
 let seriesMap = store.get('cache', {});
 let analyses = {};
 /* ---- deployment key: replace this line with the snippet from Settings > Publishing ---- */
-const DEPLOY = {salt:'aa08dd9c99c6466607e1e707c7bc515a', hash:'67d6b64fc0a060b161d5e1de874dac76b93214c1ee6d62b15cf0735512377a3c', gsec:'cdb15d11193ac0af7fd1e50feaf0d24e', inv:'9496106bae120322317edf397c96e250', epoch:1, fb:'https://stocks-2026-default-rtdb.europe-west1.firebasedatabase.app', fbkey:'AIzaSyCyxItwm8vZppbYWWMAg6kqosBMgtPXO5E'};
+const DEPLOY = {salt:'aa08dd9c99c6466607e1e707c7bc515a', hash:'67d6b64fc0a060b161d5e1de874dac76b93214c1ee6d62b15cf0735512377a3c', gsec:'cdb15d11193ac0af7fd1e50feaf0d24e', inv:'9496106bae120322317edf397c96e250', epoch:1, fb:'https://stocks-2026-default-rtdb.europe-west1.firebasedatabase.app', fbkey:'AIzaSyCyxItwm8vZppbYWWMAg6kqosBMgtPXO5E', amail:'68603bc7e97636d45d4e1f9ec5005bca97015639e634d6ee23267134304791dd', cmail:'stocksradar@duck.com'};
 
 let auth = store.get('auth', null) || (DEPLOY.hash ? {salt:DEPLOY.salt, hash:DEPLOY.hash, baked:true} : null);
 let guestMode = false, guestUntil = 0, guestTimer = null;
@@ -3227,7 +3231,7 @@ async function refreshRoster(){
       box.innerHTML = rows.length ? rows.map(r =>
         `<div class="wl-item"><div class="grow"><b>${escHtml(r.name)}</b><br>
           <span class="mono">${escHtml(r.email)} · ${t('a_since')} ${fmtTime(r.at)}</span></div>
-          <button class="btn danger" data-deluid="${escHtml(r.uid)}">${t('remove')}</button></div>`).join('')
+          <button class="btn danger" data-deluid="${escHtml(r.uid)}" data-uname="${escHtml(r.name||'')}">${t('remove')}</button></div>`).join('')
         : `<p class="hint">${t('a_none')}</p>`;
     }catch(e){
       box.innerHTML = `<p class="hint" style="color:var(--warn)">${t('fa_roster_fail')}</p>`
@@ -3288,13 +3292,17 @@ async function fbFind(ident){
   }
   return null;
 }
-function deploySnippet(){
+async function deploySnippet(){
   if(!auth) return '';
   const gsec = ensureGuestSecret(), isec = ensureInvSecret();
+  const am = String(settings.adminMail||'').trim().toLowerCase();
+  const amail = am ? await sha256(am) : String(DEPLOY.amail||'');
   return "const DEPLOY = {salt:'" + auth.salt + "', hash:'" + auth.hash
     + "', gsec:'" + gsec + "', inv:'" + isec + "', epoch:" + deployEpoch()
     + ", fb:'" + (settings.fbUrl || DEPLOY.fb || '')
-    + "', fbkey:'" + (settings.fbKey || DEPLOY.fbkey || '') + "'};";
+    + "', fbkey:'" + (settings.fbKey || DEPLOY.fbkey || '')
+    + "', amail:'" + amail
+    + "', cmail:'" + (settings.contactMail || DEPLOY.cmail || '') + "'};";
 }
 /* Fetches this very page, swaps the DEPLOY line for the real one and offers the
    result as a download - so nobody has to hand-edit a 260 kB file.            */
@@ -3307,7 +3315,7 @@ async function downloadConfigured(){
     let html = await res.text();
     const re = /^const DEPLOY = \{[^{}]*\};/m;   // anchored: only the real declaration, never the builder string
     if(!re.test(html)) return 'dl_nomarker';
-    html = html.replace(re, deploySnippet());
+    html = html.replace(re, await deploySnippet());
     const url = URL.createObjectURL(new Blob([html], {type:'text/html'}));
     const a = document.createElement('a');
     a.href = url; a.download = 'index.html';
@@ -3410,10 +3418,24 @@ async function fbAuthDel(path){
   const tok = await fbToken();
   return (await fetch(fbBase() + path + '.json?auth=' + encodeURIComponent(tok), {method:'DELETE'})).ok;
 }
-function isAdminEmail(mail){
+/* The admin address is never written into the file. Only its SHA-256 goes in,
+   so the source reveals nothing to read or scrape. The contact alias IS in the
+   file in clear - that is the point of an alias: disposable and replaceable.  */
+async function isAdminEmailAsync(mail){
+  const m = String(mail||'').trim().toLowerCase();
+  if(!m) return false;
+  const h = String(DEPLOY.amail || '').trim();
+  if(h) return (await sha256(m)) === h;
   const a = String(settings.adminMail||'').trim().toLowerCase();
-  return !!a && String(mail||'').trim().toLowerCase() === a;
+  return !!a && m === a;
 }
+function isAdminEmail(mail){                       // sync fallback, admin's own device
+  const m = String(mail||'').trim().toLowerCase();
+  if(fbSession && fbSession.email === m && typeof fbSession.admin === 'boolean') return fbSession.admin;
+  const a = String(settings.adminMail||'').trim().toLowerCase();
+  return !!a && m === a;
+}
+function contactAddress(){ return String(DEPLOY.cmail || settings.contactMail || '').trim(); }
 /* registration still needs a valid invite; Firebase itself cannot enforce that */
 async function fbRegister(user, email, pw, pw2, code){
   const r = await checkInvite(code);
@@ -3430,18 +3452,41 @@ async function fbRegister(user, email, pw, pw2, code){
   fbSaveSession(j);
   try{ await fbAuthSet('/users/' + j.localId, {name:u, email:fbSession.email, at:Date.now()}); }
   catch(e){ return 'a_sync_fail'; }
+  /* the admin is left out on purpose: no lookup entry, no exposed address */
+  if(!(await isAdminEmailAsync(fbSession.email))){
+    try{ await fbAuthSet('/usernames/' + u, fbSession.email); }catch(e){}
+  }
   return null;
 }
 async function fbSignUp(email, pw){ return fbIdent('signUp', {email, password:pw, returnSecureToken:true}); }
 async function fbSignIn(email, pw){ return fbIdent('signInWithPassword', {email, password:pw, returnSecureToken:true}); }
 async function fbSendReset(email){ return fbIdent('sendOobCode', {requestType:'PASSWORD_RESET', email:String(email||'').trim().toLowerCase()}); }
 
-async function fbLogin(email, pw){
+/* Firebase only knows e-mail addresses. A small public map turns a username
+   into one. Rules allow reading a single key but not listing the map, and the
+   admin is deliberately left out of it so the admin address stays private.  */
+async function fbResolveIdent(ident){
+  const s = String(ident||'').trim().toLowerCase();
+  if(!s) return '';
+  if(s.indexOf('@') > 0) return s;
+  try{
+    const r = await fetch(fbBase() + '/usernames/' + encodeURIComponent(s) + '.json', {cache:'no-store'});
+    if(r.ok){
+      const v = await r.json();
+      if(typeof v === 'string' && v.indexOf('@') > 0) return v.toLowerCase();
+    }
+  }catch(e){}
+  return '';
+}
+async function fbLogin(ident, pw){
+  const email = await fbResolveIdent(ident);
+  if(!email) return {err:'fa_user_unknown'};
   let j;
-  try{ j = await fbSignIn(String(email||'').trim().toLowerCase(), pw); }
+  try{ j = await fbSignIn(email, pw); }
   catch(e){ return {err: fbErrKey(e.code)}; }
   fbSaveSession(j);
-  const admin = isAdminEmail(fbSession.email);
+  const admin = await isAdminEmailAsync(fbSession.email);
+  fbSession.admin = admin; store.set('fbsess', fbSession);
   /* The profile is the membership record. Deleting it must actually lock the
      person out - previously a missing profile was tolerated and they got in. */
   let prof = null;
@@ -3581,7 +3626,7 @@ async function doSetup(){
     $('#lockGuest').classList.add('hidden');
     $('#deployWarn').classList.add('hidden');
     $('#lockDeploy').classList.remove('hidden');
-    $('#depOut').value = deploySnippet();
+    deploySnippet().then(v=>{ $('#depOut').value = v; });
     return;
   }
   if($('#suKeep').checked) store.set('authed',1);
@@ -3642,12 +3687,13 @@ function bindEvents(){
   $('#btnForgot').addEventListener('click', ()=>{
     $('#lockLogin').classList.add('hidden'); $('#lockGuest').classList.add('hidden');
     $('#lockReset').classList.remove('hidden');
-    const mail = settings.contactMail || settings.adminMail || '';
+    const mail = contactAddress();                    // alias only, never the admin address
     const a = $('#mailAdmin');
     a.href = 'mailto:' + encodeURIComponent(mail)
       + '?subject=' + encodeURIComponent(t('r_mail_subject'))
       + '&body=' + encodeURIComponent(t('r_mail_body'));
     a.classList.toggle('hidden', !mail);
+    if(!mail) $('#rsErr').textContent = t('fa_no_contact');
     $('#rsUser').focus();
   });
   $('#btnBackLogin2').addEventListener('click', ()=>{
@@ -4006,6 +4052,8 @@ function bindEvents(){
     const du=e.target.closest('[data-deluid]');
     if(du){
       if(confirm(t('fa_del_confirm'))){
+        const uname = du.dataset.uname || '';
+        if(uname) fbAuthDel('/usernames/' + encodeURIComponent(uname));
         fbAuthDel('/users/' + du.dataset.deluid).then(ok=>{
           refreshRoster();
           toast(t(ok ? 'fa_del_ok' : 'a_del_local'));
@@ -4041,7 +4089,7 @@ function bindEvents(){
   $('#btnDeploy').addEventListener('click',()=>{
     if(!auth){ toast(t('g_nosec')); return; }
     const sec = ensureGuestSecret();
-    $('#deployArea').value = deploySnippet();
+    deploySnippet().then(v=>{ $('#deployArea').value = v; $('#deployArea').select(); });
     $('#deployArea').select();
   });
   $('#uniSearch').addEventListener('input', renderUniverse);
