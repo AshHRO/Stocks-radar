@@ -906,6 +906,11 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
           <label for="setFbKey" data-i18n="s_fbkey"></label>
           <input type="text" id="setFbKey" spellcheck="false" placeholder="AIza…">
         </div>
+        <div class="set-row">
+          <button class="btn" id="btnCloudSave" data-i18n="sy_save"></button>
+          <button class="btn" id="btnCloudLoad" data-i18n="sy_load"></button>
+        </div>
+        <p class="hint" data-i18n="sy_hint"></p>
         <p class="hint" data-i18n="s_fb_hint"></p>
         <h3 style="margin-top:16px" data-i18n="a_list"></h3>
         <p class="hint" id="acctStatus"></p>
@@ -1064,7 +1069,8 @@ const memStore = {};
 const store = {
   ok(){ try{ localStorage.setItem('dr_t','1'); localStorage.removeItem('dr_t'); return true; }catch(e){ return false; } },
   get(k, fb){ try{ const v = localStorage.getItem('dr_'+k); return v==null ? (k in memStore ? memStore[k] : fb) : JSON.parse(v); }catch(e){ return k in memStore ? memStore[k] : fb; } },
-  set(k, v){ memStore[k]=v; try{ localStorage.setItem('dr_'+k, JSON.stringify(v)); }catch(e){} },
+  set(k, v){ memStore[k]=v; try{ localStorage.setItem('dr_'+k, JSON.stringify(v)); }catch(e){}
+    if(k === 'watchlist' || k === 'settings'){ try{ cloudSaveSoon(); }catch(e){} } },
   del(k){ delete memStore[k]; try{ localStorage.removeItem('dr_'+k); }catch(e){} },
   clear(){ for(const k of Object.keys(memStore)) delete memStore[k];
     try{ Object.keys(localStorage).filter(k=>k.startsWith('dr_')).forEach(k=>localStorage.removeItem(k)); }catch(e){} }
@@ -1496,6 +1502,11 @@ const DEFAULT_SETTINGS = {
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  sy_save:'Jetzt sichern', sy_load:'Vom Konto laden',
+  sy_saved:'Watchlist und Einstellungen im Konto gesichert', sy_loaded:'Vom Konto geladen',
+  sy_empty:'Für dieses Konto ist noch nichts gespeichert', sy_fail:'Sichern fehlgeschlagen',
+  sy_need_login:'Dafür musst du über Firebase angemeldet sein',
+  sy_hint:'Mit Firebase-Anmeldung wandern Watchlist, Sprache, Design, Währung, Plan-Eingaben und Filter mit dem Konto mit, auf jedem Gerät. Gespeichert wird ein paar Sekunden nach jeder Änderung und beim Sperren. Es gilt immer der zuletzt gespeicherte Stand: wer auf zwei Geräten gleichzeitig etwas ändert, überschreibt sich selbst. Datenbank-Adresse, API-Key, Admin-Adresse und Gast-Regel bleiben absichtlich außen vor, die gehören zur Datei und nicht zum Konto.',
   a_syncnames:'Benutzernamen freischalten',
   a_syncnames_done:'{n} Benutzernamen freigeschaltet, {s} übersprungen. Jetzt geht die Anmeldung auch mit Namen.',
   a_syncnames_hint:'Konten, die vor dieser Funktion angelegt wurden, haben noch keinen Namens-Eintrag und können sich nur mit E-Mail anmelden. Ein Tipp auf „Benutzernamen freischalten" legt die fehlenden Einträge für alle an. Der Admin bleibt dabei absichtlich außen vor: der Eintrag verrät die Adresse hinter einem Namen, und deine Admin-Adresse soll ja privat bleiben. Wenn dir das egal ist oder dein Firebase-Konto ohnehin auf der Alias-Adresse läuft, kannst du es unten einschalten.',
@@ -1720,6 +1731,11 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  sy_save:'Save now', sy_load:'Load from account',
+  sy_saved:'Watchlist and settings saved to your account', sy_loaded:'Loaded from your account',
+  sy_empty:'Nothing stored for this account yet', sy_fail:'Saving failed',
+  sy_need_login:'You need to be signed in via Firebase for this',
+  sy_hint:'With Firebase sign-in, your watchlist, language, theme, currency, planner inputs and filters travel with the account to any device. It saves a few seconds after each change and when locking. The most recent save wins: editing on two devices at once overwrites yourself. Database URL, API key, admin address and the guest policy are deliberately excluded - they belong to the file, not to an account.',
   a_syncnames:'Enable usernames',
   a_syncnames_done:'{n} usernames enabled, {s} skipped. Signing in by name now works.',
   a_syncnames_hint:'Accounts created before this feature have no name entry and can only sign in by e-mail. One tap on "Enable usernames" creates the missing entries for everyone. The admin is deliberately left out: an entry reveals the address behind a name, and your admin address is meant to stay private. If you do not mind, or your Firebase account already uses the alias address, switch it on below.',
@@ -3545,6 +3561,48 @@ async function syncUsernames(){
   }
   return {ok, skip};
 }
+/* What follows a person from device to device. Deployment settings (database
+   URL, API key, admin address, guest policy) are deliberately NOT in this list:
+   they belong to the file, not to a user, and must never be overwritten by
+   whatever a friend happens to have set on their own phone.                  */
+const SYNC_KEYS = ['lang','theme','dispCur','linkSrc','sort','sortDir','filter','status','staleMin',
+                   'planAmount','planMonthly','planProfile','screen','mvPeriod','mvDir','scanHours'];
+let cloudTimer = null, cloudLoading = false;
+function syncPayload(){
+  const prefs = {};
+  SYNC_KEYS.forEach(k => { if(settings[k] !== undefined && settings[k] !== null) prefs[k] = settings[k]; });
+  return {watchlist: watchlist, prefs: prefs, at: Date.now()};
+}
+async function cloudSave(){
+  if(!fbAuthOn() || !fbSession) return false;
+  try{ return await fbAuthSet('/userdata/' + fbSession.uid, syncPayload()); }
+  catch(e){ return false; }
+}
+function cloudSaveSoon(){
+  if(cloudLoading || !fbAuthOn() || !fbSession) return;
+  clearTimeout(cloudTimer);
+  cloudTimer = setTimeout(cloudSave, 3000);          // debounce a burst of edits
+}
+async function cloudLoad(){
+  if(!fbAuthOn() || !fbSession) return false;
+  let d = null;
+  try{ d = await fbAuthGet('/userdata/' + fbSession.uid); }catch(e){ return false; }
+  if(!d) return false;
+  cloudLoading = true;
+  try{
+    if(Array.isArray(d.watchlist)){
+      const clean = d.watchlist.filter(a => a && a.sym).map(a => ({
+        sym:String(a.sym), name:a.name||'', isin:(a.isin||'').toUpperCase(),
+        type: a.type === 'stock' ? 'stock' : 'etf'}));
+      if(clean.length){ watchlist = clean; store.set('watchlist', watchlist); }
+    }
+    if(d.prefs){
+      SYNC_KEYS.forEach(k => { if(d.prefs[k] !== undefined) settings[k] = d.prefs[k]; });
+      saveSettings();
+    }
+  } finally { cloudLoading = false; }
+  return true;
+}
 async function fbRoster(){
   const all = await fbAuthGet('/users');
   if(!all) return [];
@@ -3704,10 +3762,17 @@ function unlock(isGuest){
   $('#lockScreen').classList.add('hidden');
   $('#app').classList.remove('hidden');
   for(const asset of watchlist){ const s=seriesMap[asset.sym]; if(s) analyses[asset.sym]=analyze(asset,s); }
-  applyLang(); applyGuestUI(); applyRoleUI(); scheduleAuto(); refreshAll();
+  applyLang(); applyGuestUI(); applyRoleUI(); scheduleAuto();
+  if(fbAuthOn() && fbSession){
+    cloudLoad().then(found => {
+      if(found){ analyses = {}; applyLang(); renderAll(); }
+      refreshAll();
+    });
+  } else refreshAll();
   if(settings.dispCur && settings.dispCur!=='auto') loadFx(false).then(()=>{ if(window.__repaintMoney) window.__repaintMoney(); });
 }
 function lockNow(){
+  if(fbAuthOn() && fbSession){ clearTimeout(cloudTimer); cloudSave(); }
   store.del('authed'); $('#liPw').value=''; currentUser=''; isAdmin=true;
   if(guestMode){ endGuest(); return; }
   closeDetail(); showLock();
@@ -3768,6 +3833,17 @@ function bindEvents(){
     saveSettings(); toast(t('saved')); refreshRoster();
   });
   $('#btnRoster').addEventListener('click', ()=>{ refreshRoster(); toast(t('a_refresh')); });
+  $('#btnCloudSave').addEventListener('click', async ()=>{
+    if(!fbAuthOn() || !fbSession){ toast(t('sy_need_login')); return; }
+    clearTimeout(cloudTimer);
+    toast(t(await cloudSave() ? 'sy_saved' : 'sy_fail'));
+  });
+  $('#btnCloudLoad').addEventListener('click', async ()=>{
+    if(!fbAuthOn() || !fbSession){ toast(t('sy_need_login')); return; }
+    const ok = await cloudLoad();
+    if(ok){ analyses = {}; applyLang(); renderAll(); refreshAll(); }
+    toast(t(ok ? 'sy_loaded' : 'sy_empty'));
+  });
   $('#btnSyncNames').addEventListener('click', async ()=>{
     if(!fbAuthOn() || !fbSession){ toast(t('fa_no_session')); return; }
     toast(t('fa_wait'));
@@ -4160,6 +4236,7 @@ function bindEvents(){
     b.disabled=true; b.textContent='⟳';
     refreshOne(b.dataset.retry).then(()=>renderStatus());
   });
+  window.addEventListener('pagehide', ()=>{ if(fbAuthOn() && fbSession){ clearTimeout(cloudTimer); cloudSave(); } });
   window.addEventListener('online', ()=>refreshAll());
   window.addEventListener('offline', ()=>setBanner('banner_offline'));
   document.addEventListener('visibilitychange',()=>{
