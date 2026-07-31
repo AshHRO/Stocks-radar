@@ -86,7 +86,7 @@ html[data-theme="light"] .btn.primary{color:#fff}
 @media(max-width:640px){ #lastUpdate{display:none} }
 
 /* ============ Tabs ============ */
-#tabbar{max-width:1080px; margin:0 auto; padding:10px 14px 0; display:flex; gap:8px}
+#tabbar{max-width:1080px; margin:0 auto; padding:8px 14px 9px; display:flex; gap:8px}
 .tab{border:1px solid var(--line); background:var(--panel2); color:var(--muted); border-radius:999px; padding:8px 16px; font-size:13.5px; cursor:pointer; letter-spacing:.02em}
 .tab.on{background:var(--accent); border-color:var(--accent); color:#05121C; font-weight:700}
 html[data-theme="light"] .tab.on{color:#fff}
@@ -219,6 +219,16 @@ canvas#dChart{display:block; width:100%; height:280px}
 textarea#backupArea{width:100%; min-height:110px; font-family:var(--mono); font-size:12px}
 .hint{font-size:12px; color:var(--faint); margin:6px 0 0}
 
+.hd-sel{border:1px solid var(--line); background:var(--panel2); color:var(--ink); border-radius:var(--r-s);
+  padding:7px 3px; font-size:12px; font-family:var(--mono); cursor:pointer; max-width:58px}
+.funnel{display:flex; flex-wrap:wrap; align-items:center; gap:5px; margin:0 0 14px; font-size:11px; font-family:var(--mono)}
+.fn-step{border:1px solid var(--line); background:var(--panel2); border-radius:7px; padding:4px 8px; color:var(--muted)}
+.fn-step b{color:var(--ink); margin-left:5px}
+.fn-step i{color:var(--down); font-style:normal; margin-left:5px}
+.fn-step u{color:var(--warn); text-decoration:none; margin-left:5px; cursor:help}
+.fn-step.fn-zero{border-color:var(--down); color:var(--down)}
+.fn-arrow{color:var(--faint)}
+
 /* ============ Screener ============ */
 .sc-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(168px,1fr)); gap:9px; margin-bottom:12px}
 .sc-grid label{display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:.06em;
@@ -239,7 +249,11 @@ textarea#backupArea{width:100%; min-height:110px; font-family:var(--mono); font-
 /* ============ Guest ============ */
 #userChip{font-family:var(--mono); font-size:11px; color:var(--accent); border:1px solid var(--accent); border-radius:999px; padding:3px 9px; white-space:nowrap}
 #guestChip{font-family:var(--mono); font-size:11px; color:var(--warn); border:1px solid var(--warn); border-radius:999px; padding:3px 9px; white-space:nowrap}
-#lockGuest{border-top:1px solid var(--line); margin-top:18px; padding-top:14px}
+#lockGuest, #lockReset{border-top:1px solid var(--line); margin-top:18px; padding-top:14px}
+#lockReset{border-top:none; margin-top:0}
+#lockReset input{width:100%; padding:11px 12px; border-radius:var(--r-s); border:1px solid var(--line); background:var(--panel2); color:var(--ink); font-size:16px}
+#deployWarn{border:1px solid var(--warn); background:color-mix(in srgb, var(--warn) 10%, transparent);
+  color:var(--warn); border-radius:var(--r-s); padding:9px 12px; font-size:12.5px; margin:0 0 14px; line-height:1.45}
 #lockGuest input{width:100%; padding:11px 12px; border-radius:var(--r-s); border:1px solid var(--line); background:var(--panel2); color:var(--ink); font-size:16px; font-family:var(--mono); letter-spacing:.08em; text-transform:uppercase}
 #gOut{flex:1; font-family:var(--mono); letter-spacing:.06em}
 textarea#deployArea{width:100%; min-height:74px; font-family:var(--mono); font-size:11.5px}
@@ -269,7 +283,8 @@ canvas.mv-spark{flex:0 0 58px; width:58px; height:26px}
 .mv-num span{font-size:11px; color:var(--faint)}
 .mv-act{flex:0 0 auto; display:flex; gap:6px}
 .mv-act button, .mv-act a{border:1px solid var(--line); background:var(--panel2); color:var(--ink); border-radius:8px;
-  width:34px; height:34px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:15px; text-decoration:none; padding:0}
+  min-width:34px; height:34px; padding:0 6px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:11.5px; font-family:var(--mono); text-decoration:none}
+.mv-act button{font-size:15px; font-family:inherit}
 .mv-act button:hover, .mv-act a:hover{border-color:var(--accent)}
 .mv-act button.in{color:var(--up); border-color:var(--up); cursor:default}
 .mv-act button:disabled{opacity:.5}
@@ -373,6 +388,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
   <div class="lock-card">
     <div class="lock-brand"><span class="dot"></span><h1>DEPOT·RADAR</h1></div>
     <p class="lock-hint" id="lockHint"></p>
+    <p id="deployWarn" class="hidden"></p>
 
     <div id="lockSetup" class="hidden">
       <label for="suPw" data-i18n="pw"></label>
@@ -387,7 +403,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
     </div>
 
     <div id="lockLogin" class="hidden">
-      <label for="liUser" data-i18n="a_user"></label>
+      <label for="liUser" data-i18n="a_ident"></label>
       <input type="text" id="liUser" autocomplete="username" spellcheck="false" placeholder="admin">
       <label for="liPw" data-i18n="pw"></label>
       <input type="password" id="liPw" autocomplete="current-password">
@@ -405,6 +421,8 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
       <input type="text" id="nwCode" autocomplete="off" spellcheck="false" placeholder="KXXXX-XXXXXXX-XXXXXX">
       <label for="nwUser" data-i18n="a_user"></label>
       <input type="text" id="nwUser" autocomplete="username" spellcheck="false">
+      <label for="nwMail" data-i18n="a_email"></label>
+      <input type="text" id="nwMail" autocomplete="email" spellcheck="false" inputmode="email">
       <label for="nwPw" data-i18n="pw"></label>
       <input type="password" id="nwPw" autocomplete="new-password">
       <label for="nwPw2" data-i18n="pw2"></label>
@@ -413,6 +431,23 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
       <div class="lock-actions">
         <button class="btn primary" id="btnCreateAcct" data-i18n="a_create"></button>
         <button class="lock-forgot" id="btnBackLogin" data-i18n="a_back"></button>
+      </div>
+    </div>
+
+    <div id="lockReset" class="hidden">
+      <label for="rsUser" data-i18n="a_ident"></label>
+      <input type="text" id="rsUser" spellcheck="false">
+      <label for="rsCode" data-i18n="r_code"></label>
+      <input type="text" id="rsCode" spellcheck="false" placeholder="RXXXXXXX-XXXXXX">
+      <label for="rsPw" data-i18n="pw_new"></label>
+      <input type="password" id="rsPw" autocomplete="new-password">
+      <label for="rsPw2" data-i18n="pw_new2"></label>
+      <input type="password" id="rsPw2" autocomplete="new-password">
+      <p class="lock-err" id="rsErr"></p>
+      <div class="lock-actions">
+        <button class="btn primary" id="btnDoReset" data-i18n="r_apply"></button>
+        <a class="btn ghost" id="mailAdmin" href="#" data-i18n="r_mail"></a>
+        <button class="lock-forgot" id="btnBackLogin2" data-i18n="a_back"></button>
       </div>
     </div>
 
@@ -438,13 +473,18 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
       <span id="guestChip" class="hidden"></span>
       <span id="lastUpdate"></span>
       <button class="btn icon ghost" id="btnRefresh" title="Refresh">⟳</button>
+      <select id="hdCur" class="hd-sel" title="Währung / currency">
+        <option value="auto">⇄</option><option value="EUR">€</option>
+        <option value="USD">$</option><option value="GBP">£</option><option value="CHF">CHF</option>
+      </select>
+      <select id="hdSrc" class="hd-sel" title="Trade Republic / TradingView">
+        <option value="tr">TR</option><option value="tv">TV</option>
+      </select>
       <button class="btn icon ghost" id="btnLang">EN</button>
       <button class="btn icon ghost" id="btnTheme">☀</button>
       <button class="btn icon ghost" id="btnLock" title="Lock">🔒</button>
     </div>
-  </header>
-
-  <nav id="tabbar">
+    <nav id="tabbar">
     <button class="tab on" data-tab="overview" data-i18n="tab_overview"></button>
     <button class="tab" data-tab="movers" data-i18n="tab_movers"></button>
     <button class="tab" data-tab="screen" data-i18n="tab_screen"></button>
@@ -452,7 +492,8 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
     <button class="tab" data-tab="universe" data-i18n="tab_universe"></button>
     <button class="tab" data-tab="learn" data-i18n="tab_learn"></button>
     <button class="tab" data-tab="settings" data-i18n="tab_settings"></button>
-  </nav>
+    </nav>
+  </header>
 
   <main>
     <div id="banner" class="hidden"></div>
@@ -786,6 +827,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
           <select id="invDur">
             <option value="60">1 h</option><option value="1440">24 h</option>
             <option value="10080">7 Tage / days</option><option value="43200">30 Tage / days</option>
+            <option value="0" data-i18n="g_perma"></option>
           </select>
           <button class="btn primary" id="btnMakeInvite" data-i18n="a_make"></button>
         </div>
@@ -794,6 +836,15 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
           <button class="btn" id="btnCopyInvite" data-i18n="g_copy"></button>
         </div>
         <p class="hint" id="invInfo"></p>
+        <div class="set-row">
+          <label for="setMail" data-i18n="s_mail"></label>
+          <input type="text" id="setMail" inputmode="email" spellcheck="false">
+        </div>
+        <div class="set-row">
+          <input type="text" id="resetOut" readonly>
+          <button class="btn" id="btnCopyReset" data-i18n="g_copy"></button>
+        </div>
+        <p class="hint" id="resetInfo"></p>
         <h3 style="margin-top:16px" data-i18n="a_list"></h3>
         <div id="acctList"></div>
         <div class="set-row" style="margin-top:12px">
@@ -811,6 +862,8 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
             <option value="60">1 h</option>
             <option value="360">6 h</option>
             <option value="1440">24 h</option>
+            <option value="10080">7 Tage / days</option>
+            <option value="0" data-i18n="g_perma"></option>
           </select>
           <button class="btn primary" id="btnMakeGuest" data-i18n="g_make"></button>
         </div>
@@ -889,6 +942,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
 
       <div class="d-actions">
         <a class="btn primary" id="dTR" target="_blank" rel="noopener"></a>
+        <a class="btn" id="dTV" target="_blank" rel="noopener">TradingView ↗</a>
         <button class="btn" id="dCopyIsin" data-i18n="copy_isin"></button>
         <button class="btn ghost" id="dRefreshOne" data-i18n="refresh"></button>
       </div>
@@ -1341,7 +1395,7 @@ const DEFAULT_SETTINGS = {
   refreshMin:30, sort:'signal', filter:'all',
   planAmount:500, planMonthly:0, planProfile:'balanced',
   scanHours:3, trApp:1, mvPeriod:'d1', mvDir:'up',
-  staleMin:15, status:'all',
+  staleMin:15, status:'all', adminMail:'nsubugaashiraf50@gmail.com',
   linkSrc:'tr', tvTemplate:'https://www.tradingview.com/chart/?symbol={sym}', dispCur:'auto',
   screen:null
 };
@@ -1350,6 +1404,20 @@ const DEFAULT_SETTINGS = {
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  g_perma:'unbegrenzt',
+  g_valid_perma:'Dauerhafter Gast-Code, läuft nie ab. Zurücknehmen geht nur über „Alle Zugänge widerrufen" plus neuen Deploy-Schlüssel und erneutes Hochladen.',
+  a_inv_perma:'Dauerhafte Einladung, läuft nie ab. Jeder mit diesem Code kann jederzeit ein Konto anlegen.',
+  a_perm:'dauerhaft',
+  sc_all:'abgefragt', sc_unknown:'ohne Messwert - wird nicht aussortiert',
+  a_email:'E-Mail', a_ident:'Benutzername oder E-Mail',
+  a_mail_bad:'Bitte eine gültige E-Mail angeben', a_mail_taken:'Diese E-Mail wird schon verwendet',
+  r_make:'Reset-Code', r_code:'Reset-Code', r_apply:'Neues Passwort setzen',
+  r_bad:'Reset-Code ungültig', r_expired:'Reset-Code abgelaufen', r_done:'Passwort geändert, jetzt anmelden',
+  r_mail:'Admin anschreiben', r_created:'Reset-Code für „{u}" gültig bis {time}. Per Mail zurückschicken.',
+  r_mail_subject:'Depot Radar: Passwort zurücksetzen',
+  r_mail_body:'Hallo, ich komme nicht mehr in Depot Radar rein. Mein Benutzername lautet: ',
+  s_mail:'Admin-E-Mail (für Passwort-Hilfe)',
+  dep_warn:'Diese Datei hat noch keinen Deploy-Schlüssel. Deshalb funktionieren Gast- und Einladungscodes nur auf genau dem Gerät, das sie erzeugt hat, und jeder neue Besucher landet im Einrichtungs-Modus. Fix: Einstellungen › Veröffentlichen › Schnipsel erzeugen, die Zeile in der HTML-Datei ersetzen, neu hochladen.',
   a_title:'Konten & Einladungen', a_dur:'Einladung gültig', a_make:'Einladung erzeugen',
   a_list:'Konten auf diesem Gerät', a_none:'Auf diesem Gerät wurde noch kein Konto angelegt.',
   a_since:'angelegt', a_revoke:'Alle Zugänge widerrufen',
@@ -1503,6 +1571,20 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  g_perma:'no expiry',
+  g_valid_perma:'Permanent guest code, never expires. Taking it back needs "Revoke all access" plus a new deployment key and another upload.',
+  a_inv_perma:'Permanent invitation, never expires. Anyone holding this code can create an account at any time.',
+  a_perm:'permanent',
+  sc_all:'fetched', sc_unknown:'no measurement - not filtered out',
+  a_email:'E-mail', a_ident:'Username or e-mail',
+  a_mail_bad:'Please enter a valid e-mail', a_mail_taken:'That e-mail is already in use',
+  r_make:'Reset code', r_code:'Reset code', r_apply:'Set new password',
+  r_bad:'Reset code invalid', r_expired:'Reset code expired', r_done:'Password changed, sign in now',
+  r_mail:'E-mail the admin', r_created:'Reset code for "{u}" valid until {time}. Send it back by mail.',
+  r_mail_subject:'Depot Radar: password reset',
+  r_mail_body:'Hi, I can no longer get into Depot Radar. My username is: ',
+  s_mail:'Admin e-mail (for password help)',
+  dep_warn:'This file has no deployment key yet. That is why guest and invitation codes only work on the exact device that created them, and every new visitor lands in setup mode. Fix: Settings › Publishing › create snippet, replace the line in the HTML file, upload again.',
   a_title:'Accounts & invitations', a_dur:'Invitation valid', a_make:'Create invitation',
   a_list:'Accounts on this device', a_none:'No account has been created on this device yet.',
   a_since:'created', a_revoke:'Revoke all access',
@@ -2244,7 +2326,8 @@ function cardHtml(asset){
       <p class="autoline mono">${autoLine(a)}</p>
       <div class="card-actions">
         <button class="btn ghost act-detail">${t('details')}</button>
-        <a class="btn ghost act-tr" target="_blank" rel="noopener" href="${escHtml(assetUrl(asset.isin, asset.sym))}" data-isin="${escHtml(asset.isin||'')}">${settings.linkSrc==='tv'?'TV':'TR'} ↗</a>
+        <a class="btn ghost act-go" data-go="tr" data-isin="${escHtml(asset.isin||'')}" data-sym="${escHtml(asset.sym)}" target="_blank" rel="noopener" href="${escHtml(asset.isin?trUrl(asset.isin):'#')}">TR ↗</a>
+        <a class="btn ghost act-go" data-go="tv" data-isin="${escHtml(asset.isin||'')}" data-sym="${escHtml(asset.sym)}" target="_blank" rel="noopener" href="${escHtml(tvUrl(asset.sym))}">TV ↗</a>
         <button class="btn ghost act-one" title="${t('refresh')}">⟳</button>
       </div>
       <p class="card-stamp">${t('card_stamp').replace('{time}', fmtTime(a.fetchedAt)).replace('{src}', sourceTxt(a))}</p>
@@ -2379,7 +2462,7 @@ function fillDetail(){
      <span><i style="background:${cssVar('--sma50')}"></i>SMA 50</span>
      <span><i style="background:${cssVar('--sma200')}"></i>SMA 200</span>
      <span><i style="background:${hexA(a2,0.55)}"></i>${settings.lang==='de'?'Projektion ±1σ':'Projection ±1σ'}</span>`;
-  const tr=$('#dTR'); tr.textContent = settings.linkSrc==='tv' ? 'TradingView ↗' : t('open_tr');
+  const tr=$('#dTR'); tr.textContent = t('open_tr'); $('#dTV').href = tvUrl(asset.sym);
   if(asset.isin){ tr.href=trUrl(asset.isin); tr.removeAttribute('data-noisin'); }
   else { tr.href='#'; tr.setAttribute('data-noisin','1'); }
   const sl=$('#dTravel'), last=s.c.length-1;
@@ -2609,6 +2692,9 @@ function renderSettingsValues(){
   $('#setSrc').value=settings.linkSrc;
   $('#setTv').value=settings.tvTemplate;
   $('#setCur').value=settings.dispCur;
+  $('#setMail').value=settings.adminMail||'';
+  if($('#hdCur')) $('#hdCur').value=settings.dispCur;
+  if($('#hdSrc')) $('#hdSrc').value=settings.linkSrc;
   $('#setStale').value=settings.staleMin;
   $('#setTrApp').value=String(settings.trApp);
   $('#sortSel').value=settings.sort;
@@ -2743,7 +2829,7 @@ function deployEpoch(){ return Math.max(1, +DEPLOY.epoch || 0, +store.get('epoch
 
 async function makeInvite(mins){
   const sec = invSecret(); if(!sec) return null;
-  const ep = deployEpoch(), exp = Date.now() + Math.max(1,mins)*60000;
+  const ep = deployEpoch(), exp = (+mins > 0) ? Date.now() + mins*60000 : PERMA;
   const body = ep.toString(36).toUpperCase() + '-' + exp.toString(36).toUpperCase();
   const sig = (await sha256(sec + ':' + body)).slice(0,6).toUpperCase();
   return {code: 'K' + body + '-' + sig, exp, ep};
@@ -2764,18 +2850,62 @@ async function checkInvite(raw){
   if(exp <= Date.now()) return -1;
   return exp;
 }
-async function createAccount(user, pw, pw2, code){
+async function makeReset(user, mins){
+  const sec = invSecret(); if(!sec) return null;
+  const u = String(user||'').trim().toLowerCase();
+  if(!u || u === 'admin') return null;          // see applyReset for why admin is excluded
+  const exp = Date.now() + Math.max(1,mins)*60000;
+  const body = exp.toString(36).toUpperCase();
+  const sig = (await sha256(sec + ':R:' + u + ':' + body)).slice(0,6).toUpperCase();
+  return {code: 'R' + body + '-' + sig, exp, u};
+}
+/* Deliberately cannot reset the admin password. The signing secret sits in the
+   public source, so an admin reset code could be forged by anyone who reads it -
+   that would be a far easier way in than attacking the password hash. If the
+   admin password is lost, regenerate the deployment key and re-upload.          */
+async function applyReset(user, code, pw, pw2){
+  const sec = invSecret(); if(!sec) return 'r_bad';
+  const u = String(user||'').trim().toLowerCase();
+  const key = accountKey(u);
+  if(!key) return 'a_login_bad';
+  const parts = String(code||'').trim().toUpperCase().replace(/\s+/g,'').split('-');
+  if(parts.length !== 2 || parts[0].charAt(0) !== 'R') return 'r_bad';
+  const body = parts[0].slice(1);
+  const sig = (await sha256(sec + ':R:' + key + ':' + body)).slice(0,6).toUpperCase();
+  if(sig !== parts[1]) return 'r_bad';
+  const exp = parseInt(body, 36);
+  if(!isFinite(exp)) return 'r_bad';
+  if(exp <= Date.now()) return 'r_expired';
+  if(String(pw||'').length < 4) return 'pw_short';
+  if(pw !== pw2) return 'pw_mismatch';
+  const salt = randomSalt();
+  accounts[key] = Object.assign({}, accounts[key], {salt, hash: await sha256(salt + ':' + pw)});
+  store.set('accounts', accounts);
+  return null;
+}
+/* accepts either the username or the registered e-mail */
+function accountKey(ident){
+  const s = String(ident||'').trim().toLowerCase();
+  if(!s) return '';
+  if(accounts[s]) return s;
+  for(const k of Object.keys(accounts)){ if((accounts[k].email||'').toLowerCase() === s) return k; }
+  return '';
+}
+async function createAccount(user, email, pw, pw2, code){
   const r = await checkInvite(code);
   if(r === -2) return 'a_revoked';
   if(r === -1) return 'a_inv_expired';
   if(!r) return 'a_inv_bad';
   const u = String(user||'').trim().toLowerCase();
+  const em = String(email||'').trim().toLowerCase();
   if(!/^[a-z0-9._-]{2,20}$/.test(u)) return 'a_user_bad';
   if(u === 'admin' || accounts[u]) return 'a_user_taken';
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) return 'a_mail_bad';
+  if(accountKey(em)) return 'a_mail_taken';
   if(String(pw||'').length < 4) return 'pw_short';
   if(pw !== pw2) return 'pw_mismatch';
   const salt = randomSalt();
-  accounts[u] = {salt, hash: await sha256(salt + ':' + pw), epoch: deployEpoch(), at: Date.now()};
+  accounts[u] = {salt, hash: await sha256(salt + ':' + pw), email: em, epoch: deployEpoch(), at: Date.now()};
   store.set('accounts', accounts);
   return null;
 }
@@ -2786,13 +2916,14 @@ async function verifyLogin(user, pw){
     if((await sha256(auth.salt + ':' + pw)) === auth.hash) return {user:'admin', admin:true};
     return null;
   }
-  const a = accounts[u];
+  const key = accountKey(u);
+  const a = accounts[key];
   if(!a) return null;
   if((a.epoch || 0) < deployEpoch()){          // invalidated by a redeploy
-    delete accounts[u]; store.set('accounts', accounts); return null;
+    delete accounts[key]; store.set('accounts', accounts); return null;
   }
   if((await sha256(a.salt + ':' + pw)) !== a.hash) return null;
-  return {user:u, admin:false};
+  return {user:key, admin:false};
 }
 function accountRows(){
   return Object.keys(accounts).sort().map(u => ({user:u, at:accounts[u].at, epoch:accounts[u].epoch}));
@@ -2802,7 +2933,8 @@ function renderAccounts(){
   const rows = accountRows();
   box.innerHTML = rows.length
     ? rows.map(r => `<div class="wl-item"><div class="grow"><b>${escHtml(r.user)}</b><br>
-        <span class="mono">${t('a_since')} ${fmtTime(r.at)}</span></div>
+        <span class="mono">${escHtml(accounts[r.user].email||'')} · ${t('a_since')} ${fmtTime(r.at)} · ${t('a_perm')}</span></div>
+        <button class="btn ghost" data-resetacct="${escHtml(r.user)}">${t('r_make')}</button>
         <button class="btn danger" data-delacct="${escHtml(r.user)}">${t('remove')}</button></div>`).join('')
     : `<p class="hint">${t('a_none')}</p>`;
 }
@@ -2834,6 +2966,9 @@ function applyRoleUI(){
    Anyone holding a valid code gets in until it expires. Verifiable offline
    because the secret is baked into the deployed file.
    ===================================================================== */
+const PERMA = 4102444800000;                 // 2100-01-01, stands for "no expiry"
+function isPerma(exp){ return exp >= PERMA - 1; }
+function expLabel(exp){ return isPerma(exp) ? t('g_perma') : fmtTime(exp); }
 function guestSecret(){ return DEPLOY.gsec || store.get('gsec','') || ''; }
 function ensureGuestSecret(){
   let s = store.get('gsec','');
@@ -2842,9 +2977,9 @@ function ensureGuestSecret(){
 }
 async function makeGuestCode(mins){
   const sec = guestSecret(); if(!sec) return null;
-  const exp = Date.now() + Math.max(1, mins)*60000;
+  const exp = (+mins > 0) ? Date.now() + mins*60000 : PERMA;
   const body = exp.toString(36).toUpperCase();
-  const sig = (await sha256(sec + ':' + body)).slice(0,6).toUpperCase();
+  const sig = (await sha256(sec + ':' + deployEpoch() + ':' + body)).slice(0,6).toUpperCase();
   return {code: body + '-' + sig, exp};
 }
 /* returns expiry ms, 0 = invalid, -1 = correct but expired */
@@ -2854,12 +2989,13 @@ async function checkGuestCode(raw){
   if(parts.length !== 2 || !parts[0] || !parts[1]) return 0;
   const exp = parseInt(parts[0], 36);
   if(!isFinite(exp) || exp <= 0) return 0;
-  const sig = (await sha256(sec + ':' + parts[0])).slice(0,6).toUpperCase();
-  if(sig !== parts[1]) return 0;
+  const sig = (await sha256(sec + ':' + deployEpoch() + ':' + parts[0])).slice(0,6).toUpperCase();
+  if(sig !== parts[1]) return 0;              // also fails once the epoch is bumped
   return exp > Date.now() ? exp : -1;
 }
 function tickGuest(){
   if(!guestUntil) return;
+  if(isPerma(guestUntil)){ $('#guestChip').textContent = t('g_chip'); return; }
   const left = guestUntil - Date.now();
   if(left <= 0){ endGuest(t('g_expired_now')); return; }
   const m = Math.floor(left/60000), s = Math.floor((left%60000)/1000);
@@ -2909,7 +3045,11 @@ function showLock(){
   $('#lockHint').textContent=t(setup?'lock_setup_hint':'lock_login_hint');
   $('#lockGuest').classList.toggle('hidden', !guestSecret());
   $('#lockNew').classList.add('hidden');
-  $('#btnHaveInvite').classList.toggle('hidden', setup || !invSecret());
+  $('#lockReset').classList.add('hidden');
+  $('#btnHaveInvite').classList.toggle('hidden', setup);
+  const dw = $('#deployWarn');
+  dw.textContent = t('dep_warn');
+  dw.classList.toggle('hidden', !!DEPLOY.hash);
   setTimeout(()=>{ (setup?$('#suPw'):$('#liPw')).focus(); },50);
 }
 async function doSetup(){
@@ -2956,7 +3096,35 @@ function resetApp(){
 function bindEvents(){
   $('#btnSetup').addEventListener('click', doSetup);
   $('#btnLogin').addEventListener('click', doLogin);
-  $('#btnForgot').addEventListener('click', resetApp);
+  $('#btnForgot').addEventListener('click', ()=>{
+    $('#lockLogin').classList.add('hidden'); $('#lockGuest').classList.add('hidden');
+    $('#lockReset').classList.remove('hidden');
+    const mail = settings.adminMail || '';
+    const a = $('#mailAdmin');
+    a.href = 'mailto:' + encodeURIComponent(mail)
+      + '?subject=' + encodeURIComponent(t('r_mail_subject'))
+      + '&body=' + encodeURIComponent(t('r_mail_body'));
+    a.classList.toggle('hidden', !mail);
+    $('#rsUser').focus();
+  });
+  $('#btnBackLogin2').addEventListener('click', ()=>{
+    $('#lockReset').classList.add('hidden'); $('#lockLogin').classList.remove('hidden');
+    $('#lockGuest').classList.toggle('hidden', !guestSecret());
+  });
+  $('#btnDoReset').addEventListener('click', async ()=>{
+    const err = $('#rsErr');
+    const bad = await applyReset($('#rsUser').value, $('#rsCode').value, $('#rsPw').value, $('#rsPw2').value);
+    if(bad){ err.textContent = t(bad); return; }
+    err.textContent = '';
+    const u = accountKey($('#rsUser').value);
+    $('#rsCode').value=$('#rsPw').value=$('#rsPw2').value='';
+    $('#btnBackLogin2').click();
+    $('#liUser').value = u; $('#liPw').focus();
+    toast(t('r_done'));
+  });
+  $('#rsPw2').addEventListener('keydown', e=>{ if(e.key==='Enter') $('#btnDoReset').click(); });
+  $('#btnCopyReset').addEventListener('click', ()=>{ const v=$('#resetOut').value; if(v) copyText(v); });
+  $('#setMail').addEventListener('change', e=>{ settings.adminMail=e.target.value.trim(); saveSettings(); toast(t('saved')); });
   [['#suPw2',doSetup],['#liPw',doLogin]].forEach(([sel,fn])=>{
     $(sel).addEventListener('keydown',e=>{ if(e.key==='Enter') fn(); });
   });
@@ -2969,7 +3137,10 @@ function bindEvents(){
     $$('.panel').forEach(p=>p.classList.toggle('on', p.id==='panel-'+b.dataset.tab));
     if(b.dataset.tab==='movers'){ Object.keys(scanData.items||{}).length ? scanUniverse(false) : renderMovers(); }
     if(b.dataset.tab==='plan' && !planState) renderPlan();
-    if(b.dataset.tab==='screen') renderScreen();
+    if(b.dataset.tab==='screen'){
+      renderScreen();
+      if(!Object.keys((scanData&&scanData.items)||{}).length) scanUniverse(false).then(renderScreen);
+    }
   }));
   $$('.controls .chip[data-filter]').forEach(ch=>ch.addEventListener('click',()=>{
     settings.filter=ch.dataset.filter; saveSettings();
@@ -2989,8 +3160,8 @@ function bindEvents(){
   $('#cardGrid').addEventListener('click',e=>{
     const art=e.target.closest('article[data-sym]'); if(!art) return;
     const sym=art.dataset.sym;
-    const tr=e.target.closest('.act-tr');
-    if(tr){ e.preventDefault(); openAsset(tr.dataset.isin, sym); return; }
+    const tr=e.target.closest('.act-go');
+    if(tr){ e.preventDefault(); openWith(tr.dataset.go, tr.dataset.isin, sym); return; }
     const one=e.target.closest('.act-one');
     if(one){ e.stopPropagation(); one.classList.add('spin');
       refreshOne(sym).then(()=>{ const b=$('#cardGrid').querySelector(`article[data-sym="${CSS.escape(sym)}"] .act-one`); if(b) b.classList.remove('spin'); });
@@ -3015,7 +3186,8 @@ function bindEvents(){
     const a=assetBySym(detailSym);
     if(a&&a.isin) copyText(a.isin); else toast(t('need_isin'));
   });
-  $('#dTR').addEventListener('click',e=>{ e.preventDefault(); const a=assetBySym(detailSym); openAsset(a&&a.isin, detailSym); });
+  $('#dTR').addEventListener('click',e=>{ e.preventDefault(); const a=assetBySym(detailSym); openWith('tr', a&&a.isin, detailSym); });
+  $('#dTV').addEventListener('click',e=>{ e.preventDefault(); openWith('tv', null, detailSym); });
   $('#dRefreshOne').addEventListener('click',()=>refreshOne(detailSym));
   let rsTo; window.addEventListener('resize',()=>{ clearTimeout(rsTo); rsTo=setTimeout(()=>{ renderCards(); renderMovers(); if(detailSym) drawDetail(); if(planState) drawPlanChart(); },150); });
   $('#btnPlan').addEventListener('click', renderPlan);
@@ -3023,6 +3195,49 @@ function bindEvents(){
     const a=e.target.closest('.trlink'); if(a){ e.preventDefault(); openTR(a.dataset.isin); }
   });
   $('#btnScan').addEventListener('click', ()=>scanUniverse(true));
+  $('#btnScScan').addEventListener('click', ()=>scanUniverse(true).then(renderScreen));
+  $('#btnScreen').addEventListener('click', async ()=>{
+    renderScreen();
+    if(screenFilters().mcap !== 'any'){ await loadMcaps(screenRows()); renderScreen(); }
+  });
+  $('#btnScReset').addEventListener('click', ()=>{
+    settings.screen = Object.assign({}, SCREEN_DEFAULT); saveSettings(); renderScreen();
+  });
+  Object.keys(SCREEN_FIELDS).forEach(id=>{
+    const el = $('#'+id); if(!el) return;
+    el.addEventListener('change', async e=>{
+      const key = SCREEN_FIELDS[id], cur = screenFilters();
+      if(key === 'preset'){
+        const pre = SCREEN_PRESETS[e.target.value];
+        settings.screen = pre ? Object.assign({preset:e.target.value}, pre)
+                              : Object.assign({}, cur, {preset:'custom'});
+      } else {
+        settings.screen = Object.assign({}, cur, {[key]: e.target.value, preset:'custom'});
+      }
+      saveSettings(); renderScreen();
+      if(settings.screen.mcap !== 'any'){ await loadMcaps(screenRows()); renderScreen(); }
+    });
+  });
+  $('#scList').addEventListener('click', e=>{
+    const row = e.target.closest('.mv-row'); if(!row) return;
+    const u = SCAN_LIST().find(x=>x.sym===row.dataset.sym); if(!u) return;
+    const link = e.target.closest('a[data-go]');
+    if(link){ e.preventDefault(); openWith(link.dataset.go, link.dataset.isin, link.dataset.sym); return; }
+    const add = e.target.closest('.mv-add');
+    if(add && !add.disabled){ addAsset({sym:u.sym, name:u.name, isin:u.isin, type:u.type}); renderScreen(); }
+  });
+  function applySrc(v){ settings.linkSrc=v; saveSettings();
+    if($('#setSrc')) $('#setSrc').value=v; if($('#hdSrc')) $('#hdSrc').value=v;
+    renderAll(); renderMovers(); renderScreen(); if(detailSym) fillDetail(); }
+  async function applyCur(v){ settings.dispCur=v; saveSettings();
+    if($('#setCur')) $('#setCur').value=v; if($('#hdCur')) $('#hdCur').value=v;
+    if(v!=='auto') await loadFx(false);
+    renderAll(); renderMovers(); renderScreen(); if(planState) renderPlan(); if(detailSym){ fillDetail(); drawDetail(); } }
+  $('#setSrc').addEventListener('change', e=>applySrc(e.target.value));
+  $('#hdSrc').addEventListener('change', e=>applySrc(e.target.value));
+  $('#setCur').addEventListener('change', e=>applyCur(e.target.value));
+  $('#hdCur').addEventListener('change', e=>applyCur(e.target.value));
+  $('#setTv').addEventListener('change', e=>{ settings.tvTemplate=e.target.value.trim()||'https://www.tradingview.com/chart/?symbol={sym}'; e.target.value=settings.tvTemplate; saveSettings(); toast(t('saved')); });
   $$('#panel-movers .chip[data-per]').forEach(ch=>ch.addEventListener('click',()=>{
     settings.mvPeriod=ch.dataset.per; saveSettings();
     $$('#panel-movers .chip[data-per]').forEach(x=>x.classList.toggle('on',x===ch));
@@ -3038,8 +3253,8 @@ function bindEvents(){
   $('#mvList').addEventListener('click',e=>{
     const row=e.target.closest('.mv-row'); if(!row) return;
     const u=SCAN_LIST().find(x=>x.sym===row.dataset.sym); if(!u) return;
-    const link=e.target.closest('a[data-isin]');
-    if(link){ e.preventDefault(); openTR(link.dataset.isin); return; }
+    const link=e.target.closest('a[data-go]');
+    if(link){ e.preventDefault(); openWith(link.dataset.go, link.dataset.isin, link.dataset.sym||u.sym); return; }
     const add=e.target.closest('.mv-add');
     if(add && !add.disabled){ addAsset({sym:u.sym, name:u.name, isin:u.isin, type:u.type}); renderMovers(); }
   });
@@ -3136,11 +3351,11 @@ function bindEvents(){
   });
   $('#btnCreateAcct').addEventListener('click', async ()=>{
     const err=$('#nwErr');
-    const bad = await createAccount($('#nwUser').value, $('#nwPw').value, $('#nwPw2').value, $('#nwCode').value);
+    const bad = await createAccount($('#nwUser').value, $('#nwMail').value, $('#nwPw').value, $('#nwPw2').value, $('#nwCode').value);
     if(bad){ err.textContent=t(bad); return; }
     err.textContent='';
     const u=$('#nwUser').value.trim().toLowerCase();
-    $('#nwCode').value=$('#nwPw').value=$('#nwPw2').value=$('#nwUser').value='';
+    $('#nwCode').value=$('#nwPw').value=$('#nwPw2').value=$('#nwUser').value=$('#nwMail').value='';
     $('#btnBackLogin').click();
     $('#liUser').value=u; $('#liPw').focus();
     toast(t('a_created'));
@@ -3153,10 +3368,19 @@ function bindEvents(){
     const r = await makeInvite(+$('#invDur').value||1440);
     if(!r){ toast(t('g_nosec')); return; }
     $('#invOut').value=r.code;
-    $('#invInfo').textContent=t('a_inv_valid').replace('{time}', fmtTime(r.exp));
+    $('#invInfo').textContent = isPerma(r.exp) ? t('a_inv_perma') : t('a_inv_valid').replace('{time}', expLabel(r.exp));
   });
   $('#btnCopyInvite').addEventListener('click',()=>{ const v=$('#invOut').value; if(v) copyText(v); });
   $('#acctList').addEventListener('click',e=>{
+    const rb=e.target.closest('[data-resetacct]');
+    if(rb){
+      makeReset(rb.dataset.resetacct, 1440).then(r=>{
+        if(!r){ toast(t('g_nosec')); return; }
+        $('#resetOut').value=r.code;
+        $('#resetInfo').textContent=t('r_created').replace('{u}', r.u).replace('{time}', fmtTime(r.exp));
+      });
+      return;
+    }
     const b=e.target.closest('[data-delacct]'); if(!b) return;
     const u=b.dataset.delacct;
     if(confirm(t('a_del_confirm').replace('{u}',u))){
@@ -3175,7 +3399,7 @@ function bindEvents(){
     const res = await makeGuestCode(+$('#gDur').value||20);
     if(!res){ toast(t('g_nosec')); return; }
     $('#gOut').value = res.code;
-    $('#gOutInfo').textContent = t('g_valid').replace('{time}', fmtTime(res.exp));
+    $('#gOutInfo').textContent = isPerma(res.exp) ? t('g_valid_perma') : t('g_valid').replace('{time}', expLabel(res.exp));
   });
   $('#btnCopyGuest').addEventListener('click',()=>{ const v=$('#gOut').value; if(v) copyText(v); });
   $('#btnDeploy').addEventListener('click',()=>{
@@ -3368,7 +3592,7 @@ function moverRowHtml(x, idx, per){
         <span>${fmtMoney(x.m.p,x.m.cur)}</span></div>
       <div class="mv-act">
         <button class="mv-add${inWl?' in':''}" ${inWl?'disabled':''} title="${inWl?t('mv_inwl'):t('mv_add')}">${inWl?'✓':'+'}</button>
-        <a href="${escHtml(trUrl(x.u.isin))}" data-isin="${escHtml(x.u.isin)}" title="${t('mv_open')}" target="_blank" rel="noopener">↗</a>
+        ${linkPairHtml(x.u.isin, x.u.sym)}
       </div></div>`;
 }
 function leagueHtml(title, res, per){
@@ -3406,10 +3630,10 @@ function renderMovers(){
    SCREENER — filter the scanned universe on measurable conditions
    ===================================================================== */
 const SCREEN_PRESETS = {
-  trade:  {type:'stock', above:'ema20', day:'any', month:'5',  rsi:'gt40', minp:'10', minturn:'500000', mom:'any',   mcap:'any', sort:'d21'},
-  invest: {type:'all',   above:'sma200', day:'any', month:'any', rsi:'any',  minp:'10', minturn:'500000', mom:'any',   mcap:'any', sort:'d252'},
-  breakout:{type:'stock', above:'sma20', day:'4',   month:'any', rsi:'band', minp:'10', minturn:'500000', mom:'any',   mcap:'any', sort:'d1'},
-  momentum:{type:'stock', above:'sma20', day:'any', month:'0',  rsi:'band', minp:'10', minturn:'500000', mom:'start', mcap:'any', sort:'d5'}
+  trade:  {type:'stock', above:'ema20', day:'any', month:'5',  rsi:'gt40', minp:'10', minturn:'any', mom:'any',   mcap:'any', sort:'d21'},
+  invest: {type:'all',   above:'sma200', day:'any', month:'any', rsi:'any',  minp:'10', minturn:'any', mom:'any',   mcap:'any', sort:'d252'},
+  breakout:{type:'stock', above:'sma20', day:'4',   month:'any', rsi:'band', minp:'10', minturn:'any', mom:'any',   mcap:'any', sort:'d1'},
+  momentum:{type:'stock', above:'sma20', day:'any', month:'0',  rsi:'band', minp:'10', minturn:'any', mom:'start', mcap:'any', sort:'d5'}
 };
 const SCREEN_DEFAULT = Object.assign({preset:'trade'}, SCREEN_PRESETS.trade);
 const SCREEN_FIELDS = {scPreset:'preset', scType:'type', scAbove:'above', scDay:'day', scMonth:'month',
@@ -3428,36 +3652,54 @@ function momentumStart(m){
     && m.d21 > 0;
 }
 function screenFilters(){ return Object.assign({}, SCREEN_DEFAULT, settings.screen || {}); }
+let screenFunnel = [];
+/* A filter only rejects an asset when the number it needs actually exists.
+   Yahoo often reports no volume for Xetra listings, and treating "unknown"
+   as "fails" silently emptied the entire screener.                          */
 function screenRows(){
   const f = screenFilters();
   const items = (scanData && scanData.items) || {};
-  const out = [];
-  for(const u of SCAN_LIST()){
-    const m = items[u.sym];
-    if(!m) continue;
-    if(f.type !== 'all' && u.type !== f.type) continue;
-    if(f.above !== 'any'){ const ref = m[f.above]; if(ref == null || !(m.p > ref)) continue; }
-    if(f.day !== 'any'   && !(m.d1  != null && m.d1  > +f.day))   continue;
-    if(f.month !== 'any' && !(m.d21 != null && m.d21 > +f.month)) continue;
-    if(f.rsi !== 'any'){
-      const r = m.rsi; if(r == null) continue;
-      if(f.rsi === 'gt40' && !(r > 40)) continue;
-      if(f.rsi === 'gt50' && !(r > 50)) continue;
-      if(f.rsi === 'band' && !(r >= 40 && r <= 70)) continue;
-      if(f.rsi === 'lt30' && !(r < 30)) continue;
-    }
-    if(f.minp !== 'any'    && !(m.p >= +f.minp)) continue;
-    if(f.minturn !== 'any' && !(m.turn != null && m.turn >= +f.minturn)) continue;
-    if(f.mom === 'start'   && !momentumStart(m)) continue;
-    if(f.mcap !== 'any'){ const mc = mcapCache[u.sym]; if(!(mc != null && mc >= +f.mcap)) continue; }
-    out.push({u, m});
-  }
+  let list = [];
+  for(const u of SCAN_LIST()){ const m = items[u.sym]; if(m) list.push({u, m}); }
+  screenFunnel = [{label:t('sc_all'), before:list.length, after:list.length, unknown:0}];
+  const step = (label, active, test, metric) => {
+    if(!active) return;
+    const before = list.length;
+    let unknown = 0;
+    list = list.filter(x => {
+      if(metric && metric(x) == null){ unknown++; return true; }   // unmeasured never means rejected
+      return test(x);
+    });
+    screenFunnel.push({label, before, after:list.length, unknown});
+  };
+  step(t('sc_type'), f.type !== 'all', x => x.u.type === f.type, null);
+  step(t('sc_above') + ' ' + String(f.above).toUpperCase(), f.above !== 'any',
+       x => x.m.p > x.m[f.above], x => x.m[f.above]);
+  step(t('sc_day'),   f.day   !== 'any', x => x.m.d1  > +f.day,   x => x.m.d1);
+  step(t('sc_month'), f.month !== 'any', x => x.m.d21 > +f.month, x => x.m.d21);
+  step(t('sc_rsi'), f.rsi !== 'any', x => {
+    const r = x.m.rsi;
+    return f.rsi==='gt40' ? r>40 : f.rsi==='gt50' ? r>50 : f.rsi==='band' ? (r>=40&&r<=70) : r<30;
+  }, x => x.m.rsi);
+  step(t('sc_minp'), f.minp !== 'any', x => x.m.p >= +f.minp, x => x.m.p);
+  step(t('sc_turn'), f.minturn !== 'any', x => x.m.turn >= +f.minturn, x => x.m.turn);
+  step(t('sc_mom'),  f.mom === 'start', x => momentumStart(x.m), null);
+  step(t('sc_mcap'), f.mcap !== 'any', x => mcapCache[x.u.sym] >= +f.mcap,
+       x => mcapCache[x.u.sym] === undefined ? null : mcapCache[x.u.sym]);
   const key = f.sort;
   const val = x => key === 'name' ? 0 : (x.m[key] != null ? x.m[key] : -1e15);
-  out.sort((a,b) => key === 'name'
+  list.sort((a,b) => key === 'name'
     ? (a.u.name||a.u.sym).localeCompare(b.u.name||b.u.sym)
     : val(b) - val(a));
-  return out;
+  return list;
+}
+function funnelHtml(){
+  if(screenFunnel.length < 2) return '';
+  return '<div class="funnel">' + screenFunnel.map(s => {
+    const cut = s.before - s.after;
+    return `<span class="fn-step${s.after===0?' fn-zero':''}">${escHtml(s.label)}<b>${s.after}</b>`
+      + (cut?`<i>−${cut}</i>`:'') + (s.unknown?`<u title="${t('sc_unknown')}">?${s.unknown}</u>`:'') + '</span>';
+  }).join('<span class="fn-arrow">→</span>') + '</div>';
 }
 /* market cap is not in the chart endpoint, so it is fetched only for the rows
    that already survived every other filter - and only when actually asked for */
@@ -3515,7 +3757,7 @@ function screenRowHtml(x, idx){
       <span>${m.vol!=null?fmtPct(m.vol,{signed:false,d:0}):'–'}</span></div>
     <div class="mv-act">
       <button class="mv-add${inWl?' in':''}" ${inWl?'disabled':''} title="${inWl?t('mv_inwl'):t('mv_add')}">${inWl?'✓':'+'}</button>
-      <a href="${escHtml(assetUrl(u.isin, u.sym))}" data-isin="${escHtml(u.isin||'')}" data-sym="${escHtml(u.sym)}" title="${t('open_src')}" target="_blank" rel="noopener">↗</a>
+      ${linkPairHtml(u.isin, u.sym)}
     </div></div>`;
 }
 function renderScreen(){
@@ -3530,8 +3772,8 @@ function renderScreen(){
   meta.textContent = screenBusy
     ? t('sc_loading_mcap')
     : t('sc_meta').replace('{n}', rows.length).replace('{total}', scanned).replace('{time}', fmtTime(scanData.at));
-  if(!rows.length){ box.innerHTML = `<div class="plan-empty">${t('sc_none')}</div>`; return; }
-  box.innerHTML = rows.slice(0,40).map(screenRowHtml).join('');
+  if(!rows.length){ box.innerHTML = funnelHtml() + `<div class="plan-empty">${t('sc_none')}</div>`; return; }
+  box.innerHTML = funnelHtml() + rows.slice(0,40).map(screenRowHtml).join('');
   rows.slice(0,40).forEach(x => {
     const cv = box.querySelector(`.mv-row[data-sym="${CSS.escape(x.u.sym)}"] canvas`);
     if(cv && x.m.spark) drawSpark(cv, x.m.spark, (x.m.d21||0) >= 0 ? cssVar('--up') : cssVar('--down'));
@@ -3551,6 +3793,14 @@ function tvSymbol(sym){
 function tvUrl(sym){
   return (settings.tvTemplate || 'https://www.tradingview.com/chart/?symbol={sym}')
     .replace('{sym}', encodeURIComponent(tvSymbol(sym)));
+}
+function openWith(kind, isin, sym){
+  if(kind === 'tv' && sym){ window.open(tvUrl(sym), '_blank', 'noopener'); return; }
+  openTR(isin, sym);
+}
+function linkPairHtml(isin, sym){
+  return `<a data-go="tr" data-isin="${escHtml(isin||'')}" data-sym="${escHtml(sym||'')}" href="${escHtml(isin?trUrl(isin):'#')}" title="Trade Republic" target="_blank" rel="noopener">TR</a>`
+       + `<a data-go="tv" data-isin="${escHtml(isin||'')}" data-sym="${escHtml(sym||'')}" href="${escHtml(sym?tvUrl(sym):'#')}" title="TradingView" target="_blank" rel="noopener">TV</a>`;
 }
 function assetUrl(isin, sym){
   if(settings.linkSrc === 'tv' && sym) return tvUrl(sym);
