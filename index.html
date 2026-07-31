@@ -281,7 +281,7 @@ textarea#deployArea{width:100%; min-height:74px; font-family:var(--mono); font-s
   border-bottom:1px solid var(--line); font-size:12px; letter-spacing:.12em; text-transform:uppercase;
   color:var(--accent); font-family:var(--mono)}
 .mv-h span{margin-left:auto; color:var(--faint); letter-spacing:.04em; text-transform:none; font-size:11px}
-.mv-row{display:flex; align-items:center; gap:11px; padding:11px 12px; border:1px solid var(--line); background:var(--panel);
+.mv-row{display:flex; align-items:center; gap:11px; cursor:pointer; padding:11px 12px; border:1px solid var(--line); background:var(--panel);
   border-radius:var(--r); margin-bottom:8px; box-shadow:var(--shadow)}
 .mv-rank{flex:0 0 24px; font-family:var(--mono); font-size:13px; color:var(--faint); text-align:right}
 .mv-id{flex:1; min-width:0}
@@ -1043,6 +1043,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
         <a class="btn" id="dTV" target="_blank" rel="noopener">TradingView ↗</a>
         <button class="btn" id="dCopyIsin" data-i18n="copy_isin"></button>
         <button class="btn ghost" id="dRefreshOne" data-i18n="refresh"></button>
+        <a class="btn" id="dHoldings" target="_blank" rel="noopener" data-i18n="d_holdings"></a>
         <button class="btn danger" id="dRemove" data-i18n="wl_remove"></button>
       </div>
       <p id="dStamp"></p>
@@ -1504,6 +1505,9 @@ const DEFAULT_SETTINGS = {
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  tr_isin_hint:'ISIN kopiert. Falls Trade Republic nicht direkt beim richtigen Wert landet, oben in die Suche einfügen.',
+  d_loading:'Kursverlauf wird geladen …', d_load_fail:'Kursverlauf nicht abrufbar',
+  d_holdings:'Zusammensetzung ↗',
   wl_remove:'Von meiner Liste entfernen',
   wl_remove_ask:'„{n}" von deiner Watchlist entfernen? Das betrifft nur deine eigene Liste.',
   wl_local_note:'Als Gast bleibt deine Liste nur auf diesem Gerät. Mit einem Konto wandert sie mit.',
@@ -1736,6 +1740,9 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  tr_isin_hint:'ISIN copied. If Trade Republic does not land on the right security, paste it into the search at the top.',
+  d_loading:'Loading price history …', d_load_fail:'Price history unavailable',
+  d_holdings:'Holdings ↗',
   wl_remove:'Remove from my list',
   wl_remove_ask:'Remove "{n}" from your watchlist? This only affects your own list.',
   wl_local_note:'As a guest your list stays on this device. With an account it travels with you.',
@@ -2055,6 +2062,20 @@ de: `
 <p>Der Katalog deckt viel ab, aber nie alles. Im Tab <strong>Suchen</strong> lässt sich jeder Wert hinzufügen: Name, Ticker-Symbol oder – am zuverlässigsten – die <strong>ISIN direkt aus Trade Republic kopiert</strong>. Über das Sammelfeld gehen auch viele Zeilen auf einmal, etwa dein komplettes TR-Depot.</p>
 <p>Alles, was in deiner Watchlist landet, wird bei der nächsten Abfrage <strong>automatisch mitbewertet</strong> und erscheint in den Top-Listen und im Plan. Der eingebaute Katalog ist nur der Startpunkt, nicht die Grenze.</p>
 </div></details>
+<details><summary>Der Filter-Tab: eigene Kriterien</summary><div class="sec-body">
+<p>Elf Regler filtern den abgefragten Katalog nach messbaren Bedingungen: Kurs über SMA20/EMA20/SMA50/SMA200, Tagesänderung, Monatsentwicklung, RSI-Band, Mindestkurs, Tagesumsatz, Marktkapitalisierung und „fängt an zu steigen". Vier Voreinstellungen setzen alles auf einmal.</p>
+<p>Die Regel <strong>„fängt an zu steigen"</strong> ist bewusst eng: Kurs über der 20-Tage-Linie, diese über der 50-Tage-Linie, aber erst <strong>2 bis 25 Handelstage</strong> darüber, RSI zwischen 45 und 72. Wer seit Monaten läuft, fällt raus, denn diese Bewegung ist schon eingepreist.</p>
+<p>Über der Trefferliste steht ein <strong>Trichter</strong>: er zeigt für jeden Regler, wie viele Werte übrig blieben. Bleibt am Ende nichts übrig, siehst du sofort, welcher Regler zu streng war. Ein <span style="color:var(--warn)">?12</span> bedeutet: für zwölf Werte fehlt diese Messgröße. Solche Werte werden <strong>nicht</strong> aussortiert, denn eine fehlende Messung ist kein Ausschlussgrund. Yahoo liefert für Xetra oft keine Umsätze, und genau das hatte den Filter anfangs komplett leergeräumt.</p>
+</div></details>
+<details><summary>Konten, Anmeldung und Synchronisierung</summary><div class="sec-body">
+<p>Ohne Firebase liegen Konten nur im jeweiligen Browser. Mit Firebase gibt es echte Anmeldungen: Registrierung nur per Einladungscode, Anmeldung mit <strong>Benutzername oder E-Mail</strong>, Passwort-Reset per echter E-Mail, und der Admin sieht alle Konten und kann sie sperren.</p>
+<p>Angemeldete Nutzer nehmen ihre <strong>Watchlist und Einstellungen auf jedes Gerät mit</strong>. Gespeichert wird ein paar Sekunden nach jeder Änderung. Es gilt der zuletzt gespeicherte Stand, gleichzeitiges Bearbeiten auf zwei Geräten überschreibt sich also selbst.</p>
+<p>Was bewusst nicht mitwandert: Datenbank-Adresse, API-Key, Admin-Adresse und Gast-Regel. Die gehören zur Datei, nicht zu einer Person. Die Admin-Adresse steht nur als Hashwert in der Datei und ist im Quelltext nicht lesbar.</p>
+</div></details>
+<details><summary>Währung, Kurse und Links</summary><div class="sec-body">
+<p>Oben rechts lässt sich die Anzeigewährung umstellen. Umgerechnet wird mit EZB-Tageskursen; die App probiert mehrere Quellen, direkt und über den Proxy. Klappt keine, kannst du unter Einstellungen einen Kurs von Hand eintragen, dann rechnet die App ohne jede Abfrage weiter. Der angezeigte Betrag ist eine Umrechnung, nicht der echte Handelspreis in dieser Währung.</p>
+<p>Jeder Wert hat zwei Links. <strong>TradingView</strong> trifft die richtige Seite zuverlässig. <strong>Trade Republic</strong> ist unzuverlässig: die Web-App braucht einen Login und ihre Instrument-Adresse ist nicht dokumentiert, deshalb landet der Link oft auf einer Standardseite statt beim gewählten Wert. Die App kopiert darum beim Klick die ISIN, damit du sie in der TR-Suche einfügen kannst. Bei ETFs führt „Zusammensetzung" zu justETF, wo die tatsächlichen Bestandteile stehen.</p>
+</div></details>
 <details><summary>Wichtiger Hinweis</summary><div class="sec-body">
 <p class="warnbox"><strong>Keine Anlageberatung.</strong> Diese Seite zeigt technische Kennzahlen aus Vergangenheitsdaten. Vergangene Wertentwicklung ist kein verlässlicher Indikator für die Zukunft. Signale können falsch sein – besonders an Wendepunkten. Prüfe selbst (Geschäftsmodell, Kosten, Steuern, eigene Ziele) und investiere nur Geld, dessen Verlust du tragen kannst.</p>
 </div></details>
@@ -2127,6 +2148,20 @@ en: `
 <details><summary>Something missing?</summary><div class="sec-body">
 <p>The catalogue covers a lot but never everything. The <strong>Search</strong> tab adds any asset: by name, by ticker symbol, or - most reliably - by <strong>pasting the ISIN straight from Trade Republic</strong>. The bulk field takes many lines at once, for example your entire TR portfolio.</p>
 <p>Anything that lands in your watchlist is <strong>automatically included</strong> in the next fetch and shows up in the top lists and in the planner. The built-in catalogue is the starting point, not the limit.</p>
+</div></details>
+<details><summary>The Filter tab: your own criteria</summary><div class="sec-body">
+<p>Eleven controls filter the fetched catalogue on measurable conditions: price above SMA20/EMA20/SMA50/SMA200, daily change, monthly move, RSI band, minimum price, daily turnover, market cap and "starting to rise". Four presets set everything at once.</p>
+<p>The <strong>"starting to rise"</strong> rule is deliberately narrow: price above the 20-day line, that line above the 50-day line, but only <strong>2 to 25 trading days</strong> above it, RSI between 45 and 72. Anything running for months drops out, because that move is already priced in.</p>
+<p>Above the results sits a <strong>funnel</strong> showing how many assets survived each control. If nothing is left, you can see immediately which one was too strict. A <span style="color:var(--warn)">?12</span> means twelve assets have no measurement for that condition. Those are <strong>not</strong> filtered out, because a missing measurement is not a reason to reject. Yahoo often reports no turnover for Xetra, and that is exactly what emptied the screener at first.</p>
+</div></details>
+<details><summary>Accounts, sign-in and syncing</summary><div class="sec-body">
+<p>Without Firebase, accounts live in each browser. With it there are real logins: registration only by invitation code, sign-in with <strong>username or e-mail</strong>, password reset by genuine e-mail, and the admin sees every account and can block it.</p>
+<p>Signed-in users take their <strong>watchlist and settings to any device</strong>. Saving happens a few seconds after each change. The most recent save wins, so editing on two devices at once overwrites yourself.</p>
+<p>Deliberately excluded from syncing: database URL, API key, admin address and the guest policy. Those belong to the file, not to a person. The admin address is stored only as a hash and cannot be read from the source.</p>
+</div></details>
+<details><summary>Currency, rates and links</summary><div class="sec-body">
+<p>The display currency switches at the top right. Conversion uses ECB daily rates; the app tries several sources, directly and through the proxy. If none work, you can type a rate by hand in Settings and it converts with no lookup at all. The figure shown is a conversion, not the real traded price in that currency.</p>
+<p>Every asset has two links. <strong>TradingView</strong> reliably hits the right page. <strong>Trade Republic</strong> is unreliable: its web app needs a login and its instrument address is undocumented, so the link often lands on a default page instead of the security you picked. The app therefore copies the ISIN on click so you can paste it into TR's search. For ETFs, "Holdings" leads to justETF, where the actual constituents are listed.</p>
 </div></details>
 <details><summary>Important notice</summary><div class="sec-body">
 <p class="warnbox"><strong>Not investment advice.</strong> This page shows technical metrics from historical data. Past performance is not a reliable indicator of future results. Signals can be wrong – especially at turning points. Do your own research (business model, costs, taxes, your goals) and only invest money you can afford to lose.</p>
@@ -2564,7 +2599,8 @@ function renderStatus(){
 
 /* ---------------- rendering: strips, cards, sparklines ---------------- */
 const RISK_CLS = {low:'r-low', med:'r-med', high:'r-high', vhigh:'r-vhigh', na:''};
-const assetBySym = s => watchlist.find(a => a.sym === s);
+const assetBySym = s => watchlist.find(a => a.sym === s)
+  || (typeof SCAN_LIST === 'function' ? SCAN_LIST().find(a => a.sym === s) : null) || null;
 function triCls(v){ return v==null ? 'flat' : v > 0.001 ? 'up' : v < -0.001 ? 'down' : 'flat'; }
 function shortName(n, max=20){ n=String(n||''); return n.length>max ? n.slice(0,max-1)+'…' : n; }
 
@@ -2708,6 +2744,21 @@ function renderAll(){ renderStrips(); renderCards(); renderStatus(); updateLastU
 /* ---------------- detail overlay ---------------- */
 function trUrl(isin){ return (settings.trTemplate||DEFAULT_SETTINGS.trTemplate).replace('{isin}', encodeURIComponent(isin)); }
 function sourceTxt(a){ return a.demo? t('source_demo') : a.live? t('source_live') : t('source_cache'); }
+/* Rows outside the watchlist carry only a 30-point sparkline, so the full
+   series is fetched on demand before the detail view can render.         */
+async function openAnySym(sym){
+  if(!sym) return;
+  if(!seriesMap[sym]){
+    toast(t('d_loading'));
+    const a = assetBySym(sym);
+    try{
+      const s = await fetchSeries(sym);
+      seriesMap[sym] = s;
+      analyses[sym] = analyze({sym, type:(a && a.type) || 'stock'}, s);
+    }catch(e){ toast(t('d_load_fail')); return; }
+  }
+  openDetail(sym);
+}
 function openDetail(sym){
   if(!seriesMap[sym]) return;
   detailSym=sym; travelIdx=null; fillDetail();
@@ -2766,6 +2817,14 @@ function fillDetail(){
      <span><i style="background:${cssVar('--sma200')}"></i>SMA 200</span>
      <span><i style="background:${hexA(a2,0.55)}"></i>${settings.lang==='de'?'Projektion ±1σ':'Projection ±1σ'}</span>`;
   const tr=$('#dTR'); tr.textContent = t('open_tr'); $('#dTV').href = tvUrl(asset.sym);
+  const hold=$('#dHoldings'), isEtf = asset.type === 'etf';
+  hold.classList.toggle('hidden', !(isEtf && asset.isin));
+  if(isEtf && asset.isin){
+    hold.href = (settings.lang === 'de' ? 'https://www.justetf.com/de/etf-profile.html?isin='
+                                        : 'https://www.justetf.com/en/etf-profile.html?isin=')
+                + encodeURIComponent(asset.isin);
+  }
+  $('#dRemove').classList.toggle('hidden', !watchlist.some(w => w.sym === asset.sym));
   if(asset.isin){ tr.href=trUrl(asset.isin); tr.removeAttribute('data-noisin'); }
   else { tr.href='#'; tr.setAttribute('data-noisin','1'); }
   const sl=$('#dTravel'), last=s.c.length-1;
@@ -3025,6 +3084,13 @@ let toastTo;
 function toast(msg){
   const el=$('#toast'); el.textContent=msg; el.classList.add('show');
   clearTimeout(toastTo); toastTo=setTimeout(()=>el.classList.remove('show'),2200);
+}
+function copySilent(txt){
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt); return true; }
+    const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); ta.remove(); return true;
+  }catch(e){ return false; }
 }
 function copyText(txt){
   if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(()=>toast(t('copied'))); return; }
@@ -3978,7 +4044,10 @@ function bindEvents(){
   let rsTo; window.addEventListener('resize',()=>{ clearTimeout(rsTo); rsTo=setTimeout(()=>{ renderCards(); renderMovers(); if(detailSym) drawDetail(); if(planState) drawPlanChart(); },150); });
   $('#btnPlan').addEventListener('click', renderPlan);
   $('#planOut').addEventListener('click',e=>{
-    const a=e.target.closest('.trlink'); if(a){ e.preventDefault(); openTR(a.dataset.isin); }
+    const a=e.target.closest('.trlink');
+    if(a){ e.preventDefault(); openWith(a.dataset.go, a.dataset.isin, a.dataset.sym); return; }
+    const row=e.target.closest('tr[data-sym]');
+    if(row) openAnySym(row.dataset.sym);
   });
   $('#btnScan').addEventListener('click', ()=>scanUniverse(true));
   $('#btnScScan').addEventListener('click', ()=>scanUniverse(true).then(renderScreen));
@@ -4010,7 +4079,8 @@ function bindEvents(){
     const link = e.target.closest('a[data-go]');
     if(link){ e.preventDefault(); openWith(link.dataset.go, link.dataset.isin, link.dataset.sym); return; }
     const add = e.target.closest('.mv-add');
-    if(add && !add.disabled){ addAsset({sym:u.sym, name:u.name, isin:u.isin, type:u.type}); renderScreen(); }
+    if(add && !add.disabled){ addAsset({sym:u.sym, name:u.name, isin:u.isin, type:u.type}); renderScreen(); return; }
+    openAnySym(u.sym);
   });
   function applySrc(v){ settings.linkSrc=v; saveSettings();
     if($('#setSrc')) $('#setSrc').value=v; if($('#hdSrc')) $('#hdSrc').value=v;
@@ -4058,7 +4128,8 @@ function bindEvents(){
     const link=e.target.closest('a[data-go]');
     if(link){ e.preventDefault(); openWith(link.dataset.go, link.dataset.isin, link.dataset.sym||u.sym); return; }
     const add=e.target.closest('.mv-add');
-    if(add && !add.disabled){ addAsset({sym:u.sym, name:u.name, isin:u.isin, type:u.type}); renderMovers(); }
+    if(add && !add.disabled){ addAsset({sym:u.sym, name:u.name, isin:u.isin, type:u.type}); renderMovers(); return; }
+    openAnySym(u.sym);
   });
   $('#setScan').addEventListener('change',e=>{ settings.scanHours=clamp(parseInt(e.target.value||'3',10)||0,0,72); e.target.value=settings.scanHours; saveSettings(); toast(t('saved')); });
   $('#setTrApp').addEventListener('change',e=>{ settings.trApp=+e.target.value; saveSettings(); toast(t('saved')); });
@@ -4651,6 +4722,12 @@ function openTR(isin, sym){
     const a = sym ? assetBySym(sym) : null;
     if(a){ a.isin = isin; store.set('watchlist', watchlist); renderWl(); renderAll(); }
   }
+  /* TR's web app is login-gated and its instrument route is undocumented, so a
+     direct link often lands on a default page instead of the security clicked.
+     Copying the ISIN turns the fallback - paste into TR's search - into a
+     two-second job rather than a dead end.                                  */
+  copySilent(isin);
+  setTimeout(()=>toast(t('tr_isin_hint')), 400);
   const url = trUrl(isin);
   const ua = navigator.userAgent || '';
   const android = ua.indexOf('Android') >= 0;
@@ -4852,7 +4929,7 @@ function renderPlan(){
     ? `<p class="excl"><b>${t('p_excluded')}</b> ` + pl.excluded.slice(0,10).map(e=>`${escHtml(e.asset.name||e.asset.sym)} <span style="opacity:.75">(${t(e.why)})</span>`).join(' · ') + `</p>` : '';
   if(pl.empty){ box.innerHTML = `<div class="plan-empty">${t('p_none')}</div>${exHtml}`; return; }
   const rows = pl.picks.map(p=>`
-    <tr class="${p.core?'core-row':'sat-row'}">
+    <tr class="${p.core?'core-row':'sat-row'}" data-sym="${escHtml(p.asset.sym)}">
       <td><span class="aname">${escHtml(p.asset.name||p.asset.sym)}</span>
         <span class="asub">${escHtml(p.asset.sym)}${p.asset.isin?' · '+escHtml(p.asset.isin):''}</span>
         <div class="wbar"><i class="${p.core?'':'sat'}" style="width:${(p.w*100).toFixed(1)}%"></i></div></td>
@@ -4862,7 +4939,7 @@ function renderPlan(){
       <td class="num hide-s">${terOf(p.asset)!=null?fmtNum(terOf(p.asset),2)+' %':'–'}</td>
       <td class="hide-s"><span class="badge b-sig s-${p.a.signal}">${escHtml(LABELS.signal[p.a.signal][settings.lang])}</span></td>
       <td class="hide-s"><span class="badge b-risk ${RISK_CLS[p.a.risk]||''}">${escHtml(LABELS.risk[p.a.risk][settings.lang].replace(/^(Risiko|Risk): /,''))}</span></td>
-      <td class="num">${p.asset.isin?`<a class="trlink" data-isin="${escHtml(p.asset.isin)}" target="_blank" rel="noopener" href="${escHtml(trUrl(p.asset.isin))}">TR ↗</a>`:''}</td>
+      <td class="num">${p.asset.isin?`<a class="trlink" data-go="tr" data-isin="${escHtml(p.asset.isin)}" data-sym="${escHtml(p.asset.sym)}" target="_blank" rel="noopener" href="${escHtml(trUrl(p.asset.isin))}">TR</a> `:''}<a class="trlink" data-go="tv" data-sym="${escHtml(p.asset.sym)}" target="_blank" rel="noopener" href="${escHtml(tvUrl(p.asset.sym))}">TV</a></td>
     </tr>`).join('');
   const orow = r=>{
     const gain = r.p50 - r.paid;
