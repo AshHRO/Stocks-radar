@@ -499,8 +499,8 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
         <option value="auto">⇄</option><option value="EUR">€</option>
         <option value="USD">$</option><option value="GBP">£</option><option value="CHF">CHF</option>
       </select>
-      <select id="hdSrc" class="hd-sel" title="Trade Republic / TradingView">
-        <option value="tr">TR</option><option value="tv">TV</option>
+      <select id="hdSrc" class="hd-sel" title="TradingView / Yahoo / Trade Republic">
+        <option value="tv">TV</option><option value="yf">YF</option><option value="tr">TR</option>
       </select>
       <button class="btn icon ghost" id="btnLang">EN</button>
       <button class="btn icon ghost" id="btnTheme">☀</button>
@@ -779,8 +779,9 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
         <div class="set-row">
           <label for="setSrc" data-i18n="s_src"></label>
           <select id="setSrc">
-            <option value="tr" data-i18n="s_src_tr"></option>
             <option value="tv" data-i18n="s_src_tv"></option>
+            <option value="yf" data-i18n="s_src_yf"></option>
+            <option value="tr" data-i18n="s_src_tr"></option>
           </select>
         </div>
         <div class="set-row">
@@ -818,6 +819,8 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
           <label for="setTrApp" data-i18n="s_trapp"></label>
           <select id="setTrApp"><option value="1" data-i18n="s_trapp_on"></option><option value="0" data-i18n="s_trapp_off"></option></select>
         </div>
+        <p class="hint" data-i18n="s_src_hint"></p>
+        <p class="hint" data-i18n="s_tr_layout"></p>
         <p class="hint" data-i18n="s_data_hint"></p>
       </div>
 
@@ -1041,6 +1044,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
       <div class="d-actions">
         <a class="btn primary" id="dTR" target="_blank" rel="noopener"></a>
         <a class="btn" id="dTV" target="_blank" rel="noopener">TradingView ↗</a>
+        <a class="btn" id="dYF" target="_blank" rel="noopener">Yahoo Finance ↗</a>
         <button class="btn" id="dCopyIsin" data-i18n="copy_isin"></button>
         <button class="btn ghost" id="dRefreshOne" data-i18n="refresh"></button>
         <a class="btn" id="dHoldings" target="_blank" rel="noopener" data-i18n="d_holdings"></a>
@@ -1497,7 +1501,7 @@ const DEFAULT_SETTINGS = {
   planAmount:500, planMonthly:0, planProfile:'balanced',
   scanHours:3, trApp:1, mvPeriod:'d1', mvDir:'up',
   staleMin:15, status:'all', fbUrl:'', fbKey:'', contactMail:'', guestOff:false, adminNameLogin:false, sortDir:'desc', adminMail:'',
-  linkSrc:'tr', tvTemplate:'https://www.tradingview.com/chart/?symbol={sym}', dispCur:'auto',
+  linkSrc:'tv', tvTemplate:'https://www.tradingview.com/chart/?symbol={sym}', dispCur:'auto',
   screen:null
 };
 
@@ -1505,6 +1509,10 @@ const DEFAULT_SETTINGS = {
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  s_tr_layout:'Tipp zum TR-Link: Die Adresse ?layout=… ist ein gespeichertes Arbeitsblatt in Trade Republic, und dieses merkt sich den zuletzt gewählten Wert, meist Apple. Ein Wert lässt sich darüber nicht ansteuern, das kann TR schlicht nicht. Du kannst aber deine eigene Layout-Adresse oben in das Feld „Trade-Republic-Link" einfügen, dann öffnet der TR-Knopf direkt dein Trading-Fenster statt einer Weiterleitung. Die ISIN liegt beim Klick bereits in der Zwischenablage und muss dort nur noch in die Suche.',
+  s_src_yf:'Yahoo Finance',
+  s_src_hint:'TradingView und Yahoo Finance öffnen ohne Anmeldung direkt die richtige Seite. Trade Republic ist eine Bank-App: jede Seite verlangt einen Login, und für einzelne Werte gibt es keine öffentliche Adresse. Der TR-Link landet deshalb auf der Übersichtsseite. Beim Klick wird die ISIN kopiert, damit du sie nach dem Login oben in die TR-Suche einfügen kannst.',
+  tr_login_note:'ISIN kopiert. Trade Republic verlangt einen Login und öffnet die Übersicht, dort die ISIN in die Suche einfügen.',
   tr_isin_hint:'ISIN kopiert. Falls Trade Republic nicht direkt beim richtigen Wert landet, oben in die Suche einfügen.',
   d_loading:'Kursverlauf wird geladen …', d_load_fail:'Kursverlauf nicht abrufbar',
   d_holdings:'Zusammensetzung ↗',
@@ -1740,6 +1748,10 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  s_tr_layout:'Tip for the TR link: the ?layout=… address is a saved workspace in Trade Republic, and it remembers the last instrument you selected there, usually Apple. There is no way to target a security through it, TR simply cannot do this. You can paste your own layout address into the "Trade Republic link" field above, and the TR button will open your trading window directly instead of redirecting. The ISIN is already on the clipboard when you click, so it only needs pasting into the search.',
+  s_src_yf:'Yahoo Finance',
+  s_src_hint:'TradingView and Yahoo Finance open the right page directly, no login. Trade Republic is a banking app: every page requires a login and single securities have no public address. The TR link therefore lands on the dashboard. Clicking copies the ISIN so you can paste it into TR\'s search after signing in.',
+  tr_login_note:'ISIN copied. Trade Republic requires a login and opens the dashboard, paste the ISIN into the search there.',
   tr_isin_hint:'ISIN copied. If Trade Republic does not land on the right security, paste it into the search at the top.',
   d_loading:'Loading price history …', d_load_fail:'Price history unavailable',
   d_holdings:'Holdings ↗',
@@ -2074,7 +2086,7 @@ de: `
 </div></details>
 <details><summary>Währung, Kurse und Links</summary><div class="sec-body">
 <p>Oben rechts lässt sich die Anzeigewährung umstellen. Umgerechnet wird mit EZB-Tageskursen; die App probiert mehrere Quellen, direkt und über den Proxy. Klappt keine, kannst du unter Einstellungen einen Kurs von Hand eintragen, dann rechnet die App ohne jede Abfrage weiter. Der angezeigte Betrag ist eine Umrechnung, nicht der echte Handelspreis in dieser Währung.</p>
-<p>Jeder Wert hat zwei Links. <strong>TradingView</strong> trifft die richtige Seite zuverlässig. <strong>Trade Republic</strong> ist unzuverlässig: die Web-App braucht einen Login und ihre Instrument-Adresse ist nicht dokumentiert, deshalb landet der Link oft auf einer Standardseite statt beim gewählten Wert. Die App kopiert darum beim Klick die ISIN, damit du sie in der TR-Suche einfügen kannst. Bei ETFs führt „Zusammensetzung" zu justETF, wo die tatsächlichen Bestandteile stehen.</p>
+<p>Jeder Wert hat drei Links. <strong>TradingView</strong> und <strong>Yahoo Finance</strong> öffnen ohne Anmeldung direkt die richtige Seite, deshalb ist TradingView voreingestellt. <strong>Trade Republic</strong> kann das grundsätzlich nicht: es ist eine Bank-App, jede Seite verlangt einen Login, und für einzelne Werte gibt es keine öffentliche Adresse. Der Link landet daher immer auf der Übersichtsseite. Beim Klick wird die ISIN kopiert, damit du sie nach dem Login in die TR-Suche einfügen kannst. TR ist zum Kaufen da, zum Nachschauen nimm TradingView. Bei ETFs führt „Zusammensetzung" zu justETF, wo die tatsächlichen Bestandteile stehen.</p>
 </div></details>
 <details><summary>Wichtiger Hinweis</summary><div class="sec-body">
 <p class="warnbox"><strong>Keine Anlageberatung.</strong> Diese Seite zeigt technische Kennzahlen aus Vergangenheitsdaten. Vergangene Wertentwicklung ist kein verlässlicher Indikator für die Zukunft. Signale können falsch sein – besonders an Wendepunkten. Prüfe selbst (Geschäftsmodell, Kosten, Steuern, eigene Ziele) und investiere nur Geld, dessen Verlust du tragen kannst.</p>
@@ -2161,7 +2173,7 @@ en: `
 </div></details>
 <details><summary>Currency, rates and links</summary><div class="sec-body">
 <p>The display currency switches at the top right. Conversion uses ECB daily rates; the app tries several sources, directly and through the proxy. If none work, you can type a rate by hand in Settings and it converts with no lookup at all. The figure shown is a conversion, not the real traded price in that currency.</p>
-<p>Every asset has two links. <strong>TradingView</strong> reliably hits the right page. <strong>Trade Republic</strong> is unreliable: its web app needs a login and its instrument address is undocumented, so the link often lands on a default page instead of the security you picked. The app therefore copies the ISIN on click so you can paste it into TR's search. For ETFs, "Holdings" leads to justETF, where the actual constituents are listed.</p>
+<p>Every asset has three links. <strong>TradingView</strong> and <strong>Yahoo Finance</strong> open the right page directly without a login, which is why TradingView is the default. <strong>Trade Republic</strong> fundamentally cannot: it is a banking app, every page requires a login, and single securities have no public address. The link therefore always lands on the dashboard. Clicking copies the ISIN so you can paste it into TR's search after signing in. TR is for buying; for looking things up, use TradingView. For ETFs, "Holdings" leads to justETF, where the actual constituents are listed.</p>
 </div></details>
 <details><summary>Important notice</summary><div class="sec-body">
 <p class="warnbox"><strong>Not investment advice.</strong> This page shows technical metrics from historical data. Past performance is not a reliable indicator of future results. Signals can be wrong – especially at turning points. Do your own research (business model, costs, taxes, your goals) and only invest money you can afford to lose.</p>
@@ -2661,8 +2673,8 @@ function cardHtml(asset){
       <p class="autoline mono">${autoLine(a)}</p>
       <div class="card-actions">
         <button class="btn ghost act-detail">${t('details')}</button>
-        <a class="btn ghost act-go" data-go="tr" data-isin="${escHtml(asset.isin||'')}" data-sym="${escHtml(asset.sym)}" target="_blank" rel="noopener" href="${escHtml(asset.isin?trUrl(asset.isin):'#')}">TR ↗</a>
         <a class="btn ghost act-go" data-go="tv" data-isin="${escHtml(asset.isin||'')}" data-sym="${escHtml(asset.sym)}" target="_blank" rel="noopener" href="${escHtml(tvUrl(asset.sym))}">TV ↗</a>
+        <a class="btn ghost act-go" data-go="tr" data-isin="${escHtml(asset.isin||'')}" data-sym="${escHtml(asset.sym)}" target="_blank" rel="noopener" href="${escHtml(asset.isin?trUrl(asset.isin):'#')}">TR ↗</a>
         <button class="btn ghost act-one" title="${t('refresh')}">⟳</button>
       </div>
       <p class="card-stamp">${t('card_stamp').replace('{time}', fmtTime(a.fetchedAt)).replace('{src}', sourceTxt(a))}</p>
@@ -2816,7 +2828,9 @@ function fillDetail(){
      <span><i style="background:${cssVar('--sma50')}"></i>SMA 50</span>
      <span><i style="background:${cssVar('--sma200')}"></i>SMA 200</span>
      <span><i style="background:${hexA(a2,0.55)}"></i>${settings.lang==='de'?'Projektion ±1σ':'Projection ±1σ'}</span>`;
-  const tr=$('#dTR'); tr.textContent = t('open_tr'); $('#dTV').href = tvUrl(asset.sym);
+  const tr=$('#dTR'); tr.textContent = t('open_tr'); tr.classList.remove('primary');
+  $('#dTV').href = tvUrl(asset.sym); $('#dTV').classList.add('primary');
+  $('#dYF').href = yfUrl(asset.sym);
   const hold=$('#dHoldings'), isEtf = asset.type === 'etf';
   hold.classList.toggle('hidden', !(isEtf && asset.isin));
   if(isEtf && asset.isin){
@@ -4029,6 +4043,7 @@ function bindEvents(){
   });
   $('#dTR').addEventListener('click',e=>{ e.preventDefault(); const a=assetBySym(detailSym); openWith('tr', a&&a.isin, detailSym); });
   $('#dTV').addEventListener('click',e=>{ e.preventDefault(); openWith('tv', null, detailSym); });
+  $('#dYF').addEventListener('click',e=>{ e.preventDefault(); openWith('yf', null, detailSym); });
   $('#dRefreshOne').addEventListener('click',()=>refreshOne(detailSym));
   $('#dRemove').addEventListener('click',()=>{
     const a = assetBySym(detailSym); if(!a) return;
@@ -4695,12 +4710,16 @@ function tvUrl(sym){
 }
 function openWith(kind, isin, sym){
   if(kind === 'tv' && sym){ window.open(tvUrl(sym), '_blank', 'noopener'); return; }
+  if(kind === 'yf' && sym){ window.open(yfUrl(sym), '_blank', 'noopener'); return; }
   openTR(isin, sym);
 }
 function linkPairHtml(isin, sym){
-  return `<a data-go="tr" data-isin="${escHtml(isin||'')}" data-sym="${escHtml(sym||'')}" href="${escHtml(isin?trUrl(isin):'#')}" title="Trade Republic" target="_blank" rel="noopener">TR</a>`
-       + `<a data-go="tv" data-isin="${escHtml(isin||'')}" data-sym="${escHtml(sym||'')}" href="${escHtml(sym?tvUrl(sym):'#')}" title="TradingView" target="_blank" rel="noopener">TV</a>`;
+  const d = `data-isin="${escHtml(isin||'')}" data-sym="${escHtml(sym||'')}"`;
+  return `<a data-go="tv" ${d} href="${escHtml(sym?tvUrl(sym):'#')}" title="TradingView" target="_blank" rel="noopener">TV</a>`
+       + `<a data-go="yf" ${d} href="${escHtml(sym?yfUrl(sym):'#')}" title="Yahoo Finance" target="_blank" rel="noopener">YF</a>`
+       + `<a data-go="tr" ${d} href="${escHtml(isin?trUrl(isin):'#')}" title="Trade Republic (Login nötig / login required)" target="_blank" rel="noopener">TR</a>`;
 }
+function yfUrl(sym){ return 'https://finance.yahoo.com/quote/' + encodeURIComponent(sym); }
 function assetUrl(isin, sym){
   if(settings.linkSrc === 'tv' && sym) return tvUrl(sym);
   if(isin) return trUrl(isin);
@@ -4727,7 +4746,7 @@ function openTR(isin, sym){
      Copying the ISIN turns the fallback - paste into TR's search - into a
      two-second job rather than a dead end.                                  */
   copySilent(isin);
-  setTimeout(()=>toast(t('tr_isin_hint')), 400);
+  setTimeout(()=>toast(t('tr_login_note')), 400);
   const url = trUrl(isin);
   const ua = navigator.userAgent || '';
   const android = ua.indexOf('Android') >= 0;
