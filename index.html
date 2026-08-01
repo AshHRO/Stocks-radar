@@ -499,9 +499,6 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
         <option value="auto">⇄</option><option value="EUR">€</option>
         <option value="USD">$</option><option value="GBP">£</option><option value="CHF">CHF</option>
       </select>
-      <select id="hdSrc" class="hd-sel" title="TradingView / Yahoo / Trade Republic">
-        <option value="tv">TV</option><option value="yf">YF</option><option value="tr">TR</option>
-      </select>
       <button class="btn icon ghost" id="btnLang">EN</button>
       <button class="btn icon ghost" id="btnTheme">☀</button>
       <button class="btn icon ghost" id="btnLock" title="Lock">🔒</button>
@@ -777,14 +774,6 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
           <input type="number" id="setScan" min="0" max="72" step="1">
         </div>
         <div class="set-row">
-          <label for="setSrc" data-i18n="s_src"></label>
-          <select id="setSrc">
-            <option value="tv" data-i18n="s_src_tv"></option>
-            <option value="yf" data-i18n="s_src_yf"></option>
-            <option value="tr" data-i18n="s_src_tr"></option>
-          </select>
-        </div>
-        <div class="set-row">
           <label for="setCur" data-i18n="s_cur"></label>
           <select id="setCur">
             <option value="auto" data-i18n="s_cur_auto"></option>
@@ -804,12 +793,24 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
           <input type="number" id="fxManRate" step="0.0001" min="0" placeholder="1,0842" style="max-width:120px">
           <button class="btn" id="btnFxMan" data-i18n="fx_set"></button>
         </div>
+        <div class="set-row">
+          <label for="setFxMin" data-i18n="s_fxmin"></label>
+          <input type="number" id="setFxMin" min="1" max="1440" step="1">
+        </div>
         <p class="hint" id="fxNote"></p>
         <p class="hint" id="fxDiagOut" style="font-family:var(--mono);font-size:11px"></p>
+        <p class="hint" data-i18n="s_fx_hint"></p>
         <p class="hint" data-i18n="fx_man_hint"></p>
         <div class="set-row">
           <label for="setTv" data-i18n="s_tv"></label>
           <input type="text" id="setTv">
+        </div>
+        <div class="set-row">
+          <label for="setTrMode" data-i18n="s_trmode"></label>
+          <select id="setTrMode">
+            <option value="copy" data-i18n="s_trmode_copy"></option>
+            <option value="open" data-i18n="s_trmode_open"></option>
+          </select>
         </div>
         <div class="set-row">
           <label for="setTr" data-i18n="s_tr"></label>
@@ -820,7 +821,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
           <select id="setTrApp"><option value="1" data-i18n="s_trapp_on"></option><option value="0" data-i18n="s_trapp_off"></option></select>
         </div>
         <p class="hint" data-i18n="s_src_hint"></p>
-        <p class="hint" data-i18n="s_tr_layout"></p>
+        <p class="hint" data-i18n="s_trmode_hint"></p>
         <p class="hint" data-i18n="s_data_hint"></p>
       </div>
 
@@ -1501,7 +1502,7 @@ const DEFAULT_SETTINGS = {
   planAmount:500, planMonthly:0, planProfile:'balanced',
   scanHours:3, trApp:1, mvPeriod:'d1', mvDir:'up',
   staleMin:15, status:'all', fbUrl:'', fbKey:'', contactMail:'', guestOff:false, adminNameLogin:false, sortDir:'desc', adminMail:'',
-  linkSrc:'tv', tvTemplate:'https://www.tradingview.com/chart/?symbol={sym}', dispCur:'auto',
+  fxMin:10, trMode:'copy', tvTemplate:'https://www.tradingview.com/chart/?symbol={sym}', dispCur:'auto',
   screen:null
 };
 
@@ -1509,6 +1510,12 @@ const DEFAULT_SETTINGS = {
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  tr_copied_only:'ISIN kopiert. In Trade Republic oben in die Suche einfügen.',
+  s_trmode:'TR-Knopf macht', s_trmode_copy:'nur ISIN kopieren', s_trmode_open:'ISIN kopieren und TR öffnen',
+  s_trmode_hint:'Trade Republic hat keine Adresse für einen einzelnen Wert. Die Adresse ?layout=… ist ein gespeichertes Arbeitsblatt, und das zeigt immer den Wert, den du zuletzt darin ausgewählt hast, bei dir Apple. Egal worauf du klickst, es kommt dieselbe Seite. Deshalb kopiert der TR-Knopf standardmäßig nur die ISIN, statt eine falsche Seite zu öffnen. In der TR-Suche eingefügt bist du in zwei Sekunden beim richtigen Wert. Wer die Seite trotzdem geöffnet haben will, stellt oben auf „ISIN kopieren und TR öffnen".',
+  s_fxmin:'Wechselkurse erneuern alle (Minuten)',
+  fx_age:'· Stand {t}',
+  s_fx_hint:'Die Kurse sind nicht fest eingebaut, sie werden live geholt und lokal zwischengespeichert. Die App prüft jede Minute, ob der gespeicherte Stand älter ist als das eingestellte Intervall, und holt erst dann neu. Hinweis zur Erwartung: die EZB veröffentlicht ihre Referenzkurse nur einmal pro Werktag am Nachmittag, häufigeres Abfragen liefert also meist dieselbe Zahl. Nützlich ist es trotzdem, weil ein fehlgeschlagener Abruf so innerhalb von Minuten von selbst heilt statt bis zum nächsten Neuladen zu hängen.',
   s_tr_layout:'Tipp zum TR-Link: Die Adresse ?layout=… ist ein gespeichertes Arbeitsblatt in Trade Republic, und dieses merkt sich den zuletzt gewählten Wert, meist Apple. Ein Wert lässt sich darüber nicht ansteuern, das kann TR schlicht nicht. Du kannst aber deine eigene Layout-Adresse oben in das Feld „Trade-Republic-Link" einfügen, dann öffnet der TR-Knopf direkt dein Trading-Fenster statt einer Weiterleitung. Die ISIN liegt beim Klick bereits in der Zwischenablage und muss dort nur noch in die Suche.',
   s_src_yf:'Yahoo Finance',
   s_src_hint:'TradingView und Yahoo Finance öffnen ohne Anmeldung direkt die richtige Seite. Trade Republic ist eine Bank-App: jede Seite verlangt einen Login, und für einzelne Werte gibt es keine öffentliche Adresse. Der TR-Link landet deshalb auf der Übersichtsseite. Beim Klick wird die ISIN kopiert, damit du sie nach dem Login oben in die TR-Suche einfügen kannst.',
@@ -1748,6 +1755,12 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  tr_copied_only:'ISIN copied. Paste it into the search at the top of Trade Republic.',
+  s_trmode:'TR button does', s_trmode_copy:'copy the ISIN only', s_trmode_open:'copy the ISIN and open TR',
+  s_trmode_hint:'Trade Republic has no address for a single security. The ?layout=… address is a saved workspace, and it always shows whichever instrument you last selected in it - Apple, in your case. Whatever you click, the same page appears. So the TR button copies the ISIN by default instead of opening a wrong page. Pasted into TR\'s search it takes two seconds to reach the right security. If you want the page opened anyway, switch to "copy the ISIN and open TR" above.',
+  s_fxmin:'Refresh exchange rates every (minutes)',
+  fx_age:'· as of {t}',
+  s_fx_hint:'Rates are not built into the file, they are fetched live and cached locally. The app checks every minute whether the stored set is older than your interval and only then fetches again. One expectation to set: the ECB publishes its reference rates once per working day in the afternoon, so polling more often usually returns the same number. It still helps, because a failed fetch then heals within minutes instead of staying stuck until you reload.',
   s_tr_layout:'Tip for the TR link: the ?layout=… address is a saved workspace in Trade Republic, and it remembers the last instrument you selected there, usually Apple. There is no way to target a security through it, TR simply cannot do this. You can paste your own layout address into the "Trade Republic link" field above, and the TR button will open your trading window directly instead of redirecting. The ISIN is already on the clipboard when you click, so it only needs pasting into the search.',
   s_src_yf:'Yahoo Finance',
   s_src_hint:'TradingView and Yahoo Finance open the right page directly, no login. Trade Republic is a banking app: every page requires a login and single securities have no public address. The TR link therefore lands on the dashboard. Clicking copies the ISIN so you can paste it into TR\'s search after signing in.',
@@ -2190,7 +2203,7 @@ const DEPLOY = {salt:'aa08dd9c99c6466607e1e707c7bc515a', hash:'67d6b64fc0a060b16
 
 let auth = store.get('auth', null) || (DEPLOY.hash ? {salt:DEPLOY.salt, hash:DEPLOY.hash, baked:true} : null);
 let guestMode = false, guestUntil = 0, guestTimer = null;
-let refreshTimer = null, refreshing = false, detailSym = null, travelIdx = null;
+let refreshTimer = null, fxTimer = null, refreshing = false, detailSym = null, travelIdx = null;
 
 const t = k => (I18N[settings.lang] && I18N[settings.lang][k]) || I18N.de[k] || k;
 const locale = () => settings.lang === 'de' ? 'de-DE' : 'en-GB';
@@ -2209,7 +2222,8 @@ let fxRates = store.get('fx', {r:{EUR:1}, at:0});
 let fxDiag = [];
 async function loadFx(force){
   const have = Object.keys(fxRates.r || {}).length;
-  if(!force && fxRates.at && (Date.now()-fxRates.at) < 12*3600000 && have > 3) return true;
+  const ttl = clamp(+settings.fxMin || 10, 1, 1440) * 60000;
+  if(!force && fxRates.at && (Date.now()-fxRates.at) < ttl && have > 3) return true;
   const want = FX_LIST.map(c=>c.toUpperCase());
   /* Several independent hosts. The previous single source (api.frankfurter.app)
      moved to .dev, and when it stopped answering the app silently kept showing
@@ -2279,11 +2293,24 @@ function fxDiagHtml(){
   if(!fxDiag.length) return '';
   return fxDiag.map(d => (d.ok ? '✓ ' : '✗ ') + d.host + ' (' + d.mode + '): ' + d.msg).join('<br>');
 }
+function fxAgeMin(){ return fxRates.at ? Math.round((Date.now()-fxRates.at)/60000) : -1; }
 function fxNoteText(){
   const c = settings.dispCur;
   if(!c || c === 'auto') return '';
   if(!fxReady(c)) return t('fx_fail');
-  return t('fx_note').replace('{src}', fxRates.src || '?').replace('{cur}', c);
+  return t('fx_note').replace('{src}', fxRates.src || '?').replace('{cur}', c)
+       + ' ' + t('fx_age').replace('{t}', fmtTime(fxRates.at));
+}
+/* Rates keep their own short cycle, independent of the price refresh, so a
+   failed fetch heals within minutes instead of leaving the currency stuck. */
+async function fxTick(force){
+  if(!settings.dispCur || settings.dispCur === 'auto') return;
+  const ttl = clamp(+settings.fxMin || 10, 1, 1440) * 60000;
+  if(!force && fxRates.at && (Date.now()-fxRates.at) < ttl) return;
+  const before = JSON.stringify(fxRates.r || {});
+  await loadFx(true);
+  if(JSON.stringify(fxRates.r || {}) !== before && window.__repaintMoney) window.__repaintMoney();
+  const n = $('#fxNote'); if(n) n.textContent = fxNoteText();
 }
 /* rates are "units per 1 EUR", so any pair goes through EUR */
 function convert(v, from, to){
@@ -3025,6 +3052,8 @@ function scheduleAuto(){
   if(refreshTimer) clearInterval(refreshTimer);
   const m=+settings.refreshMin||0;
   if(m>0) refreshTimer=setInterval(refreshAll, m*60000);
+  if(fxTimer) clearInterval(fxTimer);
+  fxTimer = setInterval(()=>fxTick(false), 60000);      // checks age each minute, fetches only when due
 }
 function newestFetch(){ let x=0; Object.values(seriesMap).forEach(s=>{ if(s.fetchedAt>x)x=s.fetchedAt; }); return x; }
 
@@ -3066,9 +3095,10 @@ function renderSettingsValues(){
   $('#setRefresh').value=settings.refreshMin;
   $('#setTr').value=settings.trTemplate;
   $('#setScan').value=settings.scanHours;
-  $('#setSrc').value=settings.linkSrc;
   $('#setTv').value=settings.tvTemplate;
+  if($('#setTrMode')) $('#setTrMode').value=settings.trMode||'copy';
   $('#setCur').value=settings.dispCur;
+  if($('#setFxMin')) $('#setFxMin').value=settings.fxMin;
   $('#setMail').value=settings.adminMail||'';
   $('#setContact').value=settings.contactMail||'';
   if($('#setGuestOff')) $('#setGuestOff').value=settings.guestOff?'1':'0';
@@ -3077,7 +3107,6 @@ function renderSettingsValues(){
   $('#setFbKey').value=settings.fbKey||DEPLOY.fbkey||'';
   if($('#hdCur')) $('#hdCur').value=settings.dispCur;
   if($('#fxNote')) $('#fxNote').textContent=fxNoteText();
-  if($('#hdSrc')) $('#hdSrc').value=settings.linkSrc;
   $('#setStale').value=settings.staleMin;
   $('#setTrApp').value=String(settings.trApp);
   $('#sortSel').value=settings.sort;
@@ -3655,7 +3684,7 @@ async function syncUsernames(){
    URL, API key, admin address, guest policy) are deliberately NOT in this list:
    they belong to the file, not to a user, and must never be overwritten by
    whatever a friend happens to have set on their own phone.                  */
-const SYNC_KEYS = ['lang','theme','dispCur','linkSrc','sort','sortDir','filter','status','staleMin',
+const SYNC_KEYS = ['lang','theme','dispCur','fxMin','sort','sortDir','filter','status','staleMin',
                    'planAmount','planMonthly','planProfile','screen','mvPeriod','mvDir','scanHours'];
 let cloudTimer = null, cloudLoading = false;
 function syncPayload(){
@@ -3859,7 +3888,7 @@ function unlock(isGuest){
       refreshAll();
     });
   } else refreshAll();
-  if(settings.dispCur && settings.dispCur!=='auto') loadFx(false).then(()=>{ if(window.__repaintMoney) window.__repaintMoney(); });
+  fxTick(false);
 }
 function lockNow(){
   if(fbAuthOn() && fbSession){ clearTimeout(cloudTimer); cloudSave(); }
@@ -3945,6 +3974,10 @@ function bindEvents(){
     settings.adminNameLogin = e.target.value === '1'; saveSettings(); toast(t('saved'));
   });
   $('#setFbKey').addEventListener('change', e=>{ settings.fbKey=e.target.value.trim(); saveSettings(); toast(t('saved')); refreshRoster(); });
+  $('#setFxMin').addEventListener('change', e=>{
+    settings.fxMin = clamp(parseInt(e.target.value||'10',10)||10, 1, 1440);
+    e.target.value = settings.fxMin; saveSettings(); scheduleAuto(); toast(t('saved'));
+  });
   $('#btnFxTest').addEventListener('click', async ()=>{
     $('#fxDiagOut').textContent = t('fx_loading');
     const ok = await loadFx(true);
@@ -4097,9 +4130,6 @@ function bindEvents(){
     if(add && !add.disabled){ addAsset({sym:u.sym, name:u.name, isin:u.isin, type:u.type}); renderScreen(); return; }
     openAnySym(u.sym);
   });
-  function applySrc(v){ settings.linkSrc=v; saveSettings();
-    if($('#setSrc')) $('#setSrc').value=v; if($('#hdSrc')) $('#hdSrc').value=v;
-    renderAll(); renderMovers(); renderScreen(); if(detailSym) fillDetail(); }
   function repaintMoney(){
     renderAll(); renderMovers(); renderScreen();
     if(planState) renderPlan();
@@ -4120,10 +4150,9 @@ function bindEvents(){
       if(!ok || !fxReady(v)) toast(t('fx_fail'));
     }
   }
-  $('#setSrc').addEventListener('change', e=>applySrc(e.target.value));
-  $('#hdSrc').addEventListener('change', e=>applySrc(e.target.value));
   $('#setCur').addEventListener('change', e=>applyCur(e.target.value));
   $('#hdCur').addEventListener('change', e=>applyCur(e.target.value));
+  $('#setTrMode').addEventListener('change', e=>{ settings.trMode=e.target.value; saveSettings(); toast(t('saved')); });
   $('#setTv').addEventListener('change', e=>{ settings.tvTemplate=e.target.value.trim()||'https://www.tradingview.com/chart/?symbol={sym}'; e.target.value=settings.tvTemplate; saveSettings(); toast(t('saved')); });
   $$('#panel-movers .chip[data-per]').forEach(ch=>ch.addEventListener('click',()=>{
     settings.mvPeriod=ch.dataset.per; saveSettings();
@@ -4349,6 +4378,7 @@ function bindEvents(){
   document.addEventListener('visibilitychange',()=>{
     const m=+settings.refreshMin||0;
     if(!document.hidden && m>0 && Date.now()-newestFetch()>m*60000) refreshAll();
+    if(!document.hidden) fxTick(false);
   });
 }
 function addAsset(a){
@@ -4720,15 +4750,6 @@ function linkPairHtml(isin, sym){
        + `<a data-go="tr" ${d} href="${escHtml(isin?trUrl(isin):'#')}" title="Trade Republic (Login nötig / login required)" target="_blank" rel="noopener">TR</a>`;
 }
 function yfUrl(sym){ return 'https://finance.yahoo.com/quote/' + encodeURIComponent(sym); }
-function assetUrl(isin, sym){
-  if(settings.linkSrc === 'tv' && sym) return tvUrl(sym);
-  if(isin) return trUrl(isin);
-  return sym ? tvUrl(sym) : '#';
-}
-function openAsset(isin, sym){
-  if(settings.linkSrc === 'tv' && sym){ window.open(tvUrl(sym), '_blank', 'noopener'); return; }
-  openTR(isin, sym);
-}
 
 /* ---------------- Trade Republic deep link ---------------- */
 function openTR(isin, sym){
@@ -4746,6 +4767,10 @@ function openTR(isin, sym){
      Copying the ISIN turns the fallback - paste into TR's search - into a
      two-second job rather than a dead end.                                  */
   copySilent(isin);
+  if(String(settings.trMode || 'copy') !== 'open'){
+    toast(t('tr_copied_only'));
+    return;
+  }
   setTimeout(()=>toast(t('tr_login_note')), 400);
   const url = trUrl(isin);
   const ua = navigator.userAgent || '';
