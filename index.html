@@ -2,7 +2,14 @@
 <html lang="de" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" id="vpMeta" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B111C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Depot Radar">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='38' fill='%230B111C'/%3E%3Cpath d='M28 118 L62 86 L88 104 L152 46' stroke='%233BC9F0' stroke-width='11' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='152' cy='46' r='13' fill='%232FD08C'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B111C'/%3E%3Cpath d='M10 42 L22 31 L31 37 L54 17' stroke='%233BC9F0' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <title>Depot Radar · ETF & Aktien Trends</title>
 <meta name="description" content="Persönliches Markt-Radar: Trends, Risiko-Einstufung und technische Signale für ETFs und Aktien. Keine Anlageberatung.">
 <style>
@@ -387,6 +394,32 @@ table.tbl .rsn{display:block; font-size:11.5px; color:var(--muted); margin-top:3
 #tabbar::-webkit-scrollbar{display:none}
 .tab{flex:0 0 auto}
 
+/* ============ Phone layout ============ */
+html[data-view="mobile"] #cardGrid{grid-template-columns:1fr}
+html[data-view="mobile"] .hd-in{padding:8px 10px; gap:6px}
+html[data-view="mobile"] .brand small, html[data-view="mobile"] #lastUpdate{display:none}
+html[data-view="mobile"] .brand h1{font-size:14px; letter-spacing:.1em}
+html[data-view="mobile"] .btn.icon{padding:9px 11px}
+html[data-view="mobile"] main{padding:12px 10px 90px}
+html[data-view="mobile"] .tab{padding:9px 15px; font-size:14px}
+html[data-view="mobile"] .btn{padding:11px 15px}          /* thumb-sized targets */
+html[data-view="mobile"] .chip{padding:9px 14px; font-size:13.5px}
+html[data-view="mobile"] .mv-act button, html[data-view="mobile"] .mv-act a{min-width:40px; height:40px}
+html[data-view="mobile"] canvas.mv-spark{display:none}
+html[data-view="mobile"] .mv-rank{flex-basis:18px}
+html[data-view="mobile"] .sc-grid{grid-template-columns:1fr 1fr; gap:7px}
+html[data-view="mobile"] .set-row{flex-direction:column; align-items:stretch; gap:6px}
+html[data-view="mobile"] .set-row label{min-width:0}
+html[data-view="mobile"] .metrics{grid-template-columns:1fr 1fr}
+html[data-view="mobile"] canvas#dChart{height:220px}
+html[data-view="mobile"] canvas#planChart{height:200px}
+html[data-view="mobile"] .tbl th, html[data-view="mobile"] .tbl td{padding:6px 4px; font-size:12px}
+html[data-view="mobile"] .tbl .hide-s{display:none}
+html[data-view="mobile"] .detail-in{padding:12px 10px 70px}
+html[data-view="mobile"] .d-actions .btn{flex:1 1 45%}
+/* forced desktop on a small screen: let it scroll rather than squash */
+html[data-view="desktop"] body{min-width:1040px}
+
 /* ============ Footer ============ */
 footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--faint); font-size:12px; text-align:center}
 </style>
@@ -741,9 +774,19 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
           <select id="setLang"><option value="de">Deutsch</option><option value="en">English</option></select>
         </div>
         <div class="set-row">
+          <label for="setView" data-i18n="s_view"></label>
+          <select id="setView">
+            <option value="auto" data-i18n="v_auto"></option>
+            <option value="desktop" data-i18n="v_desktop"></option>
+            <option value="mobile" data-i18n="v_mobile"></option>
+          </select>
+          <span class="cur-suffix" id="viewNow"></span>
+        </div>
+        <div class="set-row">
           <label for="setTheme" data-i18n="s_theme"></label>
           <select id="setTheme"><option value="dark" data-i18n="th_dark"></option><option value="light" data-i18n="th_light"></option></select>
         </div>
+        <p class="hint" data-i18n="s_view_hint"></p>
       </div>
 
       <div class="set-group">
@@ -1502,7 +1545,7 @@ const DEFAULT_SETTINGS = {
   planAmount:500, planMonthly:0, planProfile:'balanced',
   scanHours:3, trApp:1, mvPeriod:'d1', mvDir:'up',
   staleMin:15, status:'all', fbUrl:'', fbKey:'', contactMail:'', guestOff:false, adminNameLogin:false, sortDir:'desc', adminMail:'',
-  fxMin:10, trMode:'copy', tvTemplate:'https://www.tradingview.com/chart/?symbol={sym}', dispCur:'auto',
+  fxMin:10, view:'auto', trMode:'copy', tvTemplate:'https://www.tradingview.com/chart/?symbol={sym}', dispCur:'auto',
   screen:null
 };
 
@@ -1510,6 +1553,9 @@ const DEFAULT_SETTINGS = {
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  s_view:'Ansicht', v_auto:'Automatisch', v_desktop:'PC', v_mobile:'Handy',
+  v_is_mobile:'aktiv: Handy', v_is_desktop:'aktiv: PC',
+  s_view_hint:'Automatisch richtet sich nach Fensterbreite und Eingabeart: unter 760 Pixel oder auf einem Touch-Gerät wird die Handy-Ansicht genommen, sonst die PC-Ansicht. Umschalten geht jederzeit von Hand, die Wahl wandert mit dem Konto auf andere Geräte. „PC" auf dem Handy zeigt das breite Layout verkleinert, so wie „Desktop-Seite anfordern" im Browser. Auf iPhone und Android lässt sich die Seite außerdem über das Teilen-Menü zum Home-Bildschirm hinzufügen, dann startet sie ohne Adressleiste wie eine App.',
   tr_copied_only:'ISIN kopiert. In Trade Republic oben in die Suche einfügen.',
   s_trmode:'TR-Knopf macht', s_trmode_copy:'nur ISIN kopieren', s_trmode_open:'ISIN kopieren und TR öffnen',
   s_trmode_hint:'Trade Republic hat keine Adresse für einen einzelnen Wert. Die Adresse ?layout=… ist ein gespeichertes Arbeitsblatt, und das zeigt immer den Wert, den du zuletzt darin ausgewählt hast, bei dir Apple. Egal worauf du klickst, es kommt dieselbe Seite. Deshalb kopiert der TR-Knopf standardmäßig nur die ISIN, statt eine falsche Seite zu öffnen. In der TR-Suche eingefügt bist du in zwei Sekunden beim richtigen Wert. Wer die Seite trotzdem geöffnet haben will, stellt oben auf „ISIN kopieren und TR öffnen".',
@@ -1755,6 +1801,9 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  s_view:'Layout', v_auto:'Automatic', v_desktop:'PC', v_mobile:'Phone',
+  v_is_mobile:'active: phone', v_is_desktop:'active: PC',
+  s_view_hint:'Automatic follows window width and input type: below 760 pixels, or on a touch device, it uses the phone layout, otherwise the PC one. You can switch by hand at any time and the choice travels with your account. "PC" on a phone shows the wide layout scaled down, like "request desktop site" in the browser. On iPhone and Android you can also add the page to your home screen from the share menu, and it then starts without an address bar, like an app.',
   tr_copied_only:'ISIN copied. Paste it into the search at the top of Trade Republic.',
   s_trmode:'TR button does', s_trmode_copy:'copy the ISIN only', s_trmode_open:'copy the ISIN and open TR',
   s_trmode_hint:'Trade Republic has no address for a single security. The ?layout=… address is a saved workspace, and it always shows whichever instrument you last selected in it - Apple, in your case. Whatever you click, the same page appears. So the TR button copies the ISIN by default instead of opening a wrong page. Pasted into TR\'s search it takes two seconds to reach the right security. If you want the page opened anyway, switch to "copy the ISIN and open TR" above.',
@@ -3059,6 +3108,29 @@ function newestFetch(){ let x=0; Object.values(seriesMap).forEach(s=>{ if(s.fetc
 
 /* ---------------- settings & i18n application ---------------- */
 function saveSettings(){ store.set('settings', settings); }
+/* One resolved value drives the layout, so a manual choice and the automatic
+   one go through exactly the same path and cannot disagree.                 */
+function resolveView(){
+  const v = settings.view || 'auto';
+  if(v === 'mobile' || v === 'desktop') return v;
+  const w = window.innerWidth || document.documentElement.clientWidth || 1024;
+  const coarse = window.matchMedia && window.matchMedia('(pointer:coarse)').matches;
+  return (w < 760 || (coarse && w < 1024)) ? 'mobile' : 'desktop';
+}
+function applyView(){
+  const v = resolveView();
+  document.documentElement.dataset.view = v;
+  const meta = document.getElementById('vpMeta');
+  if(meta){
+    /* asking for a fixed width is how a phone renders the desktop layout */
+    meta.setAttribute('content', (settings.view === 'desktop')
+      ? 'width=1040'
+      : 'width=device-width, initial-scale=1, viewport-fit=cover');
+  }
+  const sel = $('#setView'); if(sel) sel.value = settings.view || 'auto';
+  const lbl = $('#viewNow'); if(lbl) lbl.textContent = t(v === 'mobile' ? 'v_is_mobile' : 'v_is_desktop');
+  return v;
+}
 function applyTheme(){
   document.documentElement.dataset.theme=settings.theme;
   $('#btnTheme').textContent=settings.theme==='dark'?'☀':'☾';
@@ -3090,6 +3162,7 @@ function renderPlanInputs(){
 function renderSettingsValues(){
   $('#setLang').value=settings.lang;
   $('#setTheme').value=settings.theme;
+  if($('#setView')) $('#setView').value=settings.view||'auto';
   $('#setProxy').value=settings.proxy;
   $('#setProxyCustom').value=settings.proxyCustom||'';
   $('#setRefresh').value=settings.refreshMin;
@@ -3684,7 +3757,7 @@ async function syncUsernames(){
    URL, API key, admin address, guest policy) are deliberately NOT in this list:
    they belong to the file, not to a user, and must never be overwritten by
    whatever a friend happens to have set on their own phone.                  */
-const SYNC_KEYS = ['lang','theme','dispCur','fxMin','sort','sortDir','filter','status','staleMin',
+const SYNC_KEYS = ['lang','theme','dispCur','fxMin','view','sort','sortDir','filter','status','staleMin',
                    'planAmount','planMonthly','planProfile','screen','mvPeriod','mvDir','scanHours'];
 let cloudTimer = null, cloudLoading = false;
 function syncPayload(){
@@ -4089,7 +4162,11 @@ function bindEvents(){
     closeDetail(); renderWl(); renderAll(); renderMovers(); renderScreen();
     toast(t('removed'));
   });
-  let rsTo; window.addEventListener('resize',()=>{ clearTimeout(rsTo); rsTo=setTimeout(()=>{ renderCards(); renderMovers(); if(detailSym) drawDetail(); if(planState) drawPlanChart(); },150); });
+  let rsTo; window.addEventListener('resize',()=>{ clearTimeout(rsTo); rsTo=setTimeout(()=>{
+    const before = document.documentElement.dataset.view;
+    if(applyView() !== before){ renderAll(); renderMovers(); renderScreen(); if(planState) renderPlan(); }
+    renderCards(); renderMovers(); if(detailSym) drawDetail(); if(planState) drawPlanChart();
+  },150); });
   $('#btnPlan').addEventListener('click', renderPlan);
   $('#planOut').addEventListener('click',e=>{
     const a=e.target.closest('.trlink');
@@ -4181,6 +4258,12 @@ function bindEvents(){
   $('#planMonthly').addEventListener('change',e=>{ settings.planMonthly=clamp(Math.round(+e.target.value||0),0,1e5); e.target.value=settings.planMonthly; saveSettings(); renderPlan(); });
   $('#planProfile').addEventListener('change',e=>{ settings.planProfile=e.target.value; saveSettings(); renderPlan(); });
   $('#setLang').addEventListener('change',e=>{ settings.lang=e.target.value; saveSettings(); applyLang(); });
+  $('#setView').addEventListener('change', e=>{
+    settings.view = e.target.value; saveSettings();
+    applyView(); renderAll(); renderMovers(); renderScreen();
+    if(planState) renderPlan(); if(detailSym){ fillDetail(); drawDetail(); }
+    toast(t('saved'));
+  });
   $('#setTheme').addEventListener('change',e=>{ settings.theme=e.target.value; saveSettings(); applyTheme(); });
   $('#setProxy').addEventListener('change',e=>{ settings.proxy=e.target.value; saveSettings(); toast(t('saved')); });
   $('#setProxyCustom').addEventListener('change',e=>{ settings.proxyCustom=e.target.value.trim(); saveSettings(); toast(t('saved')); });
@@ -5066,6 +5149,7 @@ function drawPlanChart(){
 }
 
 /* ---------------- init ---------------- */
+applyView();
 applyTheme();
 bindEvents();
 applyLang();
