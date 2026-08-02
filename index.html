@@ -250,9 +250,16 @@ textarea#backupArea{width:100%; min-height:110px; font-family:var(--mono); font-
 .sc-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(168px,1fr)); gap:9px; margin-bottom:12px}
 .sc-grid label{display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:.06em;
   text-transform:uppercase; color:var(--faint); font-family:var(--mono)}
+.sc-grid input{width:100%; font-size:13.5px; text-transform:none; letter-spacing:0; font-family:var(--sans)}
 .sc-grid select{width:100%; font-size:13.5px; text-transform:none; letter-spacing:0; font-family:var(--sans)}
 #scMeta{font-family:var(--mono); font-size:11px; color:var(--faint); margin:0 0 12px}
 #scList .mv-id .chips span{font-size:10.5px; padding:1px 5px}
+
+.sc-grid label{position:relative}
+.sc-help{display:block; margin-top:4px; font-size:10.5px; line-height:1.4; color:var(--faint);
+  text-transform:none; letter-spacing:0; font-family:var(--sans)}
+#btnScHelp{font-weight:700; width:38px; padding:0}
+#btnScHelp.on{border-color:var(--accent); color:var(--accent)}
 
 /* ============ Time travel ============ */
 .travel{margin:10px 0 2px}
@@ -655,40 +662,25 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
             <option value="sma200">SMA 200</option>
           </select></label>
         <label><span data-i18n="sc_day"></span>
-          <select id="scDay">
-            <option value="any" data-i18n="sc_any"></option>
-            <option value="0">&gt; 0 %</option><option value="2">&gt; 2 %</option>
-            <option value="4">&gt; 4 %</option><option value="6">&gt; 6 %</option>
-          </select></label>
+          <input type="number" id="scDay" list="dlDay" step="0.5" data-i18n-ph="sc_ph_any">
+          <datalist id="dlDay"><option value="0"></option><option value="2"></option><option value="4"></option><option value="6"></option><option value="10"></option></datalist></label>
         <label><span data-i18n="sc_month"></span>
-          <select id="scMonth">
-            <option value="any" data-i18n="sc_any"></option>
-            <option value="0">&gt; 0 %</option><option value="5">&gt; 5 %</option>
-            <option value="10">&gt; 10 %</option><option value="20">&gt; 20 %</option>
-          </select></label>
-        <label><span data-i18n="sc_rsi"></span>
-          <select id="scRsi">
-            <option value="any" data-i18n="sc_any"></option>
-            <option value="gt40">&gt; 40</option><option value="gt50">&gt; 50</option>
-            <option value="band">40 – 70</option><option value="lt30">&lt; 30</option>
-          </select></label>
+          <input type="number" id="scMonth" list="dlMonth" step="1" data-i18n-ph="sc_ph_any">
+          <datalist id="dlMonth"><option value="0"></option><option value="5"></option><option value="10"></option><option value="20"></option><option value="50"></option></datalist></label>
+        <label><span data-i18n="sc_rsi_min"></span>
+          <input type="number" id="scRsiMin" list="dlRsi" min="0" max="100" step="1" data-i18n-ph="sc_ph_any">
+          <datalist id="dlRsi"><option value="30"></option><option value="40"></option><option value="50"></option><option value="60"></option><option value="70"></option></datalist></label>
+        <label><span data-i18n="sc_rsi_max"></span>
+          <input type="number" id="scRsiMax" list="dlRsi" min="0" max="100" step="1" data-i18n-ph="sc_ph_any"></label>
         <label><span data-i18n="sc_minp"></span>
-          <select id="scMinp">
-            <option value="any" data-i18n="sc_any"></option>
-            <option value="10">≥ 10</option><option value="20">≥ 20</option><option value="50">≥ 50</option>
-          </select></label>
+          <input type="number" id="scMinp" list="dlMinp" min="0" step="1" data-i18n-ph="sc_ph_any">
+          <datalist id="dlMinp"><option value="1"></option><option value="5"></option><option value="10"></option><option value="20"></option><option value="50"></option><option value="100"></option></datalist></label>
         <label><span data-i18n="sc_turn"></span>
-          <select id="scTurn">
-            <option value="any" data-i18n="sc_any"></option>
-            <option value="100000">≥ 100k</option><option value="500000">≥ 500k</option>
-            <option value="1000000">≥ 1 Mio</option><option value="5000000">≥ 5 Mio</option>
-          </select></label>
+          <input type="number" id="scTurn" list="dlTurn" min="0" step="10000" data-i18n-ph="sc_ph_any">
+          <datalist id="dlTurn"><option value="50000"></option><option value="100000"></option><option value="500000"></option><option value="1000000"></option><option value="5000000"></option><option value="20000000"></option></datalist></label>
         <label><span data-i18n="sc_mcap"></span>
-          <select id="scMcap">
-            <option value="any" data-i18n="sc_any"></option>
-            <option value="500000000">≥ 500 Mio</option><option value="2000000000">≥ 2 Mrd</option>
-            <option value="10000000000">≥ 10 Mrd</option><option value="100000000000">≥ 100 Mrd</option>
-          </select></label>
+          <input type="number" id="scMcap" list="dlMcap" min="0" step="100000000" data-i18n-ph="sc_ph_any">
+          <datalist id="dlMcap"><option value="100000000"></option><option value="500000000"></option><option value="2000000000"></option><option value="10000000000"></option><option value="100000000000"></option><option value="1000000000000"></option></datalist></label>
         <label><span data-i18n="sc_mom"></span>
           <select id="scMom">
             <option value="any" data-i18n="sc_any"></option>
@@ -707,6 +699,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
           </select></label>
       </div>
       <div class="mv-bar">
+        <button class="btn ghost" id="btnScHelp" title="?">?</button>
         <button class="btn primary" id="btnScreen" data-i18n="sc_apply"></button>
         <button class="chip" id="scDir" title="">↓</button>
         <button class="btn ghost" id="btnScReset" data-i18n="sc_reset"></button>
@@ -1561,7 +1554,7 @@ const DEFAULT_SETTINGS = {
   planAmount:500, planMonthly:0, planProfile:'balanced',
   scanHours:3, trApp:1, mvPeriod:'d1', mvDir:'up',
   staleMin:15, status:'all', fbUrl:'', fbKey:'', contactMail:'', guestOff:false, adminNameLogin:false, sortDir:'desc', adminMail:'',
-  fxMin:10, view:'auto', trMode:'copy', tvTemplate:'https://www.tradingview.com/chart/?symbol={sym}', dispCur:'auto',
+  fxMin:10, view:'auto', scHelp:false, trMode:'copy', tvTemplate:'https://www.tradingview.com/chart/?symbol={sym}', dispCur:'auto',
   screen:null
 };
 
@@ -1569,6 +1562,19 @@ const DEFAULT_SETTINGS = {
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  sc_h_preset:'Setzt alle Regler auf einmal auf eine sinnvolle Kombination. Sobald du danach etwas änderst, springt es auf „Eigene".',
+  sc_h_type:'Nur Aktien, nur ETFs oder beides. ETFs schwanken naturgemäß ruhiger als Einzelaktien.',
+  sc_h_above:'SMA = gleitender Durchschnitt der letzten X Tage, EMA = derselbe Gedanke, aber jüngere Tage zählen stärker. Liegt der Kurs darüber, zeigt der Trend über diesen Zeitraum nach oben. 20 Tage = kurzfristig, 50 = mittelfristig, 200 = langfristig.',
+  sc_h_day:'Kursänderung seit dem Vortagesschluss, in Prozent. Leer lassen heißt: egal.',
+  sc_h_month:'Kursänderung über die letzten 21 Handelstage, also etwa einen Monat.',
+  sc_h_rsi:'RSI = Relative Strength Index, eine Zahl von 0 bis 100 aus den Kursbewegungen der letzten 14 Tage. Über 70 gilt als überkauft (viel gekauft, Rücksetzer wahrscheinlicher), unter 30 als überverkauft. Ein Bereich von 40 bis 70 fängt Werte, die steigen, aber noch nicht heiß gelaufen sind.',
+  sc_h_minp:'Mindest-Stückpreis in der jeweiligen Handelswährung. Filtert sehr billige Papiere heraus, die oft stark schwanken.',
+  sc_h_turn:'Umsatz pro Tag = Kurs mal Stückzahl, als Median der letzten 20 Tage. Grob: wie leicht sich der Wert kaufen und verkaufen lässt.',
+  sc_h_mcap:'Marktkapitalisierung = Kurs mal Anzahl aller Aktien, also der Börsenwert des Unternehmens. Wird nur bei Bedarf einzeln nachgeladen.',
+  sc_h_mom:'„Fängt an zu steigen": Kurs über der 20-Tage-Linie, diese über der 50-Tage-Linie, aber erst 2 bis 25 Tage darüber und RSI zwischen 45 und 72. Also frisch gedreht statt seit Monaten gelaufen.',
+  sc_h_sort:'Reihenfolge der Treffer. Mit dem Pfeil daneben zwischen größtem und kleinstem Wert zuerst wechseln.',
+  sc_help_btn:'Erklärungen ein- und ausblenden',
+  sc_rsi_min:'RSI mindestens', sc_rsi_max:'RSI höchstens', sc_ph_any:'egal',
   v_auto_s:'Auto',
   s_view:'Ansicht', v_auto:'Automatisch', v_desktop:'PC', v_mobile:'Handy',
   v_is_mobile:'aktiv: Handy', v_is_desktop:'aktiv: PC',
@@ -1818,6 +1824,19 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  sc_h_preset:'Sets every control at once to a sensible combination. Changing anything afterwards switches it to "Custom".',
+  sc_h_type:'Stocks only, ETFs only or both. ETFs move more calmly than single stocks by nature.',
+  sc_h_above:'SMA = simple moving average of the last X days, EMA = the same idea but recent days count more. Price above it means the trend over that span points up. 20 days = short term, 50 = medium, 200 = long.',
+  sc_h_day:'Price change since the previous close, in percent. Leaving it empty means no limit.',
+  sc_h_month:'Price change over the last 21 trading days, roughly a month.',
+  sc_h_rsi:'RSI = Relative Strength Index, a 0 to 100 figure from the last 14 days of price moves. Above 70 counts as overbought (heavily bought, pullback more likely), below 30 as oversold. A 40 to 70 band catches assets that are rising but not yet overheated.',
+  sc_h_minp:'Minimum price per share in its trading currency. Filters out very cheap paper, which often swings hard.',
+  sc_h_turn:'Turnover per day = price times shares traded, as the median of the last 20 days. Roughly: how easily you can buy and sell it.',
+  sc_h_mcap:'Market cap = price times all outstanding shares, the stock-market value of the company. Fetched separately only when needed.',
+  sc_h_mom:'"Starting to rise": price above the 20-day line, that line above the 50-day line, but only 2 to 25 days above it and RSI between 45 and 72. Freshly turned rather than running for months.',
+  sc_h_sort:'Order of the results. The arrow next to it switches between largest and smallest first.',
+  sc_help_btn:'Show or hide the explanations',
+  sc_rsi_min:'RSI at least', sc_rsi_max:'RSI at most', sc_ph_any:'any',
   v_auto_s:'Auto',
   s_view:'Layout', v_auto:'Automatic', v_desktop:'PC', v_mobile:'Phone',
   v_is_mobile:'active: phone', v_is_desktop:'active: PC',
@@ -3169,7 +3188,7 @@ function applyLang(){
   md.textContent=t(md.dataset.i18n);
   md.classList.toggle('on', settings.mvDir==='up');
   $$('#panel-movers .chip[data-per]').forEach(x=>x.classList.toggle('on', x.dataset.per===settings.mvPeriod));
-  renderSettingsValues(); renderPlanInputs(); renderWl(); renderAccounts(); renderUniCat(); renderUniverse(); renderAll(); renderMovers(); renderScreen();
+  renderSettingsValues(); renderPlanInputs(); renderWl(); renderAccounts(); applyScHelp(); renderUniCat(); renderUniverse(); renderAll(); renderMovers(); renderScreen();
   if(planState) renderPlan();
   if(detailSym){ fillDetail(); drawDetail(); }
 }
@@ -3776,7 +3795,7 @@ async function syncUsernames(){
    URL, API key, admin address, guest policy) are deliberately NOT in this list:
    they belong to the file, not to a user, and must never be overwritten by
    whatever a friend happens to have set on their own phone.                  */
-const SYNC_KEYS = ['lang','theme','dispCur','fxMin','view','sort','sortDir','filter','status','staleMin',
+const SYNC_KEYS = ['lang','theme','dispCur','fxMin','view','scHelp','sort','sortDir','filter','status','staleMin',
                    'planAmount','planMonthly','planProfile','screen','mvPeriod','mvDir','scanHours'];
 let cloudTimer = null, cloudLoading = false;
 function syncPayload(){
@@ -4197,14 +4216,17 @@ function bindEvents(){
   $('#btnScScan').addEventListener('click', ()=>scanUniverse(true).then(renderScreen));
   $('#btnScreen').addEventListener('click', async ()=>{
     renderScreen();
-    if(screenFilters().mcap !== 'any'){ await loadMcaps(screenRows()); renderScreen(); }
+    if(numOrNull(screenFilters().mcap) != null){ await loadMcaps(screenRows()); renderScreen(); }
+  });
+  $('#btnScHelp').addEventListener('click', ()=>{
+    settings.scHelp = !settings.scHelp; saveSettings(); applyScHelp();
   });
   $('#btnScReset').addEventListener('click', ()=>{
     settings.screen = Object.assign({}, SCREEN_DEFAULT); saveSettings(); renderScreen();
   });
   Object.keys(SCREEN_FIELDS).forEach(id=>{
     const el = $('#'+id); if(!el) return;
-    el.addEventListener('change', async e=>{
+    el.addEventListener(el.tagName === 'INPUT' ? 'input' : 'change', async e=>{
       const key = SCREEN_FIELDS[id], cur = screenFilters();
       if(key === 'preset'){
         const pre = SCREEN_PRESETS[e.target.value];
@@ -4214,7 +4236,7 @@ function bindEvents(){
         settings.screen = Object.assign({}, cur, {[key]: e.target.value, preset:'custom'});
       }
       saveSettings(); renderScreen();
-      if(settings.screen.mcap !== 'any'){ await loadMcaps(screenRows()); renderScreen(); }
+      if(numOrNull(settings.screen.mcap) != null){ await loadMcaps(screenRows()); renderScreen(); }
     });
   });
   $('#scList').addEventListener('click', e=>{
@@ -4682,14 +4704,21 @@ function renderMovers(){
    SCREENER — filter the scanned universe on measurable conditions
    ===================================================================== */
 const SCREEN_PRESETS = {
-  trade:  {type:'stock', above:'ema20', day:'any', month:'5',  rsi:'gt40', minp:'10', minturn:'any', mom:'any',   mcap:'any', sort:'d21'},
-  invest: {type:'all',   above:'sma200', day:'any', month:'any', rsi:'any',  minp:'10', minturn:'any', mom:'any',   mcap:'any', sort:'d252'},
-  breakout:{type:'stock', above:'sma20', day:'4',   month:'any', rsi:'band', minp:'10', minturn:'any', mom:'any',   mcap:'any', sort:'d1'},
-  momentum:{type:'stock', above:'sma20', day:'any', month:'0',  rsi:'band', minp:'10', minturn:'any', mom:'start', mcap:'any', sort:'d5'}
+  trade:   {type:'stock', above:'ema20',  day:'',  month:'5', rsiMin:'40', rsiMax:'',   minp:'10', minturn:'', mom:'any',   mcap:'', sort:'d21'},
+  invest:  {type:'all',   above:'sma200', day:'',  month:'',  rsiMin:'',   rsiMax:'',   minp:'10', minturn:'', mom:'any',   mcap:'', sort:'d252'},
+  breakout:{type:'stock', above:'sma20',  day:'4', month:'',  rsiMin:'40', rsiMax:'70', minp:'10', minturn:'', mom:'any',   mcap:'', sort:'d1'},
+  momentum:{type:'stock', above:'sma20',  day:'',  month:'0', rsiMin:'40', rsiMax:'70', minp:'10', minturn:'', mom:'start', mcap:'', sort:'d5'}
 };
 const SCREEN_DEFAULT = Object.assign({preset:'trade'}, SCREEN_PRESETS.trade);
 const SCREEN_FIELDS = {scPreset:'preset', scType:'type', scAbove:'above', scDay:'day', scMonth:'month',
-  scRsi:'rsi', scMinp:'minp', scTurn:'minturn', scMcap:'mcap', scMom:'mom', scSort:'sort'};
+  scRsiMin:'rsiMin', scRsiMax:'rsiMax', scMinp:'minp', scTurn:'minturn', scMcap:'mcap', scMom:'mom', scSort:'sort'};
+/* An empty box means "no limit", so any number the user types is accepted
+   instead of only the handful a dropdown could offer.                    */
+function numOrNull(v){
+  if(v === '' || v === null || v === undefined || v === 'any') return null;
+  const n = Number(String(v).replace(',', '.'));
+  return isFinite(n) ? n : null;
+}
 let mcapCache = store.get('mcap', {});
 let screenBusy = false;
 
@@ -4727,16 +4756,17 @@ function screenRows(){
   step(t('sc_type'), f.type !== 'all', x => x.u.type === f.type, null);
   step(t('sc_above') + ' ' + String(f.above).toUpperCase(), f.above !== 'any',
        x => x.m.p > x.m[f.above], x => x.m[f.above]);
-  step(t('sc_day'),   f.day   !== 'any', x => x.m.d1  > +f.day,   x => x.m.d1);
-  step(t('sc_month'), f.month !== 'any', x => x.m.d21 > +f.month, x => x.m.d21);
-  step(t('sc_rsi'), f.rsi !== 'any', x => {
-    const r = x.m.rsi;
-    return f.rsi==='gt40' ? r>40 : f.rsi==='gt50' ? r>50 : f.rsi==='band' ? (r>=40&&r<=70) : r<30;
-  }, x => x.m.rsi);
-  step(t('sc_minp'), f.minp !== 'any', x => x.m.p >= +f.minp, x => x.m.p);
-  step(t('sc_turn'), f.minturn !== 'any', x => x.m.turn >= +f.minturn, x => x.m.turn);
+  const nDay=numOrNull(f.day), nMon=numOrNull(f.month), nRmin=numOrNull(f.rsiMin),
+        nRmax=numOrNull(f.rsiMax), nMinp=numOrNull(f.minp),
+        nTurn=numOrNull(f.minturn), nCap=numOrNull(f.mcap);
+  step(t('sc_day')+' >'+nDay,   nDay!=null, x => x.m.d1  > nDay,  x => x.m.d1);
+  step(t('sc_month')+' >'+nMon, nMon!=null, x => x.m.d21 > nMon,  x => x.m.d21);
+  step('RSI ≥'+nRmin, nRmin!=null, x => x.m.rsi >= nRmin, x => x.m.rsi);
+  step('RSI ≤'+nRmax, nRmax!=null, x => x.m.rsi <= nRmax, x => x.m.rsi);
+  step(t('sc_minp'), nMinp!=null, x => x.m.p >= nMinp, x => x.m.p);
+  step(t('sc_turn'), nTurn!=null, x => x.m.turn >= nTurn, x => x.m.turn);
   step(t('sc_mom'),  f.mom === 'start', x => momentumStart(x.m), null);
-  step(t('sc_mcap'), f.mcap !== 'any', x => mcapCache[x.u.sym] >= +f.mcap,
+  step(t('sc_mcap'), nCap!=null, x => mcapCache[x.u.sym] >= nCap,
        x => mcapCache[x.u.sym] === undefined ? null : mcapCache[x.u.sym]);
   const key = f.sort;
   const val = x => key === 'name' ? 0 : (x.m[key] != null ? x.m[key] : -1e15);
@@ -4812,6 +4842,28 @@ function screenRowHtml(x, idx){
       <button class="mv-add${inWl?' in':''}" ${inWl?'disabled':''} title="${inWl?t('mv_inwl'):t('mv_add')}">${inWl?'✓':'+'}</button>
       ${linkPairHtml(u.isin, u.sym)}
     </div></div>`;
+}
+const SC_HELP = {
+  scPreset:'sc_h_preset', scType:'sc_h_type', scAbove:'sc_h_above', scDay:'sc_h_day',
+  scMonth:'sc_h_month', scRsiMin:'sc_h_rsi', scRsiMax:'sc_h_rsi', scMinp:'sc_h_minp',
+  scTurn:'sc_h_turn', scMcap:'sc_h_mcap', scMom:'sc_h_mom', scSort:'sc_h_sort'
+};
+/* Hover alone would leave phone users with no way in, so the same text is
+   also shown inline by the ? toggle.                                      */
+function applyScHelp(){
+  const on = !!settings.scHelp;
+  const btn = $('#btnScHelp'); if(btn) btn.classList.toggle('on', on);
+  Object.keys(SC_HELP).forEach(id => {
+    const el = $('#' + id); if(!el) return;
+    const lab = el.closest('label'); if(!lab) return;
+    const txt = t(SC_HELP[id]);
+    lab.title = txt;
+    let p = lab.querySelector('.sc-help');
+    if(on){
+      if(!p){ p = document.createElement('span'); p.className = 'sc-help'; lab.appendChild(p); }
+      p.textContent = txt;
+    } else if(p) p.remove();
+  });
 }
 function renderScreen(){
   const box = $('#scList'), meta = $('#scMeta');
