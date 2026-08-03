@@ -261,6 +261,11 @@ textarea#backupArea{width:100%; min-height:110px; font-family:var(--mono); font-
 #btnScHelp{font-weight:700; width:38px; padding:0}
 #btnScHelp.on{border-color:var(--accent); color:var(--accent)}
 
+.zoom-bar{display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin:6px 0 0; min-height:26px}
+#dZoomInfo{font-size:11px; color:var(--warn)}
+.zoom-tip{font-size:11px; color:var(--faint)}
+canvas#dChart{touch-action:pan-y; cursor:grab}
+
 /* ============ Time travel ============ */
 .travel{margin:10px 0 2px}
 .travel-btns{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px}
@@ -969,6 +974,10 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
         </div>
         <p class="hint" data-i18n="sy_hint"></p>
         <p class="hint" data-i18n="s_fb_hint"></p>
+        <h3 style="margin-top:16px" data-i18n="se_title"></h3>
+        <div class="set-row"><button class="btn" id="btnSessions" data-i18n="se_load"></button></div>
+        <div id="sessList"></div>
+        <p class="hint" data-i18n="se_hint"></p>
         <h3 style="margin-top:16px" data-i18n="a_list"></h3>
         <p class="hint" id="acctStatus"></p>
         <p class="hint" id="acctScope"></p>
@@ -1017,6 +1026,12 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
           <button class="btn" id="btnCopyGuest" data-i18n="g_copy"></button>
         </div>
         <p class="hint" id="gOutInfo"></p>
+        <div class="set-row">
+          <input type="text" id="gCheck" spellcheck="false" data-i18n-ph="g_check_ph">
+          <button class="btn" id="btnGCheck" data-i18n="g_check"></button>
+        </div>
+        <p class="hint" id="gCheckOut"></p>
+        <p class="hint" data-i18n="g_used_note"></p>
         <p class="hint" data-i18n="g_hint"></p>
       </div>
 
@@ -1060,6 +1075,11 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
 
       <div id="dChartWrap"><canvas id="dChart"></canvas></div>
       <div class="legend" id="dLegend"></div>
+      <div class="zoom-bar">
+        <span id="dZoomInfo" class="mono"></span>
+        <button class="chip hidden" id="dZoomReset" data-i18n="z_reset"></button>
+        <span class="zoom-tip" data-i18n="z_tip"></span>
+      </div>
       <div class="travel">
         <div class="travel-btns">
           <button class="chip" data-back="0" data-i18n="tt_now"></button>
@@ -1562,6 +1582,17 @@ const DEFAULT_SETTINGS = {
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  z_reset:'Ganzer Zeitraum', z_bars:'Handelstage',
+  z_tip:'Mausrad zoomt, ziehen verschiebt, Doppelklick setzt zurück. Am Handy mit zwei Fingern zoomen.',
+  se_title:'Angemeldete Geräte', se_load:'Geräte laden', se_none:'Noch keine Anmeldung erfasst.',
+  se_this:'dieses Gerät', se_seen:'zuletzt aktiv', se_ago:'vor {m} Min.',
+  se_kick:'Abmelden', se_kick_ask:'Dieses Gerät abmelden? Es fliegt beim nächsten Aktualisieren raus.',
+  se_kicked_ok:'Gerät abgemeldet', se_kicked:'Dein Zugang wurde vom Admin beendet.',
+  se_hint:'Jeder angemeldete Browser meldet sich hier mit Gerät und letzter Aktivität, unabhängig davon wem das Konto gehört. „Abmelden" löscht den Eintrag; das Gerät bemerkt das beim nächsten Aktualisieren und landet wieder auf dem Sperrbildschirm. Es kann sich danach mit gültigem Passwort neu anmelden, zum endgültigen Aussperren also das Konto entfernen.',
+  g_check:'Code prüfen', g_check_ph:'Gast-Code einfügen …',
+  g_st_bad:'Ungültig oder bereits widerrufen.', g_st_expired:'Abgelaufen.',
+  g_st_perma:'Gültig, ohne Ablauf.', g_st_left:'Gültig, noch {m} Minuten (bis {time}).',
+  g_used_note:'Hinweis: Ein Gast-Code trägt seine Gültigkeit in sich und wird nirgends registriert. Deshalb lässt sich nicht sehen, ob er schon benutzt wurde, und ein einzelner Code lässt sich nicht zurückziehen. Möglich sind: Restzeit prüfen, kurze Laufzeiten vergeben, einen neuen Code erzeugen oder mit „Alle Zugänge widerrufen" sämtliche Codes auf einmal ungültig machen.',
   sc_h_preset:'Setzt alle Regler auf einmal auf eine sinnvolle Kombination. Sobald du danach etwas änderst, springt es auf „Eigene".',
   sc_h_type:'Nur Aktien, nur ETFs oder beides. ETFs schwanken naturgemäß ruhiger als Einzelaktien.',
   sc_h_above:'SMA = gleitender Durchschnitt der letzten X Tage, EMA = derselbe Gedanke, aber jüngere Tage zählen stärker. Liegt der Kurs darüber, zeigt der Trend über diesen Zeitraum nach oben. 20 Tage = kurzfristig, 50 = mittelfristig, 200 = langfristig.',
@@ -1824,6 +1855,17 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  z_reset:'Full range', z_bars:'trading days',
+  z_tip:'Wheel zooms, drag pans, double-click resets. On a phone, pinch with two fingers.',
+  se_title:'Signed-in devices', se_load:'Load devices', se_none:'No sign-in recorded yet.',
+  se_this:'this device', se_seen:'last active', se_ago:'{m} min ago',
+  se_kick:'Sign out', se_kick_ask:'Sign this device out? It drops on its next refresh.',
+  se_kicked_ok:'Device signed out', se_kicked:'Your access was ended by the admin.',
+  se_hint:'Every signed-in browser reports here with its device and last activity, whoever the account belongs to. "Sign out" deletes the entry; the device notices on its next refresh and returns to the lock screen. It can sign in again with a valid password, so to lock someone out for good, remove the account.',
+  g_check:'Check code', g_check_ph:'Paste a guest code …',
+  g_st_bad:'Invalid or already revoked.', g_st_expired:'Expired.',
+  g_st_perma:'Valid, no expiry.', g_st_left:'Valid, {m} minutes left (until {time}).',
+  g_used_note:'Note: a guest code carries its validity inside itself and is not registered anywhere. So there is no way to see whether it has been used, and a single code cannot be withdrawn. What you can do: check the time left, hand out short ones, issue a new code, or invalidate every code at once with "Revoke all access".',
   sc_h_preset:'Sets every control at once to a sensible combination. Changing anything afterwards switches it to "Custom".',
   sc_h_type:'Stocks only, ETFs only or both. ETFs move more calmly than single stocks by nature.',
   sc_h_above:'SMA = simple moving average of the last X days, EMA = the same idea but recent days count more. Price above it means the trend over that span points up. 20 days = short term, 50 = medium, 200 = long.',
@@ -2290,6 +2332,7 @@ const DEPLOY = {salt:'aa08dd9c99c6466607e1e707c7bc515a', hash:'67d6b64fc0a060b16
 let auth = store.get('auth', null) || (DEPLOY.hash ? {salt:DEPLOY.salt, hash:DEPLOY.hash, baked:true} : null);
 let guestMode = false, guestUntil = 0, guestTimer = null;
 let refreshTimer = null, fxTimer = null, refreshing = false, detailSym = null, travelIdx = null;
+let zoomFrom = null, zoomTo = null;      // visible index window, null = whole series
 
 const t = k => (I18N[settings.lang] && I18N[settings.lang][k]) || I18N.de[k] || k;
 const locale = () => settings.lang === 'de' ? 'de-DE' : 'en-GB';
@@ -2875,26 +2918,39 @@ async function openAnySym(sym){
   if(!sym) return;
   if(!seriesMap[sym]){
     toast(t('d_loading'));
+    try{ seriesMap[sym] = await fetchSeries(sym); }
+    catch(e){ toast(t('d_load_fail')); return; }
+  }
+  /* analyses gets wiped on language switch, import and cloud load, so it is
+     rebuilt here rather than only on the fetch path                       */
+  if(!analyses[sym]){
     const a = assetBySym(sym);
-    try{
-      const s = await fetchSeries(sym);
-      seriesMap[sym] = s;
-      analyses[sym] = analyze({sym, type:(a && a.type) || 'stock'}, s);
-    }catch(e){ toast(t('d_load_fail')); return; }
+    analyses[sym] = analyze({sym, type:(a && a.type) || 'stock'}, seriesMap[sym]);
   }
   openDetail(sym);
 }
 function openDetail(sym){
   if(!seriesMap[sym]) return;
-  detailSym=sym; travelIdx=null; fillDetail();
+  detailSym=sym; travelIdx=null; zoomFrom=zoomTo=null; detailBlank(''); fillDetail();
   document.body.style.overflow='hidden';
   $('#detail').classList.remove('hidden');
   requestAnimationFrame(drawDetail);
 }
 function closeDetail(){ detailSym=null; $('#detail').classList.add('hidden'); document.body.style.overflow=''; }
+function detailBlank(msg){
+  ['dTitle','dSub','dPrice','dDay','dProjText','dStamp'].forEach(id=>{ const e=$('#'+id); if(e) e.textContent=''; });
+  ['dBadges','dMetrics','dWhySignal','dWhyRisk','dLegend'].forEach(id=>{ const e=$('#'+id); if(e) e.innerHTML=''; });
+  const t1=$('#dTitle'); if(t1) t1.textContent = msg || '';
+}
 function fillDetail(){
-  const asset=assetBySym(detailSym), s=seriesMap[detailSym], a=analyses[detailSym];
-  if(!asset||!s||!a) return;
+  const s=seriesMap[detailSym];
+  let a=analyses[detailSym];
+  let asset=assetBySym(detailSym);
+  if(!s){ detailBlank(t('d_load_fail')); return; }
+  /* an asset reached from a list may not be in the watchlist or the catalogue;
+     a minimal record is better than an empty panel                          */
+  if(!asset) asset = {sym:detailSym, name:detailSym, isin:'', type:'stock'};
+  if(!a){ a = analyses[detailSym] = analyze(asset, s); }
   $('#dTitle').textContent=asset.name||asset.sym;
   $('#dSub').textContent=`${asset.sym} · ${asset.type==='etf'?t('t_etf'):t('t_stock')} · ${asset.isin||'—'}`;
   $('#dPrice').textContent=fmtMoney(a.price,a.cur);
@@ -2958,8 +3014,62 @@ function fillDetail(){
   sl.min='0'; sl.max=String(last);
   if(travelIdx==null || travelIdx>last) travelIdx=last;
   sl.value=String(travelIdx);
-  updateTravelText();
+  updateTravelText(); updateZoomLabel();
   $('#dStamp').textContent=`${t('stand')} ${fmtTime(a.fetchedAt)} · ${sourceTxt(a)} · Yahoo/Xetra`;
+}
+/* The visible window is a pair of indices. Keeping it in index space means the
+   y-axis can rescale to what is on screen, which is the point of zooming.  */
+const MIN_BARS = 12;
+function zoomRange(){
+  const s = seriesMap[detailSym];
+  if(!s) return {a:0, b:0};
+  const n = s.c.length;
+  let a = zoomFrom == null ? 0 : Math.round(zoomFrom);
+  let b = zoomTo == null ? n-1 : Math.round(zoomTo);
+  a = clamp(a, 0, n-1); b = clamp(b, 0, n-1);
+  if(b - a < MIN_BARS){ b = Math.min(n-1, a + MIN_BARS); a = Math.max(0, b - MIN_BARS); }
+  return {a, b};
+}
+function zoomIsFull(){
+  const s = seriesMap[detailSym]; if(!s) return true;
+  const {a,b} = zoomRange();
+  return a === 0 && b === s.c.length-1;
+}
+function zoomReset(){ zoomFrom = zoomTo = null; updateZoomLabel(); drawDetail(); }
+function updateZoomLabel(){
+  const btn = $('#dZoomReset'); if(!btn) return;
+  btn.classList.toggle('hidden', zoomIsFull());
+  const s = seriesMap[detailSym]; if(!s) return;
+  const {a,b} = zoomRange();
+  const d1 = new Date(s.t[a]).toLocaleDateString(locale(), {day:'2-digit', month:'2-digit', year:'2-digit'});
+  const d2 = new Date(s.t[b]).toLocaleDateString(locale(), {day:'2-digit', month:'2-digit', year:'2-digit'});
+  const lab = $('#dZoomInfo');
+  if(lab) lab.textContent = zoomIsFull() ? '' : (d1 + ' – ' + d2 + ' · ' + (b-a+1) + ' ' + t('z_bars'));
+}
+/* anchor is the fraction of the window under the cursor, so the point you
+   point at stays put while everything else expands around it              */
+function zoomBy(factor, anchor){
+  const s = seriesMap[detailSym]; if(!s) return;
+  const n = s.c.length, {a,b} = zoomRange();
+  const span = b - a;
+  const pivot = a + span * clamp(anchor, 0, 1);
+  let newSpan = clamp(span * factor, MIN_BARS, n-1);
+  let na = pivot - newSpan * clamp(anchor, 0, 1);
+  let nb = na + newSpan;
+  if(na < 0){ nb -= na; na = 0; }
+  if(nb > n-1){ na -= (nb - (n-1)); nb = n-1; }
+  zoomFrom = Math.max(0, na); zoomTo = Math.min(n-1, nb);
+  if(zoomIsFull()) zoomFrom = zoomTo = null;
+  updateZoomLabel(); drawDetail();
+}
+function zoomPan(barDelta){
+  const s = seriesMap[detailSym]; if(!s) return;
+  const n = s.c.length, {a,b} = zoomRange(), span = b - a;
+  let na = a + barDelta, nb = b + barDelta;
+  if(na < 0){ na = 0; nb = span; }
+  if(nb > n-1){ nb = n-1; na = nb - span; }
+  zoomFrom = na; zoomTo = nb;
+  updateZoomLabel(); drawDetail();
 }
 function travelPos(){
   const s = seriesMap[detailSym];
@@ -2987,7 +3097,16 @@ function setTravel(idx){
   const last = s.c.length - 1;
   travelIdx = clamp(idx, 0, last);
   $('#dTravel').value = String(travelIdx);
+  ensureTravelVisible();
   updateTravelText(); drawDetail();
+}
+/* the slider still spans the whole history; if its marker leaves the zoomed
+   window the window follows it, so the handle never points at nothing     */
+function ensureTravelVisible(){
+  if(zoomFrom == null || travelIdx == null) return;
+  const {a,b} = zoomRange();
+  if(travelIdx < a) zoomPan(travelIdx - a);
+  else if(travelIdx > b) zoomPan(travelIdx - b);
 }
 function drawDetail(){
   if(!detailSym) return;
@@ -2999,15 +3118,20 @@ function drawDetail(){
   const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
   const W=r.width, H=r.height; ctx.clearRect(0,0,W,H);
   const c=s.c, tm=s.t, n=c.length;
-  const showProj=$('#dProjToggle').checked && a && a.proj;
+  const {a:vA, b:vB} = zoomRange();
+  const atEnd = vB >= n-1;
+  const showProj=$('#dProjToggle').checked && a && a.proj && atEnd;
   const projPts=showProj? a.proj.pts : [];
   const s50=smaSeries(c,50), s200=smaSeries(c,200);
-  const totalUnits=(n-1)+(showProj?252:0);
+  /* units are measured from the left edge of the window, so zooming simply
+     shrinks the range being mapped across the same pixels                 */
+  const spanUnits=(vB-vA)+(showProj?252:0);
   const padL=46,padR=8,padT=8,padB=20;
-  const X=u=>padL+(W-padL-padR)*(u/totalUnits);
+  const X=u=>padL+(W-padL-padR)*((u-vA)/(spanUnits||1));
   let lo=Infinity, hi=-Infinity;
-  c.forEach(v=>{ if(v<lo)lo=v; if(v>hi)hi=v; });
-  [s50,s200].forEach(arr=>arr.forEach(v=>{ if(v!=null){ if(v<lo)lo=v; if(v>hi)hi=v; } }));
+  for(let i=vA;i<=vB;i++){ const v=c[i]; if(v<lo)lo=v; if(v>hi)hi=v; }
+  [s50,s200].forEach(arr=>{ for(let i=vA;i<=vB;i++){ const v=arr[i];
+    if(v!=null){ if(v<lo)lo=v; if(v>hi)hi=v; } } });
   projPts.forEach(p=>{ if(p.lo<lo)lo=p.lo; if(p.hi>hi)hi=p.hi; });
   const span=(hi-lo)||1; lo-=span*0.04; hi+=span*0.04;
   const Y=v=>padT+(H-padT-padB)*(1-(v-lo)/(hi-lo));
@@ -3023,10 +3147,12 @@ function drawDetail(){
   const monthsEn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const months=settings.lang==='de'?monthsDe:monthsEn;
   let lastM=-1;
-  for(let i=0;i<n;i++){
+  const vis=vB-vA+1;
+  const every = vis>500 ? 6 : vis>200 ? 3 : vis>60 ? 1 : 1;
+  for(let i=vA;i<=vB;i++){
     const d=new Date(tm[i]), m=d.getMonth();
     if(m!==lastM){ lastM=m;
-      if(m%3===0){ const x=X(i);
+      if(m%every===0){ const x=X(i);
         ctx.strokeStyle=cssVar('--grid'); ctx.beginPath(); ctx.moveTo(x,padT); ctx.lineTo(x,H-padB); ctx.stroke();
         ctx.fillText(months[m]+' '+String(d.getFullYear()).slice(2), x-16, H-6); } }
   }
@@ -3046,7 +3172,7 @@ function drawDetail(){
   const line=(arr,color)=>{
     ctx.strokeStyle=color; ctx.lineWidth=1.3; ctx.setLineDash([4,3]);
     ctx.beginPath(); let st=false;
-    for(let i=0;i<n;i++){ const v=arr[i]; if(v==null) continue;
+    for(let i=vA;i<=vB;i++){ const v=arr[i]; if(v==null) continue;
       const px=X(i), py=Y(v); st?ctx.lineTo(px,py):(ctx.moveTo(px,py),st=true); }
     ctx.stroke(); ctx.setLineDash([]);
   };
@@ -3054,12 +3180,14 @@ function drawDetail(){
   ctx.strokeStyle=cssVar('--accent'); ctx.lineWidth=2;
   if(dark()){ ctx.shadowColor=cssVar('--accent'); ctx.shadowBlur=7; }
   ctx.beginPath();
-  for(let i=0;i<n;i++){ const px=X(i), py=Y(c[i]); i?ctx.lineTo(px,py):ctx.moveTo(px,py); }
+  for(let i=vA;i<=vB;i++){ const px=X(i), py=Y(c[i]); i===vA?ctx.moveTo(px,py):ctx.lineTo(px,py); }
   ctx.stroke(); ctx.shadowBlur=0;
-  ctx.fillStyle=cssVar('--accent');
-  ctx.beginPath(); ctx.arc(X(n-1),Y(c[n-1]),3,0,7); ctx.fill();
+  if(atEnd){
+    ctx.fillStyle=cssVar('--accent');
+    ctx.beginPath(); ctx.arc(X(n-1),Y(c[n-1]),3,0,7); ctx.fill();
+  }
   const ti = travelPos();
-  if(ti < n-1){
+  if(ti < n-1 && ti >= vA && ti <= vB){
     const px=X(ti), py=Y(c[ti]);
     ctx.strokeStyle=cssVar('--warn'); ctx.lineWidth=1.3; ctx.setLineDash([3,3]);
     ctx.beginPath(); ctx.moveTo(px,padT); ctx.lineTo(px,H-padB); ctx.stroke(); ctx.setLineDash([]);
@@ -3764,7 +3892,10 @@ async function fbLogin(ident, pw){
     fbSession = null; store.del('fbsess');
     return {err:'fa_removed'};
   }
-  return {user:(prof && prof.name) || fbSession.email, admin, email:fbSession.email};
+  const res = {user:(prof && prof.name) || fbSession.email, admin, email:fbSession.email};
+  currentUser = res.user;
+  sessionTouch();
+  return res;
 }
 function fbProjectId(){
   const m = String(fbBase()||'').match(/https:\/\/([^.]+?)-default-rtdb\./);
@@ -3832,6 +3963,51 @@ async function cloudLoad(){
     }
   } finally { cloudLoading = false; }
   return true;
+}
+/* One record per browser per account, so the admin can see real devices
+   rather than guessing from account names.                              */
+function deviceId(){
+  let d = store.get('devid','');
+  if(!d){ d = randomSalt().slice(0,12); store.set('devid', d); }
+  return d;
+}
+function deviceName(){
+  const ua = navigator.userAgent || '';
+  const os = /Android/i.test(ua) ? 'Android'
+    : /iPhone|iPad|iPod/i.test(ua) ? 'iOS'
+    : /Windows/i.test(ua) ? 'Windows'
+    : /Mac OS X/i.test(ua) ? 'macOS'
+    : /Linux/i.test(ua) ? 'Linux' : '?';
+  const br = /Edg\//i.test(ua) ? 'Edge'
+    : /SamsungBrowser/i.test(ua) ? 'Samsung'
+    : /Firefox/i.test(ua) ? 'Firefox'
+    : /Chrome/i.test(ua) ? 'Chrome'
+    : /Safari/i.test(ua) ? 'Safari' : '?';
+  return os + ' · ' + br;
+}
+async function sessionTouch(){
+  if(!fbAuthOn() || !fbSession) return;
+  const key = fbSession.uid + '_' + deviceId();
+  try{
+    await fbAuthSet('/sessions/' + key, {
+      uid: fbSession.uid, user: currentUser || fbSession.email, email: fbSession.email,
+      device: deviceName(), dev: deviceId(), at: Date.now(), last: Date.now()});
+  }catch(e){}
+}
+/* If the admin removed this session, the device signs itself out. */
+async function sessionCheck(){
+  if(!fbAuthOn() || !fbSession || isAdmin) return;
+  const key = fbSession.uid + '_' + deviceId();
+  try{
+    const rec = await fbAuthGet('/sessions/' + key);
+    if(rec === null){ fbSession = null; store.del('fbsess'); store.del('authed'); lockNow(); toast(t('se_kicked')); }
+  }catch(e){}
+}
+async function fbSessions(){
+  const all = await fbAuthGet('/sessions');
+  if(!all) return [];
+  return Object.keys(all).map(k => Object.assign({key:k}, all[k]))
+    .sort((a,b) => (b.last||0) - (a.last||0));
 }
 async function fbRoster(){
   const all = await fbAuthGet('/users');
@@ -4176,6 +4352,58 @@ function bindEvents(){
   $('#detail').addEventListener('click',e=>{ if(e.target.id==='detail'||e.target.classList.contains('detail-in')) closeDetail(); });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&detailSym) closeDetail(); });
   $('#dProjToggle').addEventListener('change', drawDetail);
+  (function bindZoom(){
+    const cv = $('#dChart'); if(!cv) return;
+    const frac = clientX => {
+      const r = cv.getBoundingClientRect();
+      const padL = 46, padR = 8;
+      return clamp((clientX - r.left - padL) / Math.max(1, r.width - padL - padR), 0, 1);
+    };
+    cv.addEventListener('wheel', e => {
+      if(!detailSym) return;
+      e.preventDefault();
+      zoomBy(e.deltaY > 0 ? 1.25 : 0.8, frac(e.clientX));
+    }, {passive:false});
+    let drag = null;
+    cv.addEventListener('pointerdown', e => {
+      if(!detailSym || e.pointerType === 'touch') return;
+      drag = {x:e.clientX, range:zoomRange()};
+      cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing';
+    });
+    cv.addEventListener('pointermove', e => {
+      if(!drag) return;
+      const r = cv.getBoundingClientRect();
+      const span = drag.range.b - drag.range.a;
+      const bars = Math.round((drag.x - e.clientX) / Math.max(1, r.width - 54) * span);
+      if(bars){ zoomFrom = drag.range.a; zoomTo = drag.range.b; zoomPan(bars); }
+    });
+    const endDrag = () => { drag = null; cv.style.cursor = ''; };
+    cv.addEventListener('pointerup', endDrag);
+    cv.addEventListener('pointercancel', endDrag);
+    cv.addEventListener('dblclick', e => { e.preventDefault(); zoomReset(); });
+    /* pinch: two fingers, distance ratio drives the zoom factor */
+    let pinch = null;
+    cv.addEventListener('touchstart', e => {
+      if(e.touches.length === 2){
+        const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX,
+                             e.touches[0].clientY - e.touches[1].clientY);
+        pinch = {d, mid:(e.touches[0].clientX + e.touches[1].clientX)/2};
+      }
+    }, {passive:true});
+    cv.addEventListener('touchmove', e => {
+      if(pinch && e.touches.length === 2){
+        e.preventDefault();
+        const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX,
+                             e.touches[0].clientY - e.touches[1].clientY);
+        if(Math.abs(d - pinch.d) > 6){
+          zoomBy(pinch.d / Math.max(1, d), frac(pinch.mid));
+          pinch.d = d;
+        }
+      }
+    }, {passive:false});
+    cv.addEventListener('touchend', () => { pinch = null; }, {passive:true});
+  })();
+  $('#dZoomReset').addEventListener('click', zoomReset);
   $('#dTravel').addEventListener('input', e=>{ travelIdx=+e.target.value; updateTravelText(); drawDetail(); });
   $$('.travel-btns .chip').forEach(b=>b.addEventListener('click',()=>{
     const s=seriesMap[detailSym]; if(!s) return;
@@ -4476,6 +4704,42 @@ function bindEvents(){
     $('#gOutInfo').textContent = isPerma(res.exp) ? t('g_valid_perma') : t('g_valid').replace('{time}', expLabel(res.exp));
   });
   $('#btnCopyGuest').addEventListener('click',()=>{ const v=$('#gOut').value; if(v) copyText(v); });
+  $('#btnGCheck').addEventListener('click', async ()=>{
+    const code = $('#gCheck').value.trim();
+    if(!code){ $('#gCheckOut').textContent=''; return; }
+    const r = await checkGuestCode(code);
+    const out = $('#gCheckOut');
+    if(r === 0) out.textContent = t('g_st_bad');
+    else if(r === -1) out.textContent = t('g_st_expired');
+    else if(isPerma(r)) out.textContent = t('g_st_perma');
+    else {
+      const min = Math.max(0, Math.round((r - Date.now())/60000));
+      out.textContent = t('g_st_left').replace('{m}', min).replace('{time}', fmtTime(r));
+    }
+  });
+  $('#btnSessions').addEventListener('click', async ()=>{
+    const box = $('#sessList');
+    if(!fbAuthOn() || !fbSession){ box.innerHTML = `<p class="hint">${t('fa_no_session')}</p>`; return; }
+    box.innerHTML = `<p class="hint">${t('fa_wait')}</p>`;
+    try{
+      const rows = await fbSessions();
+      box.innerHTML = rows.length ? rows.map(r => {
+        const mine = r.dev === deviceId();
+        const mins = r.last ? Math.round((Date.now() - r.last)/60000) : null;
+        return `<div class="wl-item"><div class="grow"><b>${escHtml(r.user||r.email||'?')}</b>${mine?' <span class="mono" style="color:var(--accent)">'+t('se_this')+'</span>':''}<br>
+          <span class="mono">${escHtml(r.device||'?')} · ${t('se_seen')} ${mins!=null?t('se_ago').replace('{m}',mins):'?'}</span></div>
+          <button class="btn danger" data-delsess="${escHtml(r.key)}">${t('se_kick')}</button></div>`;
+      }).join('') : `<p class="hint">${t('se_none')}</p>`;
+    }catch(e){ box.innerHTML = `<p class="hint" style="color:var(--warn)">${t('fa_roster_fail')}</p>`; }
+  });
+  $('#sessList').addEventListener('click', e=>{
+    const b = e.target.closest('[data-delsess]'); if(!b) return;
+    if(!confirm(t('se_kick_ask'))) return;
+    fbAuthDel('/sessions/' + b.dataset.delsess).then(ok=>{
+      $('#btnSessions').click();
+      toast(t(ok ? 'se_kicked_ok' : 'a_del_local'));
+    });
+  });
   $('#btnDeploy').addEventListener('click',()=>{
     if(!auth){ toast(t('g_nosec')); return; }
     const sec = ensureGuestSecret();
@@ -4509,7 +4773,7 @@ function bindEvents(){
   document.addEventListener('visibilitychange',()=>{
     const m=+settings.refreshMin||0;
     if(!document.hidden && m>0 && Date.now()-newestFetch()>m*60000) refreshAll();
-    if(!document.hidden) fxTick(false);
+    if(!document.hidden){ fxTick(false); sessionTouch(); sessionCheck(); }
   });
 }
 function addAsset(a){
