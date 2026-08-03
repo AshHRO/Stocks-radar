@@ -1027,11 +1027,15 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
         </div>
         <p class="hint" id="gOutInfo"></p>
         <div class="set-row">
+          <input type="text" id="gNote" data-i18n-ph="g_note_ph" style="flex:1">
+        </div>
+        <div id="gList"></div>
+        <div class="set-row">
           <input type="text" id="gCheck" spellcheck="false" data-i18n-ph="g_check_ph">
           <button class="btn" id="btnGCheck" data-i18n="g_check"></button>
         </div>
         <p class="hint" id="gCheckOut"></p>
-        <p class="hint" data-i18n="g_used_note"></p>
+        <p class="hint" data-i18n="g_list_hint"></p>
         <p class="hint" data-i18n="g_hint"></p>
       </div>
 
@@ -1215,7 +1219,7 @@ function randomSalt(){
 }
 
 /* ---------------- defaults ---------------- */
-const DEFAULT_ASSETS = ['SPPW.DE','EUNL.DE','VWCE.DE','SXR8.DE','SXRV.DE','IS3N.DE','MEUD.DE','EXS1.DE',
+const DEFAULT_ASSETS = ['SPPW.DE','EUNL.DE','VWCE.DE','SXR8.DE','SXRV.DE','IS3N.DE','EXS1.DE',
   'IUSN.DE','QDVE.DE','XEON.DE','EUNA.DE','4GLD.DE',
   'SAP.DE','SIE.DE','ALV.DE','RHM.DE','IFX.DE','DTE.DE','APC.DE','MSF.DE','NVD.DE','AMZ.DE','ABEA.DE','TL0.DE'];
 
@@ -1239,7 +1243,6 @@ const CATALOG = [
   {sym:'SXRV.DE', isin:'IE00B53SZB19', name:'iShares Nasdaq 100', type:'etf', cat:'us', ter:0.30},
   {sym:'EQQQ.DE', isin:'IE0032077012', name:'Invesco EQQQ Nasdaq-100', type:'etf', cat:'us', ter:0.30},
   // ---- Europe ----
-  {sym:'MEUD.DE', isin:'LU0908500753', name:'Amundi Stoxx Europe 600', type:'etf', cat:'europe', ter:0.07},
   {sym:'SXRT.DE', isin:'IE00B53L3W79', name:'iShares Core EURO STOXX 50', type:'etf', cat:'europe', ter:0.10},
   {sym:'IMEA.DE', isin:'IE00B4K48X80', name:'iShares Core MSCI Europe', type:'etf', cat:'europe', ter:0.12},
   {sym:'EXS1.DE', isin:'DE0005933931', name:'iShares Core DAX', type:'etf', cat:'europe', ter:0.16},
@@ -1582,6 +1585,13 @@ const DEFAULT_SETTINGS = {
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  g_none:'Noch keine Codes erzeugt.', g_note_ph:'Notiz, z. B. „für Tom" (optional)',
+  g_revoke:'Sperren', g_revoke_ask:'Diesen Code sofort ungültig machen?',
+  g_revoked:'Code gesperrt, gilt auf allen Geräten.',
+  g_revoke_local:'Nur auf diesem Gerät gesperrt. Ohne Firebase lässt sich das nicht veröffentlichen.',
+  g_st_revoked:'Gesperrt.',
+  g_list_hint:'Jeder erzeugte Code landet hier mit Restlaufzeit und Notiz. „Sperren" trägt ihn in eine öffentliche Sperrliste ein, die beim Einlösen geprüft wird, damit ein einzelner Code zurückgezogen werden kann, ohne alle anderen zu entwerten. Ob ein Code schon benutzt wurde, lässt sich weiterhin nicht sehen: die Prüfung läuft ohne Server und hinterlässt keine Spur.',
+  nodata:'Keine Kursdaten. Symbol vermutlich veraltet oder an dieser Börse nicht handelbar.',
   z_reset:'Ganzer Zeitraum', z_bars:'Handelstage',
   z_tip:'Mausrad zoomt, ziehen verschiebt, Doppelklick setzt zurück. Am Handy mit zwei Fingern zoomen.',
   se_title:'Angemeldete Geräte', se_load:'Geräte laden', se_none:'Noch keine Anmeldung erfasst.',
@@ -1855,6 +1865,13 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  g_none:'No codes created yet.', g_note_ph:'Note, e.g. "for Tom" (optional)',
+  g_revoke:'Revoke', g_revoke_ask:'Invalidate this code immediately?',
+  g_revoked:'Code revoked, applies on every device.',
+  g_revoke_local:'Revoked on this device only. Without Firebase it cannot be published.',
+  g_st_revoked:'Revoked.',
+  g_list_hint:'Every code you create appears here with its remaining time and note. "Revoke" adds it to a public revocation list checked at redemption, so a single code can be withdrawn without invalidating the rest. Whether a code has been used still cannot be seen: verification runs without a server and leaves no trace.',
+  nodata:'No price data. The symbol is probably outdated or not traded on this exchange.',
   z_reset:'Full range', z_bars:'trading days',
   z_tip:'Wheel zooms, drag pans, double-click resets. On a phone, pinch with two fingers.',
   se_title:'Signed-in devices', se_load:'Load devices', se_none:'No sign-in recorded yet.',
@@ -2518,6 +2535,18 @@ async function searchSymbols(q){
 /* ---------------- demo fallback (clearly labelled) ---------------- */
 function strHash(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
 function mulberry32(a){ return function(){ a|=0; a=(a+0x6D2B79F5)|0; let x=Math.imul(a^(a>>>15),1|a); x=(x+Math.imul(x^(x>>>7),61|x))^x; return ((x^(x>>>14))>>>0)/4294967296; }; }
+let deadSyms = store.get('dead', {});
+function markFail(sym){
+  deadSyms[sym] = (deadSyms[sym] || 0) + 1;
+  try{ store.set('dead', deadSyms); }catch(e){}
+  return deadSyms[sym];
+}
+function clearFail(sym){
+  if(deadSyms[sym]){ delete deadSyms[sym]; try{ store.set('dead', deadSyms); }catch(e){} }
+}
+/* Three misses in a row and the symbol counts as broken rather than being
+   filled with invented prices - a wrong chart is worse than an empty one. */
+function isDead(sym){ return (deadSyms[sym] || 0) >= 3; }
 function demoSeries(sym){
   const rnd = mulberry32(strHash(sym)); const n = 520;
   let price = 40 + rnd()*180;
@@ -2805,6 +2834,14 @@ function cardHtml(asset){
   const a = analyses[asset.sym];
   const name = escHtml(asset.name || asset.sym);
   const typeTxt = asset.type==='etf' ? t('t_etf') : t('t_stock');
+  if(!a && isDead(asset.sym)){
+    return `<article class="card sig-neutral" data-sym="${escHtml(asset.sym)}"><div class="rail"></div>
+      <div class="card-main"><div class="card-top"><div class="names"><h3>${name}</h3>
+      <span class="sym">${escHtml(asset.sym)} · ${typeTxt}</span></div></div>
+      <p class="autoline" style="color:var(--warn)">${t('nodata')}</p>
+      <div class="card-actions"><button class="btn ghost act-one">⟳</button>
+      <button class="btn danger act-drop">${t('remove')}</button></div></div></article>`;
+  }
   if(!a){
     return `<article class="card sig-neutral" data-sym="${escHtml(asset.sym)}"><div class="rail"></div>
       <div class="card-main"><div class="card-top"><div class="names"><h3>${name}</h3>
@@ -3215,12 +3252,15 @@ function setBanner(kind){
 async function loadOne(asset){
   try{
     const s=await fetchSeries(asset.sym);
+    clearFail(asset.sym);
     if(s.name && (!asset.name || asset.name===asset.sym)) asset.name=s.name;
     seriesMap[asset.sym]=s;
     return 'live';
   }catch(e){
     const old=seriesMap[asset.sym];
     if(old && !old.demo){ old.live=false; return 'stale'; }
+    markFail(asset.sym);
+    if(isDead(asset.sym)){ delete seriesMap[asset.sym]; delete analyses[asset.sym]; return 'dead'; }
     seriesMap[asset.sym]=demoSeries(asset.sym); return 'demo';
   }finally{
     const s=seriesMap[asset.sym];
@@ -3316,7 +3356,7 @@ function applyLang(){
   md.textContent=t(md.dataset.i18n);
   md.classList.toggle('on', settings.mvDir==='up');
   $$('#panel-movers .chip[data-per]').forEach(x=>x.classList.toggle('on', x.dataset.per===settings.mvPeriod));
-  renderSettingsValues(); renderPlanInputs(); renderWl(); renderAccounts(); applyScHelp(); renderUniCat(); renderUniverse(); renderAll(); renderMovers(); renderScreen();
+  renderSettingsValues(); renderPlanInputs(); renderWl(); renderAccounts(); renderGCodes(); applyScHelp(); renderUniCat(); renderUniverse(); renderAll(); renderMovers(); renderScreen();
   if(planState) renderPlan();
   if(detailSym){ fillDetail(); drawDetail(); }
 }
@@ -3639,6 +3679,31 @@ async function refreshRoster(){
   }catch(e){}
   renderAccounts();
 }
+function renderGCodes(){
+  const box = $('#gList'); if(!box) return;
+  const list = gcodes();
+  if(!list.length){ box.innerHTML = `<p class="hint">${t('g_none')}</p>`; return; }
+  const now = Date.now();
+  box.innerHTML = list.map(g => {
+    let state, cls = '';
+    if(g.rev){ state = t('g_st_revoked'); cls = 'color:var(--down)'; }
+    else if(isPerma(g.exp)){ state = t('g_perma'); cls = 'color:var(--up)'; }
+    else if(g.exp <= now){ state = t('g_st_expired'); cls = 'color:var(--faint)'; }
+    else {
+      const m = Math.round((g.exp - now)/60000);
+      state = (m >= 60 ? Math.floor(m/60)+' h '+(m%60)+' min' : m+' min') + ' · ' + fmtTime(g.exp);
+      cls = 'color:var(--up)';
+    }
+    const live = !g.rev && (isPerma(g.exp) || g.exp > now);
+    return `<div class="wl-item"><div class="grow">
+      <b class="mono">${escHtml(g.code)}</b>${g.note?' · '+escHtml(g.note):''}<br>
+      <span class="mono" style="${cls}">${escHtml(state)}</span></div>
+      <button class="btn ghost" data-gcopy="${escHtml(g.code)}">${t('g_copy')}</button>
+      ${live?`<button class="btn danger" data-grev="${escHtml(g.code)}">${t('g_revoke')}</button>`
+            :`<button class="btn ghost" data-gdel="${escHtml(g.code)}">${t('remove')}</button>`}
+      </div>`;
+  }).join('');
+}
 function renderAccounts(){
   const box = $('#acctList'); if(!box) return;
   const st = $('#acctStatus'); if(st) st.innerHTML = authStatusHtml();
@@ -3926,7 +3991,7 @@ async function syncUsernames(){
    URL, API key, admin address, guest policy) are deliberately NOT in this list:
    they belong to the file, not to a user, and must never be overwritten by
    whatever a friend happens to have set on their own phone.                  */
-const SYNC_KEYS = ['lang','theme','dispCur','fxMin','view','scHelp','sort','sortDir','filter','status','staleMin',
+const SYNC_KEYS = ['lang','theme','dispCur','fxMin','view','scHelp','gcodes','sort','sortDir','filter','status','staleMin',
                    'planAmount','planMonthly','planProfile','screen','mvPeriod','mvDir','scanHours'];
 let cloudTimer = null, cloudLoading = false;
 function syncPayload(){
@@ -4034,6 +4099,37 @@ function ensureGuestSecret(){
   if(!s){ s = randomSalt(); store.set('gsec', s); }
   return DEPLOY.gsec || s;
 }
+/* Codes verify offline, so nothing was ever recorded and the admin had no
+   way to see what was outstanding. The ledger fixes that, and a published
+   revocation list makes a single code withdrawable.                      */
+function gcodes(){ return Array.isArray(settings.gcodes) ? settings.gcodes : []; }
+function gcodeSave(list){ settings.gcodes = list.slice(0, 60); saveSettings(); }
+function gcodeAdd(code, exp, note){
+  const list = gcodes().filter(g => g.code !== code);
+  list.unshift({code, exp, note: note || '', at: Date.now()});
+  gcodeSave(list);
+}
+async function gcodeRevoke(code){
+  const h = (await sha256('rv:' + code)).slice(0, 20);
+  if(fbAuthOn() && fbSession){
+    try{ if(!(await fbAuthSet('/revoked/' + h, Date.now()))) return false; }catch(e){ return false; }
+  }
+  const local = store.get('revoked', {}); local[h] = Date.now(); store.set('revoked', local);
+  const list = gcodes().map(g => g.code === code ? Object.assign({}, g, {rev: Date.now()}) : g);
+  gcodeSave(list);
+  return true;
+}
+async function gcodeIsRevoked(code){
+  const h = (await sha256('rv:' + code)).slice(0, 20);
+  if((store.get('revoked', {}) || {})[h]) return true;
+  if(fbBase()){
+    try{
+      const r = await fetch(fbBase() + '/revoked/' + h + '.json', {cache:'no-store'});
+      if(r.ok && (await r.json()) != null) return true;
+    }catch(e){}
+  }
+  return false;
+}
 async function makeGuestCode(mins){
   const sec = guestSecret(); if(!sec) return null;
   const exp = (+mins > 0) ? Date.now() + mins*60000 : PERMA;
@@ -4050,6 +4146,7 @@ async function checkGuestCode(raw){
   if(!isFinite(exp) || exp <= 0) return 0;
   const sig = (await sha256(sec + ':' + deployEpoch() + ':' + parts[0])).slice(0,6).toUpperCase();
   if(sig !== parts[1]) return 0;              // also fails once the epoch is bumped
+  if(await gcodeIsRevoked(parts[0] + '-' + parts[1])) return -3;   // withdrawn individually
   return exp > Date.now() ? exp : -1;
 }
 function tickGuest(){
@@ -4169,6 +4266,7 @@ function unlock(isGuest){
   $('#app').classList.remove('hidden');
   for(const asset of watchlist){ const s=seriesMap[asset.sym]; if(s) analyses[asset.sym]=analyze(asset,s); }
   applyLang(); applyGuestUI(); applyRoleUI(); scheduleAuto();
+  sessionTouch();          // devices restored from "stay signed in" never registered before
   if(fbAuthOn() && fbSession){
     cloudLoad().then(found => {
       if(found){ analyses = {}; applyLang(); renderAll(); }
@@ -4337,6 +4435,13 @@ function bindEvents(){
     const sym=art.dataset.sym;
     const tr=e.target.closest('.act-go');
     if(tr){ e.preventDefault(); openWith(tr.dataset.go, tr.dataset.isin, sym); return; }
+    const drop=e.target.closest('.act-drop');
+    if(drop){
+      const i=watchlist.findIndex(x=>x.sym===sym);
+      if(i>=0){ watchlist.splice(i,1); store.set('watchlist',watchlist); clearFail(sym);
+        renderWl(); renderAll(); toast(t('removed')); }
+      return;
+    }
     const one=e.target.closest('.act-one');
     if(one){ e.stopPropagation(); one.classList.add('spin');
       refreshOne(sym).then(()=>{ const b=$('#cardGrid').querySelector(`article[data-sym="${CSS.escape(sym)}"] .act-one`); if(b) b.classList.remove('spin'); });
@@ -4701,15 +4806,32 @@ function bindEvents(){
     const res = await makeGuestCode(+$('#gDur').value||20);
     if(!res){ toast(t('g_nosec')); return; }
     $('#gOut').value = res.code;
+    gcodeAdd(res.code, res.exp, $('#gNote').value.trim());
+    $('#gNote').value = '';
+    renderGCodes();
     $('#gOutInfo').textContent = isPerma(res.exp) ? t('g_valid_perma') : t('g_valid').replace('{time}', expLabel(res.exp));
   });
   $('#btnCopyGuest').addEventListener('click',()=>{ const v=$('#gOut').value; if(v) copyText(v); });
+  $('#gList').addEventListener('click', async e=>{
+    const cp = e.target.closest('[data-gcopy]');
+    if(cp){ copyText(cp.dataset.gcopy); return; }
+    const rv = e.target.closest('[data-grev]');
+    if(rv){
+      if(!confirm(t('g_revoke_ask'))) return;
+      const ok = await gcodeRevoke(rv.dataset.grev);
+      renderGCodes(); toast(t(ok ? 'g_revoked' : 'g_revoke_local'));
+      return;
+    }
+    const dl = e.target.closest('[data-gdel]');
+    if(dl){ gcodeSave(gcodes().filter(g => g.code !== dl.dataset.gdel)); renderGCodes(); }
+  });
   $('#btnGCheck').addEventListener('click', async ()=>{
     const code = $('#gCheck').value.trim();
     if(!code){ $('#gCheckOut').textContent=''; return; }
     const r = await checkGuestCode(code);
     const out = $('#gCheckOut');
-    if(r === 0) out.textContent = t('g_st_bad');
+    if(r === -3) out.textContent = t('g_st_revoked');
+    else if(r === 0) out.textContent = t('g_st_bad');
     else if(r === -1) out.textContent = t('g_st_expired');
     else if(isPerma(r)) out.textContent = t('g_st_perma');
     else {
@@ -4812,7 +4934,7 @@ async function scanUniverse(force){
   const full = SCAN_LIST();
   const items = {};
   for(const u of full){ if(prev[u.sym]) items[u.sym] = prev[u.sym]; }
-  const queue = full.filter(u => force || !items[u.sym] || (Date.now()-items[u.sym].at) > maxAge);
+  const queue = full.filter(u => !isDead(u.sym) && (force || !items[u.sym] || (Date.now()-items[u.sym].at) > maxAge));
   let done=0, ok=0;
   const total = queue.length;
   if(!total){ scanning=false; btn.classList.remove('spin'); bar.classList.add('hidden'); renderMovers(); return; }
