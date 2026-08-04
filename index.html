@@ -686,6 +686,32 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
         <label><span data-i18n="sc_mcap"></span>
           <input type="number" id="scMcap" list="dlMcap" min="0" step="100000000" data-i18n-ph="sc_ph_any">
           <datalist id="dlMcap"><option value="100000000"></option><option value="500000000"></option><option value="2000000000"></option><option value="10000000000"></option><option value="100000000000"></option><option value="1000000000000"></option></datalist></label>
+        <label><span data-i18n="sc_signal"></span>
+          <select id="scSignal">
+            <option value="any" data-i18n="sc_any"></option>
+            <option value="strong" data-i18n="sg_strong"></option>
+            <option value="positive" data-i18n="sg_positive"></option>
+            <option value="neutral" data-i18n="sg_neutral"></option>
+            <option value="caution" data-i18n="sg_caution"></option>
+            <option value="weak" data-i18n="sg_weak"></option>
+          </select></label>
+        <label><span data-i18n="sc_trend"></span>
+          <select id="scTrend">
+            <option value="any" data-i18n="sc_any"></option>
+            <option value="steady" data-i18n="tr_steady"></option>
+            <option value="up" data-i18n="tr_up"></option>
+            <option value="recovery" data-i18n="tr_recovery"></option>
+            <option value="side" data-i18n="tr_side"></option>
+            <option value="down" data-i18n="tr_down"></option>
+          </select></label>
+        <label><span data-i18n="sc_risk"></span>
+          <select id="scRisk">
+            <option value="any" data-i18n="sc_any"></option>
+            <option value="low" data-i18n="rk_low"></option>
+            <option value="med" data-i18n="rk_med"></option>
+            <option value="high" data-i18n="rk_high"></option>
+            <option value="vhigh" data-i18n="rk_vhigh"></option>
+          </select></label>
         <label><span data-i18n="sc_mom"></span>
           <select id="scMom">
             <option value="any" data-i18n="sc_any"></option>
@@ -698,6 +724,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
             <option value="d21" data-i18n="sc_s_d21"></option>
             <option value="d63" data-i18n="sc_s_d63"></option>
             <option value="d252" data-i18n="sc_s_d252"></option>
+            <option value="score" data-i18n="sc_s_score"></option>
             <option value="rsi">RSI</option>
             <option value="turn" data-i18n="sc_s_turn"></option>
             <option value="name" data-i18n="sort_name"></option>
@@ -1066,9 +1093,11 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
   <div class="detail-in">
     <div class="detail-card">
       <div class="d-head">
+        <button class="btn icon ghost hidden" id="dPrev" title="←">‹</button>
+        <button class="btn icon ghost hidden" id="dNext" title="→">›</button>
         <div style="flex:1;min-width:0">
           <h2 id="dTitle"></h2>
-          <div id="dSub"></div>
+          <div id="dSub"></div><span id="dPos" class="mono" style="font-size:11px;color:var(--faint)"></span>
         </div>
         <button class="btn icon ghost" id="dClose">✕</button>
       </div>
@@ -1585,6 +1614,13 @@ const DEFAULT_SETTINGS = {
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  sc_signal:'Signal mindestens', sc_trend:'Trend', sc_risk:'Risiko höchstens', sc_s_score:'Signal-Punkte',
+  sg_strong:'Stark', sg_positive:'Positiv', sg_neutral:'Neutral', sg_caution:'Vorsicht', sg_weak:'Schwach',
+  tr_steady:'Stabiles Wachstum', tr_up:'Aufwärtstrend', tr_recovery:'Erholung', tr_side:'Seitwärts', tr_down:'Abwärtstrend',
+  rk_low:'Niedrig', rk_med:'Mittel', rk_high:'Hoch', rk_vhigh:'Sehr hoch',
+  sc_h_signal:'Filtert nach der Gesamtbewertung und nimmt alles ab dieser Stufe aufwärts. „Positiv" liefert also auch die starken Werte mit.',
+  sc_h_trend:'Filtert auf genau eine Trendform, zum Beispiel nur stabile Wachser oder nur Erholungen.',
+  sc_h_risk:'Obergrenze für das Risiko. „Mittel" liefert niedrig und mittel, aber nichts darüber.',
   g_none:'Noch keine Codes erzeugt.', g_note_ph:'Notiz, z. B. „für Tom" (optional)',
   g_revoke:'Sperren', g_revoke_ask:'Diesen Code sofort ungültig machen?',
   g_revoked:'Code gesperrt, gilt auf allen Geräten.',
@@ -1865,6 +1901,13 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  sc_signal:'Signal at least', sc_trend:'Trend', sc_risk:'Risk at most', sc_s_score:'Signal points',
+  sg_strong:'Strong', sg_positive:'Positive', sg_neutral:'Neutral', sg_caution:'Caution', sg_weak:'Weak',
+  tr_steady:'Steady growth', tr_up:'Uptrend', tr_recovery:'Recovery', tr_side:'Sideways', tr_down:'Downtrend',
+  rk_low:'Low', rk_med:'Medium', rk_high:'High', rk_vhigh:'Very high',
+  sc_h_signal:'Filters on the overall rating and keeps everything from this level upwards. "Positive" therefore includes the strong ones too.',
+  sc_h_trend:'Filters on exactly one trend shape, e.g. only steady growers or only recoveries.',
+  sc_h_risk:'Upper limit for risk. "Medium" returns low and medium, nothing above.',
   g_none:'No codes created yet.', g_note_ph:'Note, e.g. "for Tom" (optional)',
   g_revoke:'Revoke', g_revoke_ask:'Invalidate this code immediately?',
   g_revoked:'Code revoked, applies on every device.',
@@ -2350,6 +2393,7 @@ let auth = store.get('auth', null) || (DEPLOY.hash ? {salt:DEPLOY.salt, hash:DEP
 let guestMode = false, guestUntil = 0, guestTimer = null;
 let refreshTimer = null, fxTimer = null, refreshing = false, detailSym = null, travelIdx = null;
 let zoomFrom = null, zoomTo = null;      // visible index window, null = whole series
+let detailList = [], detailIdx = -1;     // the list the detail view is stepping through
 
 const t = k => (I18N[settings.lang] && I18N[settings.lang][k]) || I18N.de[k] || k;
 const locale = () => settings.lang === 'de' ? 'de-DE' : 'en-GB';
@@ -2951,8 +2995,29 @@ function trUrl(isin){ return (settings.trTemplate||DEFAULT_SETTINGS.trTemplate).
 function sourceTxt(a){ return a.demo? t('source_demo') : a.live? t('source_live') : t('source_cache'); }
 /* Rows outside the watchlist carry only a 30-point sparkline, so the full
    series is fetched on demand before the detail view can render.         */
-async function openAnySym(sym){
+function setDetailList(syms, sym){
+  detailList = (syms || []).filter(Boolean);
+  detailIdx = detailList.indexOf(sym);
+}
+function updateDetailNav(){
+  const prev = $('#dPrev'), next = $('#dNext'), pos = $('#dPos');
+  if(!prev || !next) return;
+  const has = detailList.length > 1 && detailIdx >= 0;
+  prev.classList.toggle('hidden', !has);
+  next.classList.toggle('hidden', !has);
+  if(pos) pos.textContent = has ? (detailIdx + 1) + '/' + detailList.length : '';
+  if(has){ prev.disabled = detailIdx <= 0; next.disabled = detailIdx >= detailList.length - 1; }
+}
+function detailStep(delta){
+  if(detailIdx < 0 || !detailList.length) return;
+  const i = detailIdx + delta;
+  if(i < 0 || i >= detailList.length) return;
+  detailIdx = i;
+  openAnySym(detailList[i], detailList);
+}
+async function openAnySym(sym, listSyms){
   if(!sym) return;
+  if(listSyms) setDetailList(listSyms, sym); else if(detailList.indexOf(sym) < 0) setDetailList([sym], sym);
   if(!seriesMap[sym]){
     toast(t('d_loading'));
     try{ seriesMap[sym] = await fetchSeries(sym); }
@@ -2968,7 +3033,8 @@ async function openAnySym(sym){
 }
 function openDetail(sym){
   if(!seriesMap[sym]) return;
-  detailSym=sym; travelIdx=null; zoomFrom=zoomTo=null; detailBlank(''); fillDetail();
+  detailSym=sym; travelIdx=null; zoomFrom=zoomTo=null; detailBlank('');
+  detailIdx = detailList.indexOf(sym); updateDetailNav(); fillDetail();
   document.body.style.overflow='hidden';
   $('#detail').classList.remove('hidden');
   requestAnimationFrame(drawDetail);
@@ -4446,6 +4512,7 @@ function bindEvents(){
     if(one){ e.stopPropagation(); one.classList.add('spin');
       refreshOne(sym).then(()=>{ const b=$('#cardGrid').querySelector(`article[data-sym="${CSS.escape(sym)}"] .act-one`); if(b) b.classList.remove('spin'); });
       return; }
+    setDetailList(Array.from($('#cardGrid').querySelectorAll('article[data-sym]')).map(a=>a.dataset.sym), sym);
     openDetail(sym);
   });
   ['stripTrend','stripSteady','stripCaution'].forEach(id=>{
@@ -4454,8 +4521,15 @@ function bindEvents(){
     });
   });
   $('#dClose').addEventListener('click', closeDetail);
+  $('#dPrev').addEventListener('click', ()=>detailStep(-1));
+  $('#dNext').addEventListener('click', ()=>detailStep(1));
   $('#detail').addEventListener('click',e=>{ if(e.target.id==='detail'||e.target.classList.contains('detail-in')) closeDetail(); });
-  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&detailSym) closeDetail(); });
+  document.addEventListener('keydown',e=>{
+    if(!detailSym) return;
+    if(e.key==='Escape') closeDetail();
+    else if(e.key==='ArrowLeft'){ e.preventDefault(); detailStep(-1); }
+    else if(e.key==='ArrowRight'){ e.preventDefault(); detailStep(1); }
+  });
   $('#dProjToggle').addEventListener('change', drawDetail);
   (function bindZoom(){
     const cv = $('#dChart'); if(!cv) return;
@@ -4543,7 +4617,7 @@ function bindEvents(){
     const a=e.target.closest('.trlink');
     if(a){ e.preventDefault(); openWith(a.dataset.go, a.dataset.isin, a.dataset.sym); return; }
     const row=e.target.closest('tr[data-sym]');
-    if(row) openAnySym(row.dataset.sym);
+    if(row) openAnySym(row.dataset.sym, Array.from($('#planOut').querySelectorAll('tr[data-sym]')).map(r=>r.dataset.sym));
   });
   $('#btnScan').addEventListener('click', ()=>scanUniverse(true));
   $('#btnScScan').addEventListener('click', ()=>scanUniverse(true).then(renderScreen));
@@ -4579,7 +4653,7 @@ function bindEvents(){
     if(link){ e.preventDefault(); openWith(link.dataset.go, link.dataset.isin, link.dataset.sym); return; }
     const add = e.target.closest('.mv-add');
     if(add && !add.disabled){ addAsset({sym:u.sym, name:u.name, isin:u.isin, type:u.type}); renderScreen(); return; }
-    openAnySym(u.sym);
+    openAnySym(u.sym, Array.from($('#scList').querySelectorAll('.mv-row')).map(r=>r.dataset.sym));
   });
   function repaintMoney(){
     renderAll(); renderMovers(); renderScreen();
@@ -4624,7 +4698,7 @@ function bindEvents(){
     if(link){ e.preventDefault(); openWith(link.dataset.go, link.dataset.isin, link.dataset.sym||u.sym); return; }
     const add=e.target.closest('.mv-add');
     if(add && !add.disabled){ addAsset({sym:u.sym, name:u.name, isin:u.isin, type:u.type}); renderMovers(); return; }
-    openAnySym(u.sym);
+    openAnySym(u.sym, Array.from($('#mvList').querySelectorAll('.mv-row')).map(r=>r.dataset.sym));
   });
   $('#setScan').addEventListener('change',e=>{ settings.scanHours=clamp(parseInt(e.target.value||'3',10)||0,0,72); e.target.value=settings.scanHours; saveSettings(); toast(t('saved')); });
   $('#setTrApp').addEventListener('change',e=>{ settings.trApp=+e.target.value; saveSettings(); toast(t('saved')); });
@@ -4915,6 +4989,38 @@ let scanning = false, scanAbort = false;
 let scanProg = {done:0, total:0, ok:0};
 let scanData = store.get('scan', {at:0, ok:0, total:0, items:{}});
 
+/* Same rules as the watchlist rating, computed from the scan snapshot, so the
+   screener can filter on signal, trend and risk instead of the user having to
+   open every asset one by one.                                              */
+function scanScore(m, type){
+  if(!m) return null;
+  const above200 = m.sma200 != null ? m.p > m.sma200 : null;
+  const golden = (m.sma50 != null && m.sma200 != null) ? m.sma50 > m.sma200 : null;
+  let sc = 0;
+  if(above200 === true) sc += 2; else if(above200 === false) sc -= 2;
+  if(golden === true) sc += 1; else if(golden === false) sc -= 1;
+  if(m.d126 != null) sc += m.d126 > 0 ? 1 : -1;
+  if(m.lr && m.lr.r2 >= 0.55) sc += m.lr.slope > 0 ? 1 : -1;
+  if(m.rsi != null){ if(m.rsi > 72) sc -= 1; else if(m.rsi < 28) sc += (above200 === false ? -1 : 1); }
+  const signal = sc>=4 ? 'strong' : sc>=2 ? 'positive' : sc>=-1 ? 'neutral' : sc>=-3 ? 'caution' : 'weak';
+  let trend;
+  if(m.sma200 == null) trend = 'na';
+  else if(m.lr && m.lr.r2>=0.65 && m.lr.annualPct>=4 && m.lr.annualPct<=45 && m.vol!=null && m.vol<22) trend='steady';
+  else if(above200 && m.sma50!=null && m.p>m.sma50 && golden) trend='up';
+  else if(!above200 && m.sma50!=null && m.p<m.sma50 && golden===false) trend='down';
+  else if(m.sma50!=null && m.p>m.sma50 && above200===false) trend='recovery';
+  else trend='side';
+  let risk = 'na';
+  if(m.vol != null){
+    let tier = m.vol<12 ? 0 : m.vol<20 ? 1 : m.vol<32 ? 2 : 3;
+    if(type === 'stock' && tier < 1) tier = 1;
+    if(m.dd != null && m.dd <= -40 && tier < 3) tier += 1;
+    risk = ['low','med','high','vhigh'][tier];
+  }
+  return {score:sc, signal, trend, risk};
+}
+const SIG_RANK = {weak:0, caution:1, neutral:2, positive:3, strong:4};
+const RISK_RANK = {low:0, med:1, high:2, vhigh:3, na:9};
 function riskTierOf(vol, type){
   if(vol==null) return 'na';
   let tier = vol<12 ? 0 : vol<20 ? 1 : vol<32 ? 2 : 3;
@@ -5004,8 +5110,9 @@ function scanItem(d){
   const c = d.c, r2 = v => v==null ? null : Math.round(v*10000)/10000;
   return {
     p:c[c.length-1], cur:d.cur||'EUR', yname:d.name||'',
-    d1:pctBack(c,1), d5:pctBack(c,5), d21:pctBack(c,21), d63:pctBack(c,63), d252:pctBack(c,252),
-    vol:annVol(c),
+    d1:pctBack(c,1), d5:pctBack(c,5), d21:pctBack(c,21), d63:pctBack(c,63),
+    d126:pctBack(c,126), d252:pctBack(c,252),
+    vol:annVol(c), dd:maxDD(c), lr:linregLog(c,120),
     sma20:r2(smaLast(c,20)), sma50:r2(smaLast(c,50)), sma200:r2(smaLast(c,200)),
     ema20:r2(emaLast(c,20)),
     rsi:rsi14(c),
@@ -5090,14 +5197,15 @@ function renderMovers(){
    SCREENER — filter the scanned universe on measurable conditions
    ===================================================================== */
 const SCREEN_PRESETS = {
-  trade:   {type:'stock', above:'ema20',  day:'',  month:'5', rsiMin:'40', rsiMax:'',   minp:'10', minturn:'', mom:'any',   mcap:'', sort:'d21'},
-  invest:  {type:'all',   above:'sma200', day:'',  month:'',  rsiMin:'',   rsiMax:'',   minp:'10', minturn:'', mom:'any',   mcap:'', sort:'d252'},
-  breakout:{type:'stock', above:'sma20',  day:'4', month:'',  rsiMin:'40', rsiMax:'70', minp:'10', minturn:'', mom:'any',   mcap:'', sort:'d1'},
-  momentum:{type:'stock', above:'sma20',  day:'',  month:'0', rsiMin:'40', rsiMax:'70', minp:'10', minturn:'', mom:'start', mcap:'', sort:'d5'}
+  trade:   {type:'stock', above:'ema20',  day:'',  month:'5', rsiMin:'40', rsiMax:'',   minp:'10', minturn:'', mom:'any',   mcap:'', signal:'any', trend:'any', risk:'any', sort:'d21'},
+  invest:  {type:'all',   above:'sma200', day:'',  month:'',  rsiMin:'',   rsiMax:'',   minp:'10', minturn:'', mom:'any',   mcap:'', signal:'any', trend:'any', risk:'any', sort:'d252'},
+  breakout:{type:'stock', above:'sma20',  day:'4', month:'',  rsiMin:'40', rsiMax:'70', minp:'10', minturn:'', mom:'any',   mcap:'', signal:'any', trend:'any', risk:'any', sort:'d1'},
+  momentum:{type:'stock', above:'sma20',  day:'',  month:'0', rsiMin:'40', rsiMax:'70', minp:'10', minturn:'', mom:'start', mcap:'', signal:'any', trend:'any', risk:'any', sort:'d5'}
 };
 const SCREEN_DEFAULT = Object.assign({preset:'trade'}, SCREEN_PRESETS.trade);
 const SCREEN_FIELDS = {scPreset:'preset', scType:'type', scAbove:'above', scDay:'day', scMonth:'month',
-  scRsiMin:'rsiMin', scRsiMax:'rsiMax', scMinp:'minp', scTurn:'minturn', scMcap:'mcap', scMom:'mom', scSort:'sort'};
+  scRsiMin:'rsiMin', scRsiMax:'rsiMax', scMinp:'minp', scTurn:'minturn', scMcap:'mcap', scMom:'mom',
+  scSignal:'signal', scTrend:'trend', scRisk:'risk', scSort:'sort'};
 /* An empty box means "no limit", so any number the user types is accepted
    instead of only the handful a dropdown could offer.                    */
 function numOrNull(v){
@@ -5151,11 +5259,19 @@ function screenRows(){
   step('RSI ≤'+nRmax, nRmax!=null, x => x.m.rsi <= nRmax, x => x.m.rsi);
   step(t('sc_minp'), nMinp!=null, x => x.m.p >= nMinp, x => x.m.p);
   step(t('sc_turn'), nTurn!=null, x => x.m.turn >= nTurn, x => x.m.turn);
+  step(t('sc_signal'), f.signal && f.signal !== 'any',
+       x => SIG_RANK[(scanScore(x.m, x.u.type)||{}).signal] >= SIG_RANK[f.signal], null);
+  step(t('sc_trend'), f.trend && f.trend !== 'any',
+       x => (scanScore(x.m, x.u.type)||{}).trend === f.trend, null);
+  step(t('sc_risk'), f.risk && f.risk !== 'any',
+       x => RISK_RANK[(scanScore(x.m, x.u.type)||{}).risk] <= RISK_RANK[f.risk], null);
   step(t('sc_mom'),  f.mom === 'start', x => momentumStart(x.m), null);
   step(t('sc_mcap'), nCap!=null, x => mcapCache[x.u.sym] >= nCap,
        x => mcapCache[x.u.sym] === undefined ? null : mcapCache[x.u.sym]);
   const key = f.sort;
-  const val = x => key === 'name' ? 0 : (x.m[key] != null ? x.m[key] : -1e15);
+  const val = x => key === 'name' ? 0
+    : key === 'score' ? ((scanScore(x.m, x.u.type)||{}).score ?? -99)
+    : (x.m[key] != null ? x.m[key] : -1e15);
   list.sort((a,b) => key === 'name'
     ? (a.u.name||a.u.sym).localeCompare(b.u.name||b.u.sym)
     : val(b) - val(a));
@@ -5215,11 +5331,15 @@ function screenRowHtml(x, idx){
     mc != null ? (settings.lang==='de'?'MK ':'Cap ')+fmtBig(mc) : null,
     m.above20 ? (settings.lang==='de'?m.above20+' T über SMA20':m.above20+'d above SMA20') : null
   ].filter(Boolean).join(' · ');
+  const sc = scanScore(m, u.type);
+  const rate = sc ? `<span class="badge b-sig s-${sc.signal}">${escHtml(LABELS.signal[sc.signal][settings.lang])}</span>`
+      + `<span class="badge">${escHtml(LABELS.trend[sc.trend][settings.lang])}</span>` : '';
   return `<div class="mv-row" data-sym="${escHtml(u.sym)}">
     <span class="mv-rank">${idx+1}</span>
     <div class="mv-id"><b>${escHtml(u.name||u.sym)}</b>
       <span>${escHtml(u.sym)} · ${u.type==='etf'?t('t_etf'):t('t_stock')} · ${escHtml(LABELS.risk[risk][settings.lang].replace(/^(Risiko|Risk): /,''))}</span>
       <div class="chips mono" style="margin-top:5px">${chips}</div>
+      <div class="badges" style="margin:5px 0 3px">${rate}</div>
       <span style="font-family:var(--mono);font-size:10px;color:var(--faint)">${escHtml(extra)}</span></div>
     <canvas class="mv-spark"></canvas>
     <div class="mv-num"><b>${fmtMoney(m.p, m.cur)}</b>
@@ -5232,7 +5352,8 @@ function screenRowHtml(x, idx){
 const SC_HELP = {
   scPreset:'sc_h_preset', scType:'sc_h_type', scAbove:'sc_h_above', scDay:'sc_h_day',
   scMonth:'sc_h_month', scRsiMin:'sc_h_rsi', scRsiMax:'sc_h_rsi', scMinp:'sc_h_minp',
-  scTurn:'sc_h_turn', scMcap:'sc_h_mcap', scMom:'sc_h_mom', scSort:'sc_h_sort'
+  scTurn:'sc_h_turn', scMcap:'sc_h_mcap', scMom:'sc_h_mom',
+  scSignal:'sc_h_signal', scTrend:'sc_h_trend', scRisk:'sc_h_risk', scSort:'sc_h_sort'
 };
 /* Hover alone would leave phone users with no way in, so the same text is
    also shown inline by the ? toggle.                                      */
