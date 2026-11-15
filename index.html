@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" id="vpMeta" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0B111C">
+<link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -260,6 +261,32 @@ textarea#backupArea{width:100%; min-height:110px; font-family:var(--mono); font-
   text-transform:none; letter-spacing:0; font-family:var(--sans)}
 #btnScHelp{font-weight:700; width:38px; padding:0}
 #btnScHelp.on{border-color:var(--accent); color:var(--accent)}
+
+/* ---- alerts ---- */
+.tab .tab-n{display:inline-block; min-width:18px; margin-left:6px; padding:0 5px; border-radius:999px; background:var(--down);
+  color:#fff; font-size:11px; font-weight:700; line-height:17px; text-align:center; vertical-align:1px}
+#alMeta{font-family:var(--mono); font-size:11px; color:var(--faint); margin:0 0 12px; line-height:1.6}
+#btnAlNotify.on, #btnAlRules.on{border-color:var(--up); color:var(--up)}
+.al-opts{display:flex; flex-direction:column; gap:10px; margin-bottom:14px}
+.al-opts label{display:flex; align-items:flex-start; gap:9px; font-size:13.5px; color:var(--ink); cursor:pointer; line-height:1.35}
+.al-opts input{margin:1px 0 0; width:17px; height:17px; flex:0 0 auto; accent-color:var(--accent)}
+.mv-row.al-row{align-items:flex-start}
+.al-row .mv-num{padding-top:2px}
+.al-row.al-new{border-color:var(--accent); box-shadow:inset 3px 0 0 var(--accent)}
+.al-row.al-warn.al-new{border-color:var(--warn); box-shadow:inset 3px 0 0 var(--warn)}
+.al-ico{flex:0 0 26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px;
+  margin-top:1px; border:1px solid var(--up); color:var(--up)}
+.al-warn .al-ico{border-color:var(--warn); color:var(--warn)}
+.al-row .mv-id b{white-space:normal}
+.al-why{margin:7px 0 0; font-size:12.5px; line-height:1.45; color:var(--muted); max-width:68ch}
+.badge.b-new{border-color:var(--accent); color:var(--accent); font-family:var(--mono)}
+.badge.b-kind{border-color:var(--up); color:var(--up)}
+.al-warn .badge.b-kind{border-color:var(--warn); color:var(--warn)}
+.al-lnk{background:none; border:0; padding:0; color:var(--accent); font:inherit; cursor:pointer}
+#alBest .mv-rank{display:none}
+html[data-view="mobile"] .al-row{flex-wrap:wrap}
+html[data-view="mobile"] .al-row .mv-id{flex:1 1 60%}
+html[data-view="mobile"] .al-row .mv-act{flex:1 1 100%; justify-content:flex-end; padding-left:37px}
 
 .zoom-bar{display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin:6px 0 0; min-height:26px}
 #dZoomInfo{font-size:11px; color:var(--warn)}
@@ -566,6 +593,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
     </div>
     <nav id="tabbar">
     <button class="tab on" data-tab="overview" data-i18n="tab_overview"></button>
+    <button class="tab" data-tab="alerts" data-i18n="tab_alerts"></button>
     <button class="tab" data-tab="movers" data-i18n="tab_movers"></button>
     <button class="tab" data-tab="screen" data-i18n="tab_screen"></button>
     <button class="tab" data-tab="plan" data-i18n="tab_plan"></button>
@@ -622,6 +650,60 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
       <p class="hint hidden" id="guestNote" data-i18n="wl_local_note"></p>
       <div id="cardGrid"></div>
       <p id="emptyMsg" class="hidden" data-i18n="empty"></p>
+    </section>
+
+    <!-- ---------- ALERTS ---------- -->
+    <section class="panel" id="panel-alerts">
+      <p class="plan-intro" data-i18n="al_intro"></p>
+      <div class="mv-bar">
+        <button class="btn primary" id="btnAlCheck" data-i18n="al_check"></button>
+        <button class="btn ghost" id="btnAlNotify"></button>
+        <button class="btn ghost hidden" id="btnAlInstall" data-i18n="al_install"></button>
+        <span class="spacer"></span>
+        <button class="btn ghost" id="btnAlRules" data-i18n="al_rules"></button>
+      </div>
+      <p id="alMeta"></p>
+      <div class="set-group hidden" id="alRules">
+        <h3 data-i18n="al_rules_h"></h3>
+        <div class="al-opts">
+          <label><input type="checkbox" id="alSig"><span data-i18n="al_r_sig"></span></label>
+          <label><input type="checkbox" id="alMom"><span data-i18n="al_r_mom"></span></label>
+          <label><input type="checkbox" id="alRule"><span data-i18n="al_r_rule"></span></label>
+          <label><input type="checkbox" id="alWarn"><span data-i18n="al_r_warn"></span></label>
+          <label><input type="checkbox" id="alAuto"><span data-i18n="al_r_auto"></span></label>
+        </div>
+        <div class="sc-grid">
+          <label><span data-i18n="al_r_min"></span>
+            <select id="alMin">
+              <option value="positive" data-i18n="sg_positive"></option>
+              <option value="strong" data-i18n="sg_strong"></option>
+            </select></label>
+          <label><span data-i18n="al_r_scope"></span>
+            <select id="alScope">
+              <option value="all" data-i18n="al_sc_all"></option>
+              <option value="stock" data-i18n="al_sc_stock"></option>
+              <option value="etf" data-i18n="al_sc_etf"></option>
+              <option value="watch" data-i18n="al_sc_watch"></option>
+            </select></label>
+          <label><span data-i18n="al_r_risk"></span>
+            <select id="alRisk">
+              <option value="any" data-i18n="sc_any"></option>
+              <option value="low" data-i18n="rk_low"></option>
+              <option value="med" data-i18n="rk_med"></option>
+              <option value="high" data-i18n="rk_high"></option>
+            </select></label>
+          <label><span data-i18n="al_r_hours"></span>
+            <input type="number" id="alHours" min="1" max="72" step="1"></label>
+        </div>
+        <p class="hint" data-i18n="al_rules_hint"></p>
+      </div>
+      <h3 class="mv-h"><span style="margin:0;color:inherit;font-size:inherit;letter-spacing:inherit;text-transform:inherit" data-i18n="al_h_new"></span> <span id="alCount" style="margin-left:0"></span>
+        <span id="alHeadAct" class="hidden"><button class="al-lnk" id="btnAlMark" data-i18n="al_mark"></button> · <button class="al-lnk" id="btnAlClear" data-i18n="al_clear"></button></span></h3>
+      <div id="alList" style="margin-bottom:24px"></div>
+      <h3 class="mv-h"><span style="margin:0;color:inherit;font-size:inherit;letter-spacing:inherit;text-transform:inherit" data-i18n="al_h_best"></span><span id="alBestSub"></span></h3>
+      <div id="alBest"></div>
+      <p class="hint" data-i18n="al_disclaimer"></p>
+      <p class="hint" id="alAppHint"></p>
     </section>
 
     <!-- ---------- MOVERS ---------- -->
@@ -1614,6 +1696,48 @@ const DEFAULT_SETTINGS = {
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  tab_alerts:'Signale',
+  al_intro:'Hier meldet sich dein Depot, wenn sich etwas tut. Jede Prüfung wird mit der vorherigen verglichen: Was neu ein Kaufsignal zeigt, gerade anzieht oder neu in deine Filter-Regel passt, landet in dieser Liste, mit Begründung. Für Werte auf deiner Watchlist kommt eine Warnung, wenn das Signal kippt. Es sind technische Signale aus Kursdaten, keine Anlageberatung.',
+  al_check:'Jetzt prüfen', al_rules:'Regeln', al_rules_h:'Was soll gemeldet werden?',
+  al_r_sig:'Neue Kaufsignale (ein Wert steigt auf die gewählte Stufe)',
+  al_r_mom:'Momentum beginnt (der Kurs fängt gerade an zu steigen)',
+  al_r_rule:'Neu in meiner Filter-Regel (so wie sie im Tab „Filter" eingestellt ist)',
+  al_r_warn:'Warnung, wenn ein Wert meiner Watchlist auf „Vorsicht" oder „Schwach" fällt',
+  al_r_auto:'Automatisch prüfen',
+  al_r_min:'Ab Signalstufe', al_r_scope:'Wo suchen', al_r_risk:'Risiko höchstens', al_r_hours:'Prüfen alle … Stunden',
+  al_sc_all:'ETFs und Aktien', al_sc_stock:'Nur Aktien', al_sc_etf:'Nur ETFs', al_sc_watch:'Nur meine Watchlist',
+  al_rules_hint:'Die Regeln gelten für dein Konto und wandern auf jedes Gerät mit. Benachrichtigungen schaltest du pro Gerät ein.',
+  al_n_on:'🔔 Benachrichtigungen an', al_n_off:'🔔 Benachrichtigungen einschalten', al_n_blocked:'🔕 Im Browser blockiert',
+  al_n_unsupported:'Dieser Browser kann keine Benachrichtigungen. Öffne die Seite in Chrome.',
+  al_n_blocked_hint:'Benachrichtigungen sind für diese Seite blockiert. Erlaube sie über das Schloss-Symbol in der Adresszeile.',
+  al_n_enabled:'Benachrichtigungen sind an', al_n_disabled:'Benachrichtigungen sind aus',
+  al_n_test_t:'Depot Radar', al_n_test_b:'So meldet sich dein Depot, wenn es ein neues Signal gibt.',
+  al_n_title:'Depot Radar: neue Signale ({n})', al_n_more:'weitere',
+  al_k_buy:'Kaufsignal', al_k_mom:'Momentum beginnt', al_k_rule:'Passt zum Filter', al_k_warn:'Warnung',
+  al_install:'App installieren', al_installed:'App ist installiert',
+  al_app_standalone:'Du nutzt gerade die installierte App.',
+  al_app_ready:'Als App aufs Handy: oben auf „App installieren" tippen.',
+  al_app_hint:'Als App aufs Handy: die Seite in Chrome öffnen, Menü ⋮ antippen und „App installieren" (oder „Zum Startbildschirm hinzufügen") wählen.',
+  al_meta:'Letzte Prüfung: {time} · {n} Werte verglichen',
+  al_meta_never:'Noch keine Prüfung. Die erste speichert den Ausgangsstand, ab der zweiten werden Änderungen gemeldet.',
+  al_meta_auto:'prüft automatisch alle {h} Std.', al_meta_auto_off:'automatische Prüfung aus',
+  al_meta_bg_on:'Hintergrundprüfung aktiv (Android bestimmt den Zeitpunkt)',
+  al_meta_bg_off:'meldet, solange die App offen ist oder im Hintergrund läuft',
+  al_meta_bg_last:'im Hintergrund zuletzt geprüft: {time}',
+  al_h_new:'Neu gemeldet', al_h_best:'Aktuell die stärksten Signale',
+  al_best_sub:'Stand {time}', al_best_n:'{n} Werte erfüllen die Stufe',
+  al_none:'Noch keine Meldungen. Sobald sich bei einer Prüfung etwas ändert, erscheint es hier.',
+  al_best_none:'Kein Wert erfüllt gerade die gewählte Signalstufe.',
+  al_mark:'Alle gelesen', al_clear:'Liste leeren', al_clear_ask:'Alle Meldungen löschen?',
+  al_toast:'Neue Signale: {n}', al_toast_none:'Geprüft, nichts Neues',
+  al_new:'NEU', al_bg:'im Hintergrund erkannt', al_since:'seit Meldung',
+  al_w_up:'Signal von „{from}" auf „{to}" gestiegen.', al_w_down:'Signal von „{from}" auf „{to}" gefallen.',
+  al_w_mom:'Kurs seit {n} Tagen über SMA 20, SMA 20 über SMA 50, RSI {rsi}: die Aufwärtsbewegung ist frisch.',
+  al_w_rule:'Erfüllt jetzt deine Filter-Regel.',
+  al_y_a200:'Kurs über der 200-Tage-Linie', al_y_b200:'Kurs unter der 200-Tage-Linie',
+  al_y_golden:'SMA 50 über SMA 200', al_y_death:'SMA 50 unter SMA 200',
+  al_y_6m:'6 Monate {x}', al_y_line:'gleichmäßiger Trend ({x} pro Jahr)',
+  al_disclaimer:'Ein Signal heißt: Die Kursdaten erfüllen gerade messbare Bedingungen. Es heißt nicht, dass der Kurs weiter steigt. Schau dir jeden Wert selbst an, bevor du kaufst.',
   sc_signal:'Signal mindestens', sc_trend:'Trend', sc_risk:'Risiko höchstens', sc_s_score:'Signal-Punkte',
   sg_strong:'Stark', sg_positive:'Positiv', sg_neutral:'Neutral', sg_caution:'Vorsicht', sg_weak:'Schwach',
   tr_steady:'Stabiles Wachstum', tr_up:'Aufwärtstrend', tr_recovery:'Erholung', tr_side:'Seitwärts', tr_down:'Abwärtstrend',
@@ -1901,6 +2025,48 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  tab_alerts:'Alerts',
+  al_intro:'This is where your depot speaks up when something changes. Every check is compared with the one before: anything that newly shows a buy signal, is just starting to rise or newly fits your screener rule lands in this list, with the reason. Assets on your watchlist also raise a warning when their signal turns. These are technical signals from price data, not investment advice.',
+  al_check:'Check now', al_rules:'Rules', al_rules_h:'What should be reported?',
+  al_r_sig:'New buy signals (an asset rises to the chosen level)',
+  al_r_mom:'Momentum starting (the price has just begun to rise)',
+  al_r_rule:'New in my screener rule (as set in the Screener tab)',
+  al_r_warn:'Warn me when a watchlist asset drops to "Caution" or "Weak"',
+  al_r_auto:'Check automatically',
+  al_r_min:'From signal level', al_r_scope:'Where to look', al_r_risk:'Risk at most', al_r_hours:'Check every … hours',
+  al_sc_all:'ETFs and stocks', al_sc_stock:'Stocks only', al_sc_etf:'ETFs only', al_sc_watch:'My watchlist only',
+  al_rules_hint:'The rules belong to your account and follow you to every device. Notifications are switched on per device.',
+  al_n_on:'🔔 Notifications on', al_n_off:'🔔 Turn on notifications', al_n_blocked:'🔕 Blocked in the browser',
+  al_n_unsupported:'This browser cannot show notifications. Open the page in Chrome.',
+  al_n_blocked_hint:'Notifications are blocked for this page. Allow them via the lock icon in the address bar.',
+  al_n_enabled:'Notifications are on', al_n_disabled:'Notifications are off',
+  al_n_test_t:'Depot Radar', al_n_test_b:'This is how your depot tells you about a new signal.',
+  al_n_title:'Depot Radar: new signals ({n})', al_n_more:'more',
+  al_k_buy:'Buy signal', al_k_mom:'Momentum starting', al_k_rule:'Fits the screener', al_k_warn:'Warning',
+  al_install:'Install app', al_installed:'App installed',
+  al_app_standalone:'You are using the installed app.',
+  al_app_ready:'As an app on your phone: tap "Install app" above.',
+  al_app_hint:'As an app on your phone: open the page in Chrome, tap the ⋮ menu and choose "Install app" (or "Add to Home screen").',
+  al_meta:'Last check: {time} · {n} assets compared',
+  al_meta_never:'No check yet. The first one stores the starting point, from the second one on changes are reported.',
+  al_meta_auto:'checks automatically every {h} h', al_meta_auto_off:'automatic check off',
+  al_meta_bg_on:'background check active (Android decides when)',
+  al_meta_bg_off:'reports while the app is open or running in the background',
+  al_meta_bg_last:'last background check: {time}',
+  al_h_new:'Newly reported', al_h_best:'Strongest signals right now',
+  al_best_sub:'as of {time}', al_best_n:'{n} assets meet the level',
+  al_none:'No alerts yet. As soon as a check finds a change, it shows up here.',
+  al_best_none:'No asset currently meets the chosen signal level.',
+  al_mark:'Mark all read', al_clear:'Clear list', al_clear_ask:'Delete all alerts?',
+  al_toast:'New signals: {n}', al_toast_none:'Checked, nothing new',
+  al_new:'NEW', al_bg:'found in the background', al_since:'since alert',
+  al_w_up:'Signal rose from "{from}" to "{to}".', al_w_down:'Signal fell from "{from}" to "{to}".',
+  al_w_mom:'Price above SMA 20 for {n} days, SMA 20 above SMA 50, RSI {rsi}: the move up is fresh.',
+  al_w_rule:'Now meets your screener rule.',
+  al_y_a200:'price above the 200-day line', al_y_b200:'price below the 200-day line',
+  al_y_golden:'SMA 50 above SMA 200', al_y_death:'SMA 50 below SMA 200',
+  al_y_6m:'6 months {x}', al_y_line:'steady trend ({x} per year)',
+  al_disclaimer:'A signal means the price data currently meets measurable conditions. It does not mean the price will keep rising. Look at every asset yourself before you buy.',
   sc_signal:'Signal at least', sc_trend:'Trend', sc_risk:'Risk at most', sc_s_score:'Signal points',
   sg_strong:'Strong', sg_positive:'Positive', sg_neutral:'Neutral', sg_caution:'Caution', sg_weak:'Weak',
   tr_steady:'Steady growth', tr_up:'Uptrend', tr_recovery:'Recovery', tr_side:'Sideways', tr_down:'Downtrend',
@@ -2289,6 +2455,15 @@ de: `
 <p>Oben rechts lässt sich die Anzeigewährung umstellen. Umgerechnet wird mit EZB-Tageskursen; die App probiert mehrere Quellen, direkt und über den Proxy. Klappt keine, kannst du unter Einstellungen einen Kurs von Hand eintragen, dann rechnet die App ohne jede Abfrage weiter. Der angezeigte Betrag ist eine Umrechnung, nicht der echte Handelspreis in dieser Währung.</p>
 <p>Jeder Wert hat drei Links. <strong>TradingView</strong> und <strong>Yahoo Finance</strong> öffnen ohne Anmeldung direkt die richtige Seite, deshalb ist TradingView voreingestellt. <strong>Trade Republic</strong> kann das grundsätzlich nicht: es ist eine Bank-App, jede Seite verlangt einen Login, und für einzelne Werte gibt es keine öffentliche Adresse. Der Link landet daher immer auf der Übersichtsseite. Beim Klick wird die ISIN kopiert, damit du sie nach dem Login in die TR-Suche einfügen kannst. TR ist zum Kaufen da, zum Nachschauen nimm TradingView. Bei ETFs führt „Zusammensetzung" zu justETF, wo die tatsächlichen Bestandteile stehen.</p>
 </div></details>
+<details><summary>Signale: wann und wo sich ein Einstieg anbietet</summary><div class="sec-body">
+<p>Der Tab <strong>Signale</strong> vergleicht jede Prüfung des Katalogs mit der vorherigen. Gemeldet wird nur, was sich <strong>geändert</strong> hat: Ein Wert steigt neu auf „Positiv" oder „Stark", eine Aufwärtsbewegung beginnt gerade, ein Wert passt neu in deine Filter-Regel, oder ein Wert deiner Watchlist fällt auf „Vorsicht" oder „Schwach". Zu jeder Meldung steht die Begründung dabei. Derselbe Wert meldet sich höchstens alle drei Tage wieder, damit ein Kurs, der um eine Schwelle pendelt, nicht bei jeder Prüfung Alarm schlägt.</p>
+<p>Darunter steht <strong>„Aktuell die stärksten Signale"</strong>. Das ist der Stand von jetzt, egal ob sich gerade etwas geändert hat, wieder getrennt nach ETFs und Aktien. Bei gleicher Punktzahl stehen gleichmäßige Trends und niedrigeres Risiko vorn. Unter „Regeln" stellst du ein, was gemeldet wird, wo gesucht wird und wie oft geprüft wird.</p>
+<p>Geprüft wird automatisch, solange die App offen ist, an Börsentagen im eingestellten Abstand, nachts und am Wochenende seltener. Mit eingeschalteten Benachrichtigungen meldet sich das Handy auch, wenn die App im Hintergrund liegt. Ist sie ganz geschlossen, darf die installierte Android-App ab und zu kurz im Hintergrund prüfen; wie oft, entscheidet Android selbst, meist etwa einmal am Tag. Eine Meldung ist ein technisches Signal und keine Kaufempfehlung.</p>
+</div></details>
+<details><summary>Depot Radar als App auf dem Handy</summary><div class="sec-body">
+<p>Öffne die Seite auf dem Android-Handy in <strong>Chrome</strong>, tippe auf das Menü ⋮ und wähle <strong>„App installieren"</strong>. Danach liegt Depot Radar mit eigenem Symbol bei deinen anderen Apps, startet ohne Adresszeile und bringt jede neue Version der Seite von selbst mit. Auf dem iPhone geht dasselbe in Safari über „Teilen" und „Zum Home-Bildschirm".</p>
+<p>Die App ist dieselbe Seite in einem eigenen Fenster. Anmeldung, Watchlist und Regeln bleiben, wie sie sind.</p>
+</div></details>
 <details><summary>Wichtiger Hinweis</summary><div class="sec-body">
 <p class="warnbox"><strong>Keine Anlageberatung.</strong> Diese Seite zeigt technische Kennzahlen aus Vergangenheitsdaten. Vergangene Wertentwicklung ist kein verlässlicher Indikator für die Zukunft. Signale können falsch sein – besonders an Wendepunkten. Prüfe selbst (Geschäftsmodell, Kosten, Steuern, eigene Ziele) und investiere nur Geld, dessen Verlust du tragen kannst.</p>
 </div></details>
@@ -2375,6 +2550,15 @@ en: `
 <details><summary>Currency, rates and links</summary><div class="sec-body">
 <p>The display currency switches at the top right. Conversion uses ECB daily rates; the app tries several sources, directly and through the proxy. If none work, you can type a rate by hand in Settings and it converts with no lookup at all. The figure shown is a conversion, not the real traded price in that currency.</p>
 <p>Every asset has three links. <strong>TradingView</strong> and <strong>Yahoo Finance</strong> open the right page directly without a login, which is why TradingView is the default. <strong>Trade Republic</strong> fundamentally cannot: it is a banking app, every page requires a login, and single securities have no public address. The link therefore always lands on the dashboard. Clicking copies the ISIN so you can paste it into TR's search after signing in. TR is for buying; for looking things up, use TradingView. For ETFs, "Holdings" leads to justETF, where the actual constituents are listed.</p>
+</div></details>
+<details><summary>Alerts: when and where an entry may be worth a look</summary><div class="sec-body">
+<p>The <strong>Alerts</strong> tab compares every check of the catalogue with the one before. Only a <strong>change</strong> is reported: an asset newly rises to "Positive" or "Strong", a move up is just starting, an asset newly fits your screener rule, or a watchlist asset drops to "Caution" or "Weak". Every alert comes with its reason. The same asset reports at most once every three days, so a price hovering around a threshold does not ring on every check.</p>
+<p>Below that sits <strong>"Strongest signals right now"</strong>. That is the current standing whether or not anything just changed, again split into ETFs and stocks. Among equal scores, steady trends and lower risk come first. Under "Rules" you choose what is reported, where to look and how often to check.</p>
+<p>Checks run automatically while the app is open, at the chosen interval on trading days and less often at night and on weekends. With notifications on, the phone also tells you while the app sits in the background. When it is fully closed, the installed Android app may check briefly in the background now and then; how often is up to Android, usually about once a day. An alert is a technical signal, not a recommendation to buy.</p>
+</div></details>
+<details><summary>Depot Radar as an app on your phone</summary><div class="sec-body">
+<p>Open the page in <strong>Chrome</strong> on your Android phone, tap the ⋮ menu and choose <strong>"Install app"</strong>. Depot Radar then sits among your other apps with its own icon, starts without an address bar and picks up every new version of the page by itself. On an iPhone the same works in Safari via "Share" and "Add to Home Screen".</p>
+<p>The app is the same page in its own window. Sign-in, watchlist and rules stay as they are.</p>
 </div></details>
 <details><summary>Important notice</summary><div class="sec-body">
 <p class="warnbox"><strong>Not investment advice.</strong> This page shows technical metrics from historical data. Past performance is not a reliable indicator of future results. Signals can be wrong – especially at turning points. Do your own research (business model, costs, taxes, your goals) and only invest money you can afford to lose.</p>
@@ -3406,7 +3590,7 @@ function applyView(){
 function applyTheme(){
   document.documentElement.dataset.theme=settings.theme;
   $('#btnTheme').textContent=settings.theme==='dark'?'☀':'☾';
-  renderAll(); renderMovers();
+  renderAll(); renderMovers(); renderAlerts();
   if(planState) drawPlanChart();
   if(detailSym){ fillDetail(); drawDetail(); }
 }
@@ -3422,7 +3606,7 @@ function applyLang(){
   md.textContent=t(md.dataset.i18n);
   md.classList.toggle('on', settings.mvDir==='up');
   $$('#panel-movers .chip[data-per]').forEach(x=>x.classList.toggle('on', x.dataset.per===settings.mvPeriod));
-  renderSettingsValues(); renderPlanInputs(); renderWl(); renderAccounts(); renderGCodes(); applyScHelp(); renderUniCat(); renderUniverse(); renderAll(); renderMovers(); renderScreen();
+  renderSettingsValues(); renderPlanInputs(); renderWl(); renderAccounts(); renderGCodes(); applyScHelp(); renderUniCat(); renderUniverse(); renderAll(); renderMovers(); renderScreen(); renderAlerts();
   if(planState) renderPlan();
   if(detailSym){ fillDetail(); drawDetail(); }
 }
@@ -4058,7 +4242,7 @@ async function syncUsernames(){
    they belong to the file, not to a user, and must never be overwritten by
    whatever a friend happens to have set on their own phone.                  */
 const SYNC_KEYS = ['lang','theme','dispCur','fxMin','view','scHelp','gcodes','sort','sortDir','filter','status','staleMin',
-                   'planAmount','planMonthly','planProfile','screen','mvPeriod','mvDir','scanHours'];
+                   'planAmount','planMonthly','planProfile','screen','mvPeriod','mvDir','scanHours','al'];
 let cloudTimer = null, cloudLoading = false;
 function syncPayload(){
   const prefs = {};
@@ -4340,16 +4524,18 @@ function unlock(isGuest){
     });
   } else refreshAll();
   fxTick(false);
+  alStart();
 }
 function lockNow(){
   if(fbAuthOn() && fbSession){ clearTimeout(cloudTimer); cloudSave(); }
   store.del('authed'); $('#liPw').value=''; currentUser=''; isAdmin=true;
+  bgClear();
   if(guestMode){ endGuest(); return; }
   closeDetail(); showLock();
 }
 function resetApp(){
   const inp=prompt(t('reset_confirm'));
-  if(inp && inp.trim().toUpperCase()==='RESET'){ store.clear(); location.reload(); }
+  if(inp && inp.trim().toUpperCase()==='RESET'){ store.clear(); try{ caches.delete('dr-bg'); }catch(e){} location.reload(); }
 }
 
 /* ---------------- events ---------------- */
@@ -4465,6 +4651,7 @@ function bindEvents(){
     $$('.panel').forEach(p=>p.classList.toggle('on', p.id==='panel-'+b.dataset.tab));
     if(b.dataset.tab==='movers'){ Object.keys(scanData.items||{}).length ? scanUniverse(false) : renderMovers(); }
     if(b.dataset.tab==='plan' && !planState) renderPlan();
+    if(b.dataset.tab==='alerts') renderAlerts();
     if(b.dataset.tab==='screen'){
       renderScreen();
       if(!Object.keys((scanData&&scanData.items)||{}).length) scanUniverse(false).then(renderScreen);
@@ -4604,12 +4791,12 @@ function bindEvents(){
     watchlist.splice(i, 1);
     store.set('watchlist', watchlist);          // syncs to the account when signed in
     delete analyses[detailSym];
-    closeDetail(); renderWl(); renderAll(); renderMovers(); renderScreen();
+    closeDetail(); renderWl(); renderAll(); renderMovers(); renderScreen(); renderAlerts(); bgWriteConfigSoon();
     toast(t('removed'));
   });
   let rsTo; window.addEventListener('resize',()=>{ clearTimeout(rsTo); rsTo=setTimeout(()=>{
     const before = document.documentElement.dataset.view;
-    if(applyView() !== before){ renderAll(); renderMovers(); renderScreen(); if(planState) renderPlan(); }
+    if(applyView() !== before){ renderAll(); renderMovers(); renderScreen(); renderAlerts(); if(planState) renderPlan(); }
     renderCards(); renderMovers(); if(detailSym) drawDetail(); if(planState) drawPlanChart();
   },150); });
   $('#btnPlan').addEventListener('click', renderPlan);
@@ -4656,7 +4843,7 @@ function bindEvents(){
     openAnySym(u.sym, Array.from($('#scList').querySelectorAll('.mv-row')).map(r=>r.dataset.sym));
   });
   function repaintMoney(){
-    renderAll(); renderMovers(); renderScreen();
+    renderAll(); renderMovers(); renderScreen(); renderAlerts();
     if(planState) renderPlan();
     if(detailSym){ fillDetail(); drawDetail(); }
     const n = $('#fxNote'); if(n) n.textContent = fxNoteText();
@@ -4708,14 +4895,14 @@ function bindEvents(){
   $('#setLang').addEventListener('change',e=>{ settings.lang=e.target.value; saveSettings(); applyLang(); });
   function applyViewChoice(v){
     settings.view = v; saveSettings();
-    applyView(); renderAll(); renderMovers(); renderScreen();
+    applyView(); renderAll(); renderMovers(); renderScreen(); renderAlerts();
     if(planState) renderPlan(); if(detailSym){ fillDetail(); drawDetail(); }
     toast(t('saved'));
   }
   $('#hdView').addEventListener('change', e=>applyViewChoice(e.target.value));
   $('#setView').addEventListener('change', e=>{
     settings.view = e.target.value; saveSettings();
-    applyView(); renderAll(); renderMovers(); renderScreen();
+    applyView(); renderAll(); renderMovers(); renderScreen(); renderAlerts();
     if(planState) renderPlan(); if(detailSym){ fillDetail(); drawDetail(); }
     toast(t('saved'));
   });
@@ -4976,6 +5163,7 @@ function addAsset(a){
   if(watchlist.some(x=>x.sym===a.sym)){ toast(t('saved')); return; }
   watchlist.push(a); store.set('watchlist',watchlist);
   renderWl(); renderAll(); refreshOne(a.sym); toast(t('added'));
+  bgWriteConfigSoon();
 }
 
 /* =====================================================================
@@ -5033,6 +5221,7 @@ async function scanUniverse(force){
   const fresh = scanData.at && (Date.now()-scanData.at) < Math.max(1,+settings.scanHours||3)*3600000;
   if(!force && fresh && Object.keys(scanData.items||{}).length){ renderMovers(); return; }
   scanning = true;
+  const scanT0 = Date.now();
   const btn=$('#btnScan'); btn.classList.add('spin'); btn.title = t('mv_stop');
   const bar=$('#mvProgress'); bar.classList.remove('hidden');
   const prev = (scanData && scanData.items) || {};
@@ -5043,7 +5232,7 @@ async function scanUniverse(force){
   const queue = full.filter(u => !isDead(u.sym) && (force || !items[u.sym] || (Date.now()-items[u.sym].at) > maxAge));
   let done=0, ok=0;
   const total = queue.length;
-  if(!total){ scanning=false; btn.classList.remove('spin'); bar.classList.add('hidden'); renderMovers(); return; }
+  if(!total){ scanning=false; btn.classList.remove('spin'); bar.classList.add('hidden'); renderMovers(); alMetaRender(); return; }
   /* same object reference, so the leagues can render while it fills up */
   scanData = {at: scanData.at || Date.now(), ok: Object.keys(items).length, total: full.length, items};
   scanProg = {done:0, total, ok:0};
@@ -5051,6 +5240,7 @@ async function scanUniverse(force){
     scanProg = {done, total, ok};
     bar.firstElementChild.style.width = (done/total*100).toFixed(1)+'%';
     if(done % 10 === 0 || done === total) renderMovers(); else $('#mvMeta').textContent = t('mv_scanning')+' '+done+'/'+total;
+    alMetaRender();
   };
   tick();
   const failed = [];
@@ -5091,6 +5281,7 @@ async function scanUniverse(force){
   scanData = {at:Date.now(), ok:freshCount, total:full.length, items};
   try{ store.set('scan', scanData); }catch(e){}
   renderMovers();
+  try{ alertsAfterScan(prev, items, scanT0); }catch(e){}
   if(wasAborted) toast(t('mv_aborted'));
 }
 function median(a){
@@ -5227,6 +5418,35 @@ function momentumStart(m){
     && m.d21 > 0;
 }
 function screenFilters(){ return Object.assign({}, SCREEN_DEFAULT, settings.screen || {}); }
+/* The conditions live in one list, so the screener and the alerts judge an
+   asset by exactly the same rule and cannot drift apart.                  */
+function screenSteps(f){
+  const nDay=numOrNull(f.day), nMon=numOrNull(f.month), nRmin=numOrNull(f.rsiMin),
+        nRmax=numOrNull(f.rsiMax), nMinp=numOrNull(f.minp),
+        nTurn=numOrNull(f.minturn), nCap=numOrNull(f.mcap);
+  const sc = x => scanScore(x.m, x.u.type) || {};
+  return [
+    {key:'sc_type', on:f.type !== 'all', test:x => x.u.type === f.type},
+    {key:'sc_above', suffix:' ' + String(f.above).toUpperCase(), on:f.above !== 'any',
+     test:x => x.m.p > x.m[f.above], metric:x => x.m[f.above]},
+    {key:'sc_day', suffix:' >' + nDay, on:nDay != null, test:x => x.m.d1 > nDay, metric:x => x.m.d1},
+    {key:'sc_month', suffix:' >' + nMon, on:nMon != null, test:x => x.m.d21 > nMon, metric:x => x.m.d21},
+    {label:'RSI ≥' + nRmin, on:nRmin != null, test:x => x.m.rsi >= nRmin, metric:x => x.m.rsi},
+    {label:'RSI ≤' + nRmax, on:nRmax != null, test:x => x.m.rsi <= nRmax, metric:x => x.m.rsi},
+    {key:'sc_minp', on:nMinp != null, test:x => x.m.p >= nMinp, metric:x => x.m.p},
+    {key:'sc_turn', on:nTurn != null, test:x => x.m.turn >= nTurn, metric:x => x.m.turn},
+    {key:'sc_signal', on:!!f.signal && f.signal !== 'any', test:x => SIG_RANK[sc(x).signal] >= SIG_RANK[f.signal]},
+    {key:'sc_trend', on:!!f.trend && f.trend !== 'any', test:x => sc(x).trend === f.trend},
+    {key:'sc_risk', on:!!f.risk && f.risk !== 'any', test:x => RISK_RANK[sc(x).risk] <= RISK_RANK[f.risk]},
+    {key:'sc_mom', on:f.mom === 'start', test:x => momentumStart(x.m)},
+    {key:'sc_mcap', on:nCap != null, test:x => mcapCache[x.u.sym] >= nCap,
+     metric:x => mcapCache[x.u.sym] === undefined ? null : mcapCache[x.u.sym]}
+  ];
+}
+function ruleMatch(u, m, f){
+  const x = {u, m};
+  return screenSteps(f).every(s => !s.on || (s.metric && s.metric(x) == null) || s.test(x));
+}
 let screenFunnel = [];
 /* A filter only rejects an asset when the number it needs actually exists.
    Yahoo often reports no volume for Xetra listings, and treating "unknown"
@@ -5247,27 +5467,7 @@ function screenRows(){
     });
     screenFunnel.push({label, before, after:list.length, unknown});
   };
-  step(t('sc_type'), f.type !== 'all', x => x.u.type === f.type, null);
-  step(t('sc_above') + ' ' + String(f.above).toUpperCase(), f.above !== 'any',
-       x => x.m.p > x.m[f.above], x => x.m[f.above]);
-  const nDay=numOrNull(f.day), nMon=numOrNull(f.month), nRmin=numOrNull(f.rsiMin),
-        nRmax=numOrNull(f.rsiMax), nMinp=numOrNull(f.minp),
-        nTurn=numOrNull(f.minturn), nCap=numOrNull(f.mcap);
-  step(t('sc_day')+' >'+nDay,   nDay!=null, x => x.m.d1  > nDay,  x => x.m.d1);
-  step(t('sc_month')+' >'+nMon, nMon!=null, x => x.m.d21 > nMon,  x => x.m.d21);
-  step('RSI ≥'+nRmin, nRmin!=null, x => x.m.rsi >= nRmin, x => x.m.rsi);
-  step('RSI ≤'+nRmax, nRmax!=null, x => x.m.rsi <= nRmax, x => x.m.rsi);
-  step(t('sc_minp'), nMinp!=null, x => x.m.p >= nMinp, x => x.m.p);
-  step(t('sc_turn'), nTurn!=null, x => x.m.turn >= nTurn, x => x.m.turn);
-  step(t('sc_signal'), f.signal && f.signal !== 'any',
-       x => SIG_RANK[(scanScore(x.m, x.u.type)||{}).signal] >= SIG_RANK[f.signal], null);
-  step(t('sc_trend'), f.trend && f.trend !== 'any',
-       x => (scanScore(x.m, x.u.type)||{}).trend === f.trend, null);
-  step(t('sc_risk'), f.risk && f.risk !== 'any',
-       x => RISK_RANK[(scanScore(x.m, x.u.type)||{}).risk] <= RISK_RANK[f.risk], null);
-  step(t('sc_mom'),  f.mom === 'start', x => momentumStart(x.m), null);
-  step(t('sc_mcap'), nCap!=null, x => mcapCache[x.u.sym] >= nCap,
-       x => mcapCache[x.u.sym] === undefined ? null : mcapCache[x.u.sym]);
+  screenSteps(f).forEach(s => step(s.label || (t(s.key) + (s.suffix || '')), s.on, s.test, s.metric || null));
   const key = f.sort;
   const val = x => key === 'name' ? 0
     : key === 'score' ? ((scanScore(x.m, x.u.type)||{}).score ?? -99)
@@ -5453,6 +5653,471 @@ function openTR(isin, sym){
     return;
   }
   window.open(url, '_blank', 'noopener');
+}
+
+/* =====================================================================
+   ALERTS — tell the user when and where a new signal appears
+   Every scan is compared with the snapshot before it. Only a CHANGE is
+   reported (a level that was already there yesterday is not news), and
+   the same asset stays quiet for three days after a report so a price
+   hovering around a threshold does not ring the bell on every scan.
+   ===================================================================== */
+const AL_DEFAULT = {sig:true, min:'positive', mom:true, rule:false, warn:true, scope:'all', risk:'any', auto:true};
+const AL_COOL_MS = 3*86400000, AL_KEEP = 80, AL_KEEP_MS = 30*86400000;
+let alerts = store.get('alerts', []);            // newest first
+let alCool = store.get('alCool', {});            // "SYM|kind" -> time of the last report
+let bgLast = null, bgState = 'off', swReg = null, installEvt = null, alTimer = null, bgCfgTimer = null;
+function alPrefs(){ return Object.assign({}, AL_DEFAULT, settings.al || {}); }
+
+/* Pure on purpose: the service worker runs the very same function when it
+   checks in the background, so both always agree on what counts as news. */
+function alertKinds(u, pm, nm, al, inWl, f){
+  if(!pm || !nm) return null;
+  const ns = scanScore(nm, u.type), ps = scanScore(pm, u.type);
+  if(!ns || !ps) return null;
+  const inScope = al.scope === 'all' || (al.scope === 'watch' ? inWl : u.type === al.scope);
+  const riskOk = al.risk === 'any' || RISK_RANK[ns.risk] <= RISK_RANK[al.risk];
+  const kinds = [];
+  if(inScope && riskOk){
+    if(al.sig && SIG_RANK[ns.signal] >= SIG_RANK[al.min] && SIG_RANK[ns.signal] > SIG_RANK[ps.signal]) kinds.push('buy');
+    if(al.mom && SIG_RANK[ns.signal] >= 2 && momentumStart(nm) && !momentumStart(pm)) kinds.push('mom');
+    if(al.rule && f && ruleMatch(u, nm, f) && !ruleMatch(u, pm, f)) kinds.push('rule');
+  }
+  if(al.warn && inWl && SIG_RANK[ns.signal] <= 1 && SIG_RANK[ns.signal] < SIG_RANK[ps.signal]) kinds.push('warn');
+  return kinds.length ? {kinds, from:ps.signal, to:ns.signal, score:ns.score, trend:ns.trend, risk:ns.risk} : null;
+}
+function alertRecord(u, m, hit, bg){
+  return {id:u.sym + '|' + m.at, sym:u.sym, name:u.name || u.sym, type:u.type, isin:u.isin || '', at:m.at,
+    kinds:hit.kinds, from:hit.from, to:hit.to, score:hit.score, trend:hit.trend, risk:hit.risk,
+    p:m.p, cur:m.cur, bg:!!bg, seen:false,
+    m:{p:m.p, sma20:m.sma20, sma50:m.sma50, sma200:m.sma200, d1:m.d1, d21:m.d21, d126:m.d126,
+       rsi:m.rsi, vol:m.vol, above20:m.above20,
+       lr:m.lr ? {r2:m.lr.r2, slope:m.lr.slope, annualPct:m.lr.annualPct} : null}};
+}
+function alertNote(evs, txt){
+  const lines = evs.slice(0, 4).map(e => e.name + ' · ' + e.kinds.map(k => txt[k]).join(', '));
+  if(evs.length > 4) lines.push('+' + (evs.length - 4) + ' ' + txt.more);
+  return {title: txt.title.replace('{n}', evs.length), body: lines.join('\n')};
+}
+/* Runs inside the service worker while the app is closed. The browser grants
+   a background task a few minutes at most, so the list is capped and the
+   loop watches the clock instead of trusting the network.                  */
+async function bgRun(cfg){
+  const out = {events:[], items:{}, at:Date.now(), checked:0, note:null};
+  const queue = cfg.list.slice();
+  const deadline = Date.now() + 150000;
+  async function worker(){
+    while(queue.length && Date.now() < deadline){
+      const u = queue.shift();
+      try{
+        const nm = scanItem(parseChart(await viaProxy(chartUrl(u.sym, '1y'))));
+        delete nm.spark;
+        out.checked++;
+        const hit = alertKinds(u, cfg.items[u.sym], nm, cfg.al, !!u.wl, cfg.rule);
+        out.items[u.sym] = nm;
+        if(hit){
+          hit.kinds = hit.kinds.filter(k => !((cfg.cool[u.sym + '|' + k] || 0) > Date.now() - cfg.coolMs));
+          if(hit.kinds.length) out.events.push(alertRecord(u, nm, hit, true));
+        }
+      }catch(e){}
+      await sleep(120);
+    }
+  }
+  await Promise.all([worker(), worker(), worker()]);
+  if(out.events.length) out.note = alertNote(out.events, cfg.txt);
+  return out;
+}
+function bgCoreSource(){
+  const fns = [proxyOrder, fetchJson, viaProxy, parseChart, smaLast, smaSeries, pctBack, lastLogRets, stdev,
+    annVol, maxDD, rsi14, linregLog, emaLast, turnover, high52, daysAboveSma, scanItem, scanScore,
+    momentumStart, numOrNull, screenSteps, ruleMatch, alertKinds, alertRecord, alertNote, bgRun];
+  return [
+    'const sleep = ' + sleep.toString() + ';',
+    'let settings = cfg.settings, lastGoodProxy = null, mcapCache = {};',
+    'const PROXIES = {' + Object.keys(PROXIES).map(k => k + ':' + PROXIES[k].toString()).join(',') + '};',
+    'const chartUrl = ' + chartUrl.toString() + ';',
+    'const SIG_RANK = ' + JSON.stringify(SIG_RANK) + ', RISK_RANK = ' + JSON.stringify(RISK_RANK) + ';',
+    fns.map(f => f.toString()).join('\n')
+  ].join('\n');
+}
+function alTxt(){
+  return {title:t('al_n_title'), more:t('al_n_more'), buy:t('al_k_buy'), mom:t('al_k_mom'),
+          rule:t('al_k_rule'), warn:t('al_k_warn')};
+}
+/* Hands the background check everything it needs. It is only written for a
+   signed-in user who switched notifications on; guests and locked sessions
+   leave nothing behind for the service worker to work with.               */
+async function bgWriteConfig(){
+  if(!('caches' in window)) return;
+  try{
+    const c = await caches.open('dr-bg');
+    const locked = $('#app').classList.contains('hidden');
+    if(guestMode || locked || !store.get('alNotify', false) || !alPrefs().auto){ await c.delete('cfg'); return; }
+    const al = alPrefs(), items = scanData.items || {};
+    const wl = new Set(watchlist.map(w => w.sym));
+    const edge = al.min === 'strong' ? 3.5 : 1.5;      // the score where a new signal would appear
+    const list = SCAN_LIST().filter(u => items[u.sym] && !isDead(u.sym))
+      .map(u => ({u, s:scanScore(items[u.sym], u.type)})).filter(x => x.s)
+      .sort((a, b) => (wl.has(b.u.sym) - wl.has(a.u.sym)) || (Math.abs(a.s.score - edge) - Math.abs(b.s.score - edge)))
+      .slice(0, 160)
+      .map(x => ({sym:x.u.sym, name:x.u.name || x.u.sym, type:x.u.type, isin:x.u.isin || '', wl:wl.has(x.u.sym)}));
+    const base = {};
+    list.forEach(u => { const m = Object.assign({}, items[u.sym]); delete m.spark; base[u.sym] = m; });
+    const cfg = {settings:{proxy:settings.proxy, proxyCustom:settings.proxyCustom}, al,
+      rule: al.rule ? screenFilters() : null, list, items:base, cool:alCool, coolMs:AL_COOL_MS, txt:alTxt()};
+    const hdr = {headers:{'Content-Type':'application/json'}};
+    await c.put('cfg', new Response(JSON.stringify(cfg), hdr));
+    await c.put('core', new Response(bgCoreSource(), {headers:{'Content-Type':'text/plain'}}));
+  }catch(e){}
+}
+function bgWriteConfigSoon(){ clearTimeout(bgCfgTimer); bgCfgTimer = setTimeout(bgWriteConfig, 1500); }
+async function bgClear(){
+  try{ if('caches' in window){ const c = await caches.open('dr-bg'); await c.delete('cfg'); await c.delete('pending'); } }catch(e){}
+}
+/* Whatever the background check found while the app was closed is folded
+   into the normal list the next time the app is in front.                */
+async function bgMerge(){
+  if(!('caches' in window)) return;
+  try{
+    const c = await caches.open('dr-bg');
+    const r = await c.match('pending');
+    if(r){
+      const pend = await r.json();
+      await c.delete('pending');
+      if(Array.isArray(pend) && pend.length){
+        pend.forEach(e => (e.kinds || []).forEach(k => {
+          alCool[e.sym + '|' + k] = Math.max(alCool[e.sym + '|' + k] || 0, e.at); }));
+        alertsAdd(pend, false);
+      }
+    }
+    const l = await c.match('last');
+    if(l){ bgLast = await l.json(); alMetaRender(); }
+  }catch(e){}
+}
+async function bgRegister(){
+  bgState = 'off';
+  try{
+    if(!('serviceWorker' in navigator)) return false;
+    const reg = swReg || await navigator.serviceWorker.getRegistration();
+    if(!reg || !('periodicSync' in reg)) return false;
+    if(!store.get('alNotify', false) || !alPrefs().auto){
+      try{ await reg.periodicSync.unregister('dr-check'); }catch(e){}
+      return false;
+    }
+    const st = await navigator.permissions.query({name:'periodic-background-sync'});
+    if(st.state !== 'granted') return false;
+    await reg.periodicSync.register('dr-check', {minInterval: Math.max(1, +settings.scanHours || 3) * 3600000});
+    bgState = 'on';
+    return true;
+  }catch(e){ return false; }
+  finally{ alMetaRender(); }
+}
+function swInit(){
+  if(!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
+  navigator.serviceWorker.register('sw.js').then(r => { swReg = r; bgRegister(); }).catch(() => {});
+  navigator.serviceWorker.addEventListener('message', e => {
+    if(e.data && e.data.type === 'open-alerts'){ bgMerge().then(openAlertsTab); }
+  });
+}
+
+function alPrune(){
+  const lim = Date.now() - AL_COOL_MS;
+  Object.keys(alCool).forEach(k => { if(!(alCool[k] > lim)) delete alCool[k]; });
+}
+function alertsAdd(found, notify){
+  const have = new Set(alerts.map(e => e.id));
+  const fresh = found.filter(e => e && e.id && !have.has(e.id));
+  if(!fresh.length) return;
+  fresh.sort((a, b) => (a.kinds.includes('warn') - b.kinds.includes('warn')) || (b.score - a.score));
+  const lim = Date.now() - AL_KEEP_MS;
+  alerts = fresh.concat(alerts).filter(e => e.at > lim).slice(0, AL_KEEP);
+  alPrune();
+  store.set('alerts', alerts); store.set('alCool', alCool);
+  renderAlerts();
+  if(notify){
+    toast(t('al_toast').replace('{n}', fresh.length));
+    alNotifySystem(fresh);
+  }
+}
+function alertsAfterScan(prev, items, t0){
+  const al = alPrefs(), f = al.rule ? screenFilters() : null;
+  const wl = new Set(watchlist.map(w => w.sym));
+  const now = Date.now(), found = [];
+  let compared = 0;
+  for(const u of SCAN_LIST()){
+    const nm = items[u.sym], pm = prev[u.sym];
+    if(!nm || !pm || nm === pm || nm.at < t0) continue;
+    compared++;
+    const hit = alertKinds(u, pm, nm, al, wl.has(u.sym), f);
+    if(!hit) continue;
+    hit.kinds = hit.kinds.filter(k => !((alCool[u.sym + '|' + k] || 0) > now - AL_COOL_MS));
+    if(!hit.kinds.length) continue;
+    hit.kinds.forEach(k => { alCool[u.sym + '|' + k] = now; });
+    found.push(alertRecord(u, nm, hit, false));
+  }
+  store.set('alStat', {at:now, compared, found:found.length});
+  if(found.length) alertsAdd(found, true); else renderAlerts();
+  bgWriteConfigSoon();
+  return found;
+}
+/* Exchanges are shut at night and on weekends, so asking 300 times for prices
+   that cannot have moved only wears out the free proxies. The window is
+   written in local time for a user in Germany: Xetra opens at 9:00 and Wall
+   Street closes at 22:00.                                                    */
+function alDue(){
+  if(!alPrefs().auto || scanning || refreshing) return false;
+  if($('#app').classList.contains('hidden')) return false;
+  const h = Math.max(1, +settings.scanHours || 3);
+  const d = new Date(), wd = d.getDay(), hr = d.getHours() + d.getMinutes()/60;
+  const open = wd >= 1 && wd <= 5 && hr >= 8 && hr < 22.75;
+  return (Date.now() - (scanData.at || 0)) >= (open ? h : Math.max(h, 12)) * 3600000;
+}
+function alTick(){
+  if(alDue()) scanUniverse(false);
+}
+function alStart(){
+  if(!alTimer){
+    alTimer = setInterval(alTick, 60000);
+    document.addEventListener('visibilitychange', () => {
+      if(document.visibilityState === 'visible'){ bgMerge(); setTimeout(alTick, 4000); }
+    });
+  }
+  setTimeout(alTick, 12000);          // let the watchlist refresh go first
+  bgMerge(); bgWriteConfigSoon(); bgRegister();
+  if(location.hash === '#signale'){
+    try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
+    openAlertsTab();
+  }
+}
+function openAlertsTab(){
+  const b = document.querySelector('#tabbar [data-tab="alerts"]');
+  if(b && !$('#app').classList.contains('hidden')) b.click();
+}
+
+/* ---------------- system notifications ---------------- */
+function alNotifyState(){
+  if(!('Notification' in window)) return 'none';
+  if(Notification.permission === 'denied') return 'blocked';
+  return (Notification.permission === 'granted' && store.get('alNotify', false)) ? 'on' : 'off';
+}
+async function alShow(title, body){
+  const opt = {body, tag:'dr-alerts', renotify:true, icon:'icon-192.png', badge:'badge-96.png', data:{url:'./#signale'}};
+  /* Android refuses "new Notification()" outright; there it has to come
+     from the service worker.                                           */
+  try{
+    const reg = swReg || (navigator.serviceWorker && await navigator.serviceWorker.getRegistration());
+    if(reg && reg.showNotification){ await reg.showNotification(title, opt); return true; }
+  }catch(e){}
+  try{ const n = new Notification(title, opt); n.onclick = () => { window.focus(); openAlertsTab(); n.close(); }; return true; }
+  catch(e){ return false; }
+}
+function alNotifySystem(evs){
+  if(alNotifyState() !== 'on') return;
+  const n = alertNote(evs, alTxt());
+  alShow(n.title, n.body);
+}
+async function alToggleNotify(){
+  const st = alNotifyState();
+  if(st === 'none'){ toast(t('al_n_unsupported')); return; }
+  if(st === 'blocked'){ toast(t('al_n_blocked_hint')); return; }
+  if(st === 'on'){
+    store.set('alNotify', false); toast(t('al_n_disabled'));
+  } else {
+    let p = Notification.permission;
+    if(p !== 'granted'){ try{ p = await Notification.requestPermission(); }catch(e){ p = 'denied'; } }
+    if(p !== 'granted'){ renderAlertBar(); toast(t('al_n_blocked_hint')); return; }
+    store.set('alNotify', true);
+    const ok = await alShow(t('al_n_test_t'), t('al_n_test_b'));
+    toast(t(ok ? 'al_n_enabled' : 'al_n_unsupported'));
+  }
+  renderAlertBar(); bgWriteConfigSoon(); bgRegister();
+}
+
+/* ---------------- rendering ---------------- */
+function alUnseen(){ return alerts.filter(e => !e.seen).length; }
+function updateAlertBadge(){
+  const tab = document.querySelector('#tabbar [data-tab="alerts"]'); if(!tab) return;
+  const n = alUnseen();
+  let b = tab.querySelector('.tab-n');
+  if(n){
+    if(!b){ b = document.createElement('span'); b.className = 'tab-n'; tab.appendChild(b); }
+    b.textContent = n > 99 ? '99+' : n;
+  } else if(b) b.remove();
+  try{ if(navigator.setAppBadge){ n ? navigator.setAppBadge(n) : navigator.clearAppBadge(); } }catch(e){}
+}
+function alMarkSeen(){
+  if(!alUnseen()) return;
+  alerts.forEach(e => { e.seen = true; });
+  store.set('alerts', alerts);
+  updateAlertBadge();
+}
+function renderAlertBar(){
+  const nb = $('#btnAlNotify'); if(!nb) return;
+  const st = alNotifyState();
+  nb.textContent = t(st === 'on' ? 'al_n_on' : st === 'blocked' ? 'al_n_blocked' : 'al_n_off');
+  nb.classList.toggle('on', st === 'on');
+  const standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  $('#btnAlInstall').classList.toggle('hidden', !installEvt || standalone);
+  $('#alAppHint').textContent = standalone ? t('al_app_standalone') : (installEvt ? t('al_app_ready') : t('al_app_hint'));
+}
+function alMetaRender(){
+  const el = $('#alMeta'); if(!el) return;
+  const btn = $('#btnAlCheck'); if(btn) btn.textContent = scanning ? t('mv_stop') : t('al_check');
+  if(scanning){ el.textContent = t('mv_scanning') + ' ' + scanProg.done + '/' + scanProg.total; return; }
+  const st = store.get('alStat', null), al = alPrefs(), parts = [];
+  if(!scanData.at) parts.push(t('al_meta_never'));
+  else parts.push(t('al_meta').replace('{time}', fmtTime(scanData.at)).replace('{n}', st ? st.compared : 0));
+  parts.push(al.auto ? t('al_meta_auto').replace('{h}', Math.max(1, +settings.scanHours || 3)) : t('al_meta_auto_off'));
+  if(alNotifyState() === 'on') parts.push(t(bgState === 'on' ? 'al_meta_bg_on' : 'al_meta_bg_off'));
+  if(bgLast && bgLast.at) parts.push(t('al_meta_bg_last').replace('{time}', fmtTime(bgLast.at)));
+  el.textContent = parts.join(' · ');
+}
+function alRulesFill(){
+  const al = alPrefs();
+  $('#alSig').checked = !!al.sig; $('#alMom').checked = !!al.mom; $('#alRule').checked = !!al.rule;
+  $('#alWarn').checked = !!al.warn; $('#alAuto').checked = !!al.auto;
+  $('#alMin').value = al.min; $('#alScope').value = al.scope; $('#alRisk').value = al.risk;
+  $('#alHours').value = Math.max(1, +settings.scanHours || 3);
+}
+function alertWhy(ev){
+  const m = ev.m || {}, out = [];
+  const sg = k => t('sg_' + k);
+  const up = ev.kinds.includes('buy'), down = ev.kinds.includes('warn');
+  if(up) out.push(t('al_w_up').replace('{from}', sg(ev.from)).replace('{to}', sg(ev.to)));
+  if(down) out.push(t('al_w_down').replace('{from}', sg(ev.from)).replace('{to}', sg(ev.to)));
+  if(up || down){
+    const why = [];
+    if(m.sma200 != null) why.push(t(m.p > m.sma200 ? 'al_y_a200' : 'al_y_b200'));
+    if(m.sma50 != null && m.sma200 != null) why.push(t(m.sma50 > m.sma200 ? 'al_y_golden' : 'al_y_death'));
+    if(m.d126 != null) why.push(t('al_y_6m').replace('{x}', fmtPct(m.d126)));
+    if(m.lr && m.lr.r2 >= 0.55) why.push(t('al_y_line').replace('{x}', fmtPct(m.lr.annualPct, {d:0})));
+    if(m.rsi != null) why.push('RSI ' + fmtNum(m.rsi, 0));
+    if(why.length) out.push(why.join(', ') + '.');
+  }
+  if(ev.kinds.includes('mom')) out.push(t('al_w_mom').replace('{n}', m.above20 || 0).replace('{rsi}', m.rsi != null ? fmtNum(m.rsi, 0) : '–'));
+  if(ev.kinds.includes('rule')) out.push(t('al_w_rule'));
+  return out.join(' ');
+}
+function alertRowHtml(ev){
+  const warn = ev.kinds.includes('warn');
+  const inWl = watchlist.some(w => w.sym === ev.sym);
+  const now = (scanData.items || {})[ev.sym];
+  const since = (now && ev.p && now.at > ev.at) ? (now.p / ev.p - 1) * 100 : null;
+  const kinds = ev.kinds.map(k => `<span class="badge b-kind">${escHtml(t('al_k_' + k))}</span>`).join('');
+  const riskTxt = LABELS.risk[ev.risk || 'na'][settings.lang].replace(/^(Risiko|Risk): /, '');
+  return `<div class="mv-row al-row${ev.seen ? '' : ' al-new'}${warn ? ' al-warn' : ''}" data-sym="${escHtml(ev.sym)}">
+    <span class="al-ico">${warn ? '▼' : '▲'}</span>
+    <div class="mv-id"><b>${escHtml(ev.name)}</b>
+      <span>${escHtml(ev.sym)} · ${ev.type === 'etf' ? t('t_etf') : t('t_stock')} · ${escHtml(riskTxt)} · ${escHtml(fmtTime(ev.at))}${ev.bg ? ' · ' + escHtml(t('al_bg')) : ''}</span>
+      <div class="badges" style="margin:6px 0 0">${ev.seen ? '' : `<span class="badge b-new">${escHtml(t('al_new'))}</span>`}${kinds}<span class="badge b-sig s-${escHtml(ev.to)}">${escHtml(LABELS.signal[ev.to][settings.lang])}</span></div>
+      <p class="al-why">${escHtml(alertWhy(ev))}</p></div>
+    <div class="mv-num"><b>${fmtMoney(ev.p, ev.cur)}</b>
+      <span>${since != null ? escHtml(t('al_since')) + ' <b class="' + triCls(since) + '" style="display:inline;font-size:11px">' + fmtPct(since) + '</b>' : ''}</span></div>
+    <div class="mv-act">
+      <button class="mv-add${inWl ? ' in' : ''}" ${inWl ? 'disabled' : ''} title="${inWl ? t('mv_inwl') : t('mv_add')}">${inWl ? '✓' : '+'}</button>
+      ${linkPairHtml(ev.isin, ev.sym)}
+    </div></div>`;
+}
+/* "Where could I invest right now" is a different question from "what just
+   changed", so it gets its own list: the current standing, ETFs and stocks
+   apart, steadier and lower-risk names first among equal scores.          */
+function alBestRows(type, al, limit){
+  const items = scanData.items || {}, wl = new Set(watchlist.map(w => w.sym));
+  const rows = [];
+  for(const u of SCAN_LIST()){
+    if(u.type !== type) continue;
+    if(al.scope === 'watch' && !wl.has(u.sym)) continue;
+    const m = items[u.sym]; if(!m) continue;
+    const s = scanScore(m, u.type); if(!s) continue;
+    if(SIG_RANK[s.signal] < SIG_RANK[al.min]) continue;
+    if(al.risk !== 'any' && RISK_RANK[s.risk] > RISK_RANK[al.risk]) continue;
+    rows.push({u, m, s});
+  }
+  rows.sort((a, b) => (b.s.score - a.s.score) || ((b.s.trend === 'steady') - (a.s.trend === 'steady'))
+    || (RISK_RANK[a.s.risk] - RISK_RANK[b.s.risk]) || ((b.m.d63 || 0) - (a.m.d63 || 0)));
+  return {rows:rows.slice(0, limit), total:rows.length};
+}
+function renderAlerts(){
+  const list = $('#alList'); if(!list) return;
+  alRulesFill(); renderAlertBar(); alMetaRender(); updateAlertBadge();
+  $('#alCount').textContent = alerts.length ? '(' + alerts.length + ')' : '';
+  $('#alHeadAct').classList.toggle('hidden', !alerts.length);
+  list.innerHTML = alerts.length
+    ? alerts.map(alertRowHtml).join('')
+    : `<div class="plan-empty">${t(scanData.at ? 'al_none' : 'al_meta_never')}</div>`;
+  const al = alPrefs(), best = $('#alBest');
+  const have = Object.keys(scanData.items || {}).length;
+  if(!have){ best.innerHTML = ''; $('#alBestSub').textContent = ''; }
+  else {
+    $('#alBestSub').textContent = t('al_best_sub').replace('{time}', fmtTime(scanData.at));
+    const leagues = [];
+    if(al.scope !== 'stock') leagues.push(['etf', t('mv_league_etf')]);
+    if(al.scope !== 'etf') leagues.push(['stock', t('mv_league_stock')]);
+    const drawn = [];
+    best.innerHTML = leagues.map(([type, title]) => {
+      const res = alBestRows(type, al, 5);
+      res.rows.forEach(x => drawn.push(x));
+      return `<div class="mv-league"><h3 class="mv-h">${escHtml(title)}<span>${res.total ? t('al_best_n').replace('{n}', res.total) : ''}</span></h3>`
+        + (res.rows.length ? res.rows.map(screenRowHtml).join('') : `<div class="plan-empty">${t('al_best_none')}</div>`) + '</div>';
+    }).join('');
+    drawn.forEach(x => {
+      const cv = best.querySelector(`.mv-row[data-sym="${CSS.escape(x.u.sym)}"] canvas`);
+      if(cv && x.m.spark) drawSpark(cv, x.m.spark, (x.m.d21 || 0) >= 0 ? cssVar('--up') : cssVar('--down'));
+    });
+  }
+  /* seen once it has actually been on screen; the highlight stays until the next repaint */
+  if($('#panel-alerts').classList.contains('on') && document.visibilityState === 'visible'
+     && !$('#app').classList.contains('hidden')) alMarkSeen();
+}
+function bindAlertEvents(){
+  $('#btnAlCheck').addEventListener('click', () => {
+    const was = scanning;
+    scanUniverse(true).then(() => {
+      if(!was && !alUnseen() && !(store.get('alStat', {}).found)) toast(t('al_toast_none'));
+    });
+    alMetaRender();
+  });
+  $('#btnAlNotify').addEventListener('click', alToggleNotify);
+  $('#btnAlInstall').addEventListener('click', async () => {
+    if(!installEvt) return;
+    try{ installEvt.prompt(); await installEvt.userChoice; }catch(e){}
+    installEvt = null; renderAlertBar();
+  });
+  $('#btnAlRules').addEventListener('click', () => {
+    const box = $('#alRules'); box.classList.toggle('hidden');
+    $('#btnAlRules').classList.toggle('on', !box.classList.contains('hidden'));
+  });
+  const save = () => {
+    settings.al = {sig:$('#alSig').checked, min:$('#alMin').value, mom:$('#alMom').checked, rule:$('#alRule').checked,
+      warn:$('#alWarn').checked, scope:$('#alScope').value, risk:$('#alRisk').value, auto:$('#alAuto').checked};
+    saveSettings(); renderAlerts(); bgWriteConfigSoon(); bgRegister(); toast(t('saved'));
+  };
+  ['alSig','alMom','alRule','alWarn','alAuto','alMin','alScope','alRisk'].forEach(id => $('#' + id).addEventListener('change', save));
+  $('#alHours').addEventListener('change', e => {
+    settings.scanHours = clamp(parseInt(e.target.value || '3', 10) || 3, 1, 72);
+    e.target.value = settings.scanHours;
+    const s = $('#setScan'); if(s) s.value = settings.scanHours;
+    saveSettings(); alMetaRender(); bgRegister(); toast(t('saved'));
+  });
+  $('#btnAlMark').addEventListener('click', () => { alMarkSeen(); renderAlerts(); });
+  $('#btnAlClear').addEventListener('click', () => {
+    if(!confirm(t('al_clear_ask'))) return;
+    alerts = []; store.set('alerts', alerts); renderAlerts();
+  });
+  const rowClick = box => e => {
+    const row = e.target.closest('.mv-row'); if(!row) return;
+    const sym = row.dataset.sym;
+    const u = SCAN_LIST().find(x => x.sym === sym) || alerts.find(x => x.sym === sym); if(!u) return;
+    const link = e.target.closest('a[data-go]');
+    if(link){ e.preventDefault(); openWith(link.dataset.go, link.dataset.isin, link.dataset.sym || sym); return; }
+    const add = e.target.closest('.mv-add');
+    if(add && !add.disabled){ addAsset({sym:u.sym, name:u.name, isin:u.isin || '', type:u.type}); renderAlerts(); return; }
+    openAnySym(sym, Array.from(box.querySelectorAll('.mv-row')).map(r => r.dataset.sym));
+  };
+  $('#alList').addEventListener('click', rowClick($('#alList')));
+  $('#alBest').addEventListener('click', rowClick($('#alBest')));
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; renderAlertBar(); });
+  window.addEventListener('appinstalled', () => { installEvt = null; renderAlertBar(); toast(t('al_installed')); });
 }
 
 /* =====================================================================
@@ -5737,7 +6402,9 @@ function drawPlanChart(){
 applyView();
 applyTheme();
 bindEvents();
+bindAlertEvents();
 applyLang();
+swInit();
 const gRec = store.get('guest', null);
 if(gRec && gRec.until > Date.now() && guestSecret()){ guestUntil = gRec.until; unlock(true); }
 else {
