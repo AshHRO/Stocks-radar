@@ -1,0 +1,96 @@
+/* Depot Radar service worker
+   - keeps a copy of the app so it starts without a connection
+   - shows notifications (Android only accepts them from here)
+   - runs the background check the app hands over                */
+const SHELL = 'dr-shell-v1', BG = 'dr-bg';
+const ROOT = new URL('./', self.location).pathname;
+const json = o => new Response(JSON.stringify(o), {headers: {'Content-Type': 'application/json'}});
+
+self.addEventListener('install', e => {
+  self.skipWaiting();
+  e.waitUntil(caches.open(SHELL)
+    .then(c => c.addAll(['./', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png']))
+    .catch(() => {}));
+});
+self.addEventListener('activate', e => e.waitUntil((async () => {
+  const keys = await caches.keys();
+  await Promise.all(keys.filter(k => k.startsWith('dr-shell-') && k !== SHELL).map(k => caches.delete(k)));
+  await self.clients.claim();
+})()));
+
+/* Network first: a new index.html on the server always wins, the stored copy
+   is only the fallback when there is no connection. Price data, exchange
+   rates and Firebase live on other hosts and are never touched here.       */
+self.addEventListener('fetch', e => {
+  const r = e.request;
+  if (r.method !== 'GET') return;
+  const u = new URL(r.url);
+  if (u.origin !== self.location.origin || !u.pathname.startsWith(ROOT)) return;
+  e.respondWith((async () => {
+    try {
+      const res = await fetch(r);
+      if (res && res.ok && !u.search) {
+        const c = await caches.open(SHELL);
+        c.put(r, res.clone()).catch(() => {});
+      }
+      return res;
+    } catch (err) {
+      const c = await caches.open(SHELL);
+      const hit = await c.match(r, {ignoreSearch: true}) || (r.mode === 'navigate' ? await c.match('./') : null);
+      if (hit) return hit;
+      throw err;
+    }
+  })());
+});
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil((async () => {
+    const all = await self.clients.matchAll({type: 'window', includeUncontrolled: true});
+    for (const c of all) {
+      if ('focus' in c) {
+        try { await c.focus(); } catch (err) {}
+        c.postMessage({type: 'open-alerts'});
+        return;
+      }
+    }
+    await self.clients.openWindow('./#signale');
+  })());
+});
+
+/* The rules and the maths are not duplicated here. The app stores its own
+   functions next to the list of assets to watch, and this worker runs exactly
+   that code, so the background check can never disagree with the app.       */
+async function bgCheck(force) {
+  const c = await caches.open(BG);
+  const cfgR = await c.match('cfg'), coreR = await c.match('core');
+  if (!cfgR || !coreR) return {skipped: 'no-config'};
+  if (!force) {
+    const wins = await self.clients.matchAll({type: 'window'});
+    if (wins.some(w => w.visibilityState === 'visible')) return {skipped: 'app-open'};   // the app checks by itself
+  }
+  const cfg = await cfgR.json(), core = await coreR.text();
+  let out;
+  try { out = await (new Function('cfg', core + '\nreturn bgRun(cfg);'))(cfg); }
+  catch (err) { return {error: String(err)}; }
+  Object.assign(cfg.items, out.items);
+  out.events.forEach(ev => ev.kinds.forEach(k => { cfg.cool[ev.sym + '|' + k] = ev.at; }));
+  await c.put('cfg', json(cfg));
+  await c.put('last', json({at: out.at, checked: out.checked, found: out.events.length}));
+  if (out.events.length) {
+    const pr = await c.match('pending');
+    const pend = pr ? await pr.json() : [];
+    await c.put('pending', json(pend.concat(out.events).slice(-60)));
+    if (out.note && self.Notification && Notification.permission === 'granted') {
+      await self.registration.showNotification(out.note.title, {body: out.note.body, tag: 'dr-alerts',
+        renotify: true, icon: 'icon-192.png', badge: 'badge-96.png', data: {url: './#signale'}});
+    }
+  }
+  return {checked: out.checked, found: out.events.length};
+}
+self.addEventListener('periodicsync', e => { if (e.tag === 'dr-check') e.waitUntil(bgCheck(false)); });
+self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'bg-check') {
+    e.waitUntil(bgCheck(true).then(r => { if (e.source) e.source.postMessage({type: 'bg-done', result: r}); }));
+  }
+});
