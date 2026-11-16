@@ -285,6 +285,18 @@ textarea#backupArea{width:100%; min-height:110px; font-family:var(--mono); font-
 .al-lnk{background:none; border:0; padding:0; color:var(--accent); font:inherit; cursor:pointer}
 #alBest .mv-rank{display:none}
 .hd-tools{display:contents}
+/* ---- short trades ---- */
+.sw-box{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:12px 15px; margin-bottom:10px; font-size:13.5px; line-height:1.5}
+.sw-box p{margin:0}
+.sw-box p + p{margin-top:7px}
+.sw-box h4{margin:0 0 7px; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); font-family:var(--mono); font-weight:600}
+.sw-note{color:var(--muted)}
+.sw-warn{color:var(--warn)}
+.sw-plan{display:flex; flex-wrap:wrap; gap:4px 14px; font-size:12px; color:var(--muted); margin:2px 0 5px}
+.mv-id .sw-plan b{display:inline; font-size:inherit; font-weight:600; white-space:nowrap; overflow:visible}   /* stronger than .mv-id b, which makes the title a block */
+.badge.b-minus{border-color:var(--down); color:var(--down)}
+.mv-h .mv-h-t{margin:0; color:inherit; font-size:inherit; letter-spacing:inherit; text-transform:inherit}
+#panel-swing .sc-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
 .btn.stop{border-color:var(--warn); color:var(--warn); font-size:13px}
 .mv-extra{font-family:var(--mono); font-size:10px; color:var(--faint)}
 #scanBar{position:absolute; left:0; right:0; bottom:-1px; height:2px; pointer-events:none}
@@ -634,6 +646,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
     <button class="tab on" data-tab="overview" data-i18n="tab_overview"></button>
     <button class="tab" data-tab="alerts" data-i18n="tab_alerts"></button>
     <button class="tab" data-tab="movers" data-i18n="tab_movers"></button>
+    <button class="tab" data-tab="swing" data-i18n="tab_swing"></button>
     <button class="tab" data-tab="screen" data-i18n="tab_screen"></button>
     <button class="tab" data-tab="plan" data-i18n="tab_plan"></button>
     <button class="tab" data-tab="universe" data-i18n="tab_universe"></button>
@@ -710,6 +723,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
           <label><input type="checkbox" id="alMom"><span data-i18n="al_r_mom"></span></label>
           <label><input type="checkbox" id="alRule"><span data-i18n="al_r_rule"></span></label>
           <label><input type="checkbox" id="alWarn"><span data-i18n="al_r_warn"></span></label>
+          <label><input type="checkbox" id="alSwing"><span data-i18n="al_r_swing"></span></label>
           <label><input type="checkbox" id="alAuto"><span data-i18n="al_r_auto"></span></label>
         </div>
         <div class="sc-grid">
@@ -761,6 +775,31 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
       <div id="mvProgress" class="hidden"><i></i></div>
       <p id="mvMeta"></p>
       <div id="mvList"></div>
+    </section>
+
+    <!-- ---------- SHORT TRADES ---------- -->
+    <section class="panel" id="panel-swing">
+      <p class="plan-intro" data-i18n="sw_intro"></p>
+      <button type="button" class="intro-more"><span class="im-more" data-i18n="intro_more"></span><span class="im-less" data-i18n="intro_less"></span></button>
+      <div class="sc-grid">
+        <label><span data-i18n="sw_amt"></span><input type="number" id="swAmt" min="5" step="10" inputmode="decimal"></label>
+        <label><span data-i18n="sw_gain"></span><input type="number" id="swGain" min="0.5" step="1" inputmode="decimal"></label>
+        <label><span data-i18n="sw_loss"></span><input type="number" id="swLoss" min="0.5" step="1" inputmode="decimal"></label>
+        <label><span data-i18n="sw_hold"></span>
+          <select id="swHold">
+            <option value="3" data-i18n="sw_h3"></option>
+            <option value="5" data-i18n="sw_h5"></option>
+            <option value="10" data-i18n="sw_h10"></option>
+          </select></label>
+        <label><span data-i18n="sw_fee"></span><input type="number" id="swFee" min="0" max="50" step="0.5" inputmode="decimal"></label>
+        <label><span data-i18n="sc_type"></span>
+          <select id="swType">
+            <option value="all" data-i18n="f_all"></option>
+            <option value="stock" data-i18n="f_stock"></option>
+            <option value="etf" data-i18n="f_etf"></option>
+          </select></label>
+      </div>
+      <div id="swOut"></div>
     </section>
 
     <!-- ---------- SCREENER ---------- -->
@@ -1396,14 +1435,14 @@ const CATALOG = [
   {sym:'VWCE.DE', isin:'IE00BK5BQT80', name:'Vanguard FTSE All-World (Acc)', type:'etf', cat:'world', ter:0.22},
   {sym:'VGWL.DE', isin:'IE00B3RBWM25', name:'Vanguard FTSE All-World (Dist)', type:'etf', cat:'world', ter:0.22},
   // ---- USA ----
-  {sym:'SPXS.DE', isin:'IE00B3YCGJ38', name:'Invesco S&P 500 (Swap)', type:'etf', cat:'us', ter:0.05},
+  {sym:'P500.DE', isin:'IE00B3YCGJ38', name:'Invesco S&P 500 (Swap)', type:'etf', cat:'us', ter:0.05},
   {sym:'SXR8.DE', isin:'IE00B5BMR087', name:'iShares Core S&P 500', type:'etf', cat:'us', ter:0.07},
   {sym:'VUAA.DE', isin:'IE00BFMXXD54', name:'Vanguard S&P 500', type:'etf', cat:'us', ter:0.07},
   {sym:'SXRV.DE', isin:'IE00B53SZB19', name:'iShares Nasdaq 100', type:'etf', cat:'us', ter:0.30},
   {sym:'EQQQ.DE', isin:'IE0032077012', name:'Invesco EQQQ Nasdaq-100', type:'etf', cat:'us', ter:0.30},
   // ---- Europe ----
   {sym:'SXRT.DE', isin:'IE00B53L3W79', name:'iShares Core EURO STOXX 50', type:'etf', cat:'europe', ter:0.10},
-  {sym:'IMEA.DE', isin:'IE00B4K48X80', name:'iShares Core MSCI Europe', type:'etf', cat:'europe', ter:0.12},
+  {sym:'EUNK.DE', isin:'IE00B4K48X80', name:'iShares Core MSCI Europe', type:'etf', cat:'europe', ter:0.12},
   {sym:'EXS1.DE', isin:'DE0005933931', name:'iShares Core DAX', type:'etf', cat:'europe', ter:0.16},
   // ---- Emerging markets ----
   {sym:'IS3N.DE', isin:'IE00BKM4GZ66', name:'iShares Core MSCI EM IMI', type:'etf', cat:'em', ter:0.18},
@@ -1414,7 +1453,7 @@ const CATALOG = [
   {sym:'XDWT.DE', isin:'IE00BM67HT60', name:'Xtrackers MSCI World Info Tech', type:'etf', cat:'tech', ter:0.25},
   {sym:'VVSM.DE', isin:'IE00BMC38736', name:'VanEck Semiconductor', type:'etf', cat:'tech', ter:0.35},
   {sym:'2B76.DE', isin:'IE00BYZK4552', name:'iShares Automation & Robotics', type:'etf', cat:'tech', ter:0.40},
-  {sym:'DFNS.DE', isin:'IE000YYE6WK5', name:'VanEck Defense', type:'etf', cat:'sector', ter:0.55},
+  {sym:'DFEN.DE', isin:'IE000YYE6WK5', name:'VanEck Defense', type:'etf', cat:'sector', ter:0.55},
   {sym:'IQQH.DE', isin:'IE00B1XNHC34', name:'iShares Global Clean Energy', type:'etf', cat:'sector', ter:0.65},
   {sym:'IQQQ.DE', isin:'IE00B1TXK627', name:'iShares Global Water', type:'etf', cat:'sector', ter:0.65},
   // ---- factor / small cap ----
@@ -1428,7 +1467,7 @@ const CATALOG = [
   {sym:'EUN5.DE', isin:'IE00B3F81R35', name:'iShares Core € Corp Bond', type:'etf', cat:'bond', ter:0.20},
   // ---- gold ----
   {sym:'4GLD.DE', isin:'DE000A0S9GB0', name:'Xetra-Gold (ETC)', type:'etf', cat:'gold', ter:0.00},
-  {sym:'EWG2.DE', isin:'DE000EWG2LD7', name:'EUWAX Gold II (ETC)', type:'etf', cat:'gold', ter:0.00},
+  {sym:'EWG2.SG', isin:'DE000EWG2LD7', name:'EUWAX Gold II (ETC)', type:'etf', cat:'gold', ter:0.00},
   // ---- German stocks ----
   {sym:'SAP.DE', isin:'DE0007164600', name:'SAP', type:'stock', cat:'stockDE'},
   {sym:'SIE.DE', isin:'DE0007236101', name:'Siemens', type:'stock', cat:'stockDE'},
@@ -1461,8 +1500,8 @@ const CATALOG = [
   {sym:'ASME.DE', isin:'NL0010273215', name:'ASML', type:'stock', cat:'stockEU'},
   {sym:'MOH.DE', isin:'FR0000121014', name:'LVMH', type:'stock', cat:'stockEU'},
   {sym:'NESR.DE', isin:'CH0038863350', name:'Nestlé', type:'stock', cat:'stockEU'},
-  {sym:'NOVC.DE', isin:'DK0062498333', name:'Novo Nordisk B', type:'stock', cat:'stockEU'},
-  {sym:'R6C.DE', isin:'GB00BP6MXD84', name:'Shell', type:'stock', cat:'stockEU'},
+  {sym:'NOV.DE', isin:'DK0062498333', name:'Novo Nordisk B', type:'stock', cat:'stockEU'},
+  {sym:'R6C0.DE', isin:'GB00BP6MXD84', name:'Shell', type:'stock', cat:'stockEU'},
   // ---- US stocks (Xetra listings) ----
   {sym:'APC.DE', isin:'US0378331005', name:'Apple', type:'stock', cat:'stockUS'},
   {sym:'MSF.DE', isin:'US5949181045', name:'Microsoft', type:'stock', cat:'stockUS'},
@@ -1470,7 +1509,7 @@ const CATALOG = [
   {sym:'AMZ.DE', isin:'US0231351067', name:'Amazon', type:'stock', cat:'stockUS'},
   {sym:'ABEA.DE', isin:'US02079K3059', name:'Alphabet A', type:'stock', cat:'stockUS'},
   {sym:'FB2A.DE', isin:'US30303M1027', name:'Meta Platforms', type:'stock', cat:'stockUS'},
-  {sym:'AVGO.DE', isin:'US11135F1012', name:'Broadcom', type:'stock', cat:'stockUS'},
+  {sym:'1YD.DE', isin:'US11135F1012', name:'Broadcom', type:'stock', cat:'stockUS'},
   {sym:'AMD.DE', isin:'US0079031078', name:'AMD', type:'stock', cat:'stockUS'},
   {sym:'TL0.DE', isin:'US88160R1014', name:'Tesla', type:'stock', cat:'stockUS'},
   {sym:'NFC.DE', isin:'US64110L1061', name:'Netflix', type:'stock', cat:'stockUS'},
@@ -1525,7 +1564,7 @@ const CATALOG = [
   {sym:'ENL.DE',  isin:'IT0003128367', name:'Enel', type:'stock', cat:'stockEU'},
   {sym:'SND.DE',  isin:'FR0000121972', name:'Schneider Electric', type:'stock', cat:'stockEU'},
   {sym:'TOTB.DE', isin:'FR0000120271', name:'TotalEnergies', type:'stock', cat:'stockEU'},
-  {sym:'NOTA.DE', isin:'CH0012005267', name:'Novartis', type:'stock', cat:'stockEU'},
+  {sym:'NOT.DE', isin:'CH0012005267', name:'Novartis', type:'stock', cat:'stockEU'},
   {sym:'AIL.DE',  isin:'FR0000120073', name:'Air Liquide', type:'stock', cat:'stockEU'},
   {sym:'SEJ1.DE', isin:'FR0000073272', name:'Safran', type:'stock', cat:'stockEU'},
   // ---- more US names ----
@@ -1539,20 +1578,20 @@ const CATALOG = [
   {sym:'PRG.DE',  isin:'US7427181091', name:'Procter & Gamble', type:'stock', cat:'stockUS'},
   {sym:'WMT.DE',  isin:'US9311421039', name:'Walmart', type:'stock', cat:'stockUS'},
   {sym:'CMC.DE',  isin:'US46625H1005', name:'JPMorgan Chase', type:'stock', cat:'stockUS'},
-  {sym:'XONA.DE', isin:'US30231G1022', name:'Exxon Mobil', type:'stock', cat:'stockUS'},
+  {sym:'XOM', isin:'US30231G1022', name:'Exxon Mobil', type:'stock', cat:'stockUS'},
   {sym:'F3A.DE',  isin:'US3364331070', name:'First Solar', type:'stock', cat:'stockUS'},
   // ---- more funds / ETFs ----
   {sym:'VGVF.DE', isin:'IE00BKX55T58', name:'Vanguard FTSE Developed World', type:'etf', cat:'world', ter:0.12},
-  {sym:'VHYL.DE', isin:'IE00B8GKDB10', name:'Vanguard FTSE All-World High Div.', type:'etf', cat:'world', ter:0.29},
+  {sym:'VGWD.DE', isin:'IE00B8GKDB10', name:'Vanguard FTSE All-World High Div.', type:'etf', cat:'world', ter:0.29},
   {sym:'FGEQ.DE', isin:'IE00BYXVGZ48', name:'Fidelity Global Quality Income', type:'etf', cat:'world', ter:0.40},
   {sym:'EXSA.DE', isin:'DE0002635307', name:'iShares STOXX Europe 600', type:'etf', cat:'europe', ter:0.20},
   {sym:'EXS3.DE', isin:'DE0005933923', name:'iShares MDAX', type:'etf', cat:'europe', ter:0.51},
   {sym:'EXS2.DE', isin:'DE0005933972', name:'iShares TecDAX', type:'etf', cat:'europe', ter:0.51},
   {sym:'EUNN.DE', isin:'IE00B4L5YX21', name:'iShares Core MSCI Japan IMI', type:'etf', cat:'world', ter:0.15},
-  {sym:'IHYG.DE', isin:'IE00B66F4759', name:'iShares € High Yield Corp Bond', type:'etf', cat:'bond', ter:0.50},
+  {sym:'EUNW.DE', isin:'IE00B66F4759', name:'iShares € High Yield Corp Bond', type:'etf', cat:'bond', ter:0.50},
   {sym:'2B78.DE', isin:'IE00BYZK4776', name:'iShares Healthcare Innovation', type:'etf', cat:'sector', ter:0.40},
   {sym:'2B7K.DE', isin:'IE00BYZK4883', name:'iShares Digitalisation', type:'etf', cat:'tech', ter:0.40},
-  {sym:'WTAI.DE', isin:'IE00BDVPNG13', name:'WisdomTree Artificial Intelligence', type:'etf', cat:'tech', ter:0.40},
+  {sym:'WTAI.MI', isin:'IE00BDVPNG13', name:'WisdomTree Artificial Intelligence', type:'etf', cat:'tech', ter:0.40},
   // ---- more German names (MDAX · SDAX · TecDAX) ----
   {sym:'FRA.DE',  isin:'DE0005773303', name:'Fraport', type:'stock', cat:'stockDE'},
   {sym:'UTDI.DE', isin:'DE0005089031', name:'United Internet', type:'stock', cat:'stockDE'},
@@ -1585,8 +1624,8 @@ const CATALOG = [
   {sym:'ELG.DE',  isin:'DE0005677108', name:'Elmos Semiconductor', type:'stock', cat:'stockDE'},
   {sym:'SZU.DE',  isin:'DE0007297004', name:'Südzucker', type:'stock', cat:'stockDE'},
   // ---- more European blue chips ----
-  {sym:'RHO5.DE', isin:'CH0012032048', name:'Roche GS', type:'stock', cat:'stockEU'},
-  {sym:'UBSG.DE', isin:'CH0244767585', name:'UBS Group', type:'stock', cat:'stockEU'},
+  {sym:'RHO.DE', isin:'CH0012032113', name:'Roche (Inhaber)', type:'stock', cat:'stockEU'},
+  {sym:'0UB.DE', isin:'CH0244767585', name:'UBS Group', type:'stock', cat:'stockEU'},
   {sym:'ABJ.DE',  isin:'CH0012221716', name:'ABB', type:'stock', cat:'stockEU'},
   {sym:'ZEG.DE',  isin:'GB0009895292', name:'AstraZeneca', type:'stock', cat:'stockEU'},
   {sym:'BPE5.DE', isin:'GB0007980591', name:'BP', type:'stock', cat:'stockEU'},
@@ -1596,24 +1635,24 @@ const CATALOG = [
   {sym:'AXA.DE',  isin:'FR0000120628', name:'AXA', type:'stock', cat:'stockEU'},
   {sym:'BSN.DE',  isin:'FR0000120644', name:'Danone', type:'stock', cat:'stockEU'},
   {sym:'PPX.DE',  isin:'FR0000121485', name:'Kering', type:'stock', cat:'stockEU'},
-  {sym:'RMS.DE',  isin:'FR0000052292', name:'Hermès', type:'stock', cat:'stockEU'},
+  {sym:'RMS.PA',  isin:'FR0000052292', name:'Hermès', type:'stock', cat:'stockEU'},
   {sym:'PER.DE',  isin:'FR0000120693', name:'Pernod Ricard', type:'stock', cat:'stockEU'},
   {sym:'SQU.DE',  isin:'FR0000125486', name:'Vinci', type:'stock', cat:'stockEU'},
   {sym:'LOR.DE',  isin:'FR0000120321', name:"L'Oréal", type:'stock', cat:'stockEU'},
   {sym:'PHI1.DE', isin:'NL0000009538', name:'Philips', type:'stock', cat:'stockEU'},
-  {sym:'INN.DE',  isin:'NL0011821202', name:'ING Groep', type:'stock', cat:'stockEU'},
-  {sym:'PEU.DE',  isin:'NL00150001Q9', name:'Stellantis', type:'stock', cat:'stockEU'},
+  {sym:'INGA.AS',  isin:'NL0011821202', name:'ING Groep', type:'stock', cat:'stockEU'},
+  {sym:'STLAM.MI',  isin:'NL00150001Q9', name:'Stellantis', type:'stock', cat:'stockEU'},
   {sym:'2FE.DE',  isin:'NL0011585146', name:'Ferrari', type:'stock', cat:'stockEU'},
   {sym:'AHOG.DE', isin:'NL0011794037', name:'Ahold Delhaize', type:'stock', cat:'stockEU'},
   {sym:'CRIN.DE', isin:'IT0005239360', name:'UniCredit', type:'stock', cat:'stockEU'},
   {sym:'IES.DE',  isin:'IT0000072618', name:'Intesa Sanpaolo', type:'stock', cat:'stockEU'},
   {sym:'BSD2.DE', isin:'ES0113900J37', name:'Banco Santander', type:'stock', cat:'stockEU'},
-  {sym:'BBVA.DE', isin:'ES0113211835', name:'BBVA', type:'stock', cat:'stockEU'},
-  {sym:'IDX.DE',  isin:'ES0148396007', name:'Inditex', type:'stock', cat:'stockEU'},
+  {sym:'BBVA.MC', isin:'ES0113211835', name:'BBVA', type:'stock', cat:'stockEU'},
+  {sym:'ITX.MC',  isin:'ES0148396007', name:'Inditex', type:'stock', cat:'stockEU'},
   {sym:'TNE5.DE', isin:'ES0178430E18', name:'Telefónica', type:'stock', cat:'stockEU'},
   {sym:'NOA3.DE', isin:'FI0009000681', name:'Nokia', type:'stock', cat:'stockEU'},
-  {sym:'DNQA.DE', isin:'NO0010096985', name:'Equinor', type:'stock', cat:'stockEU'},
-  {sym:'VOL3.DE', isin:'SE0000115446', name:'Volvo B', type:'stock', cat:'stockEU'},
+  {sym:'DNQ.F', isin:'NO0010096985', name:'Equinor', type:'stock', cat:'stockEU'},
+  {sym:'VOLV-B.ST', isin:'SE0000115446', name:'Volvo B', type:'stock', cat:'stockEU'},
   {sym:'ERCB.DE', isin:'SE0000108656', name:'Ericsson B', type:'stock', cat:'stockEU'},
   // ---- more US large caps ----
   {sym:'CTO.DE',  isin:'US22160K1051', name:'Costco', type:'stock', cat:'stockUS'},
@@ -1621,7 +1660,7 @@ const CATALOG = [
   {sym:'6MK.DE',  isin:'US58933Y1055', name:'Merck & Co', type:'stock', cat:'stockUS'},
   {sym:'PFE.DE',  isin:'US7170811035', name:'Pfizer', type:'stock', cat:'stockUS'},
   {sym:'4AB.DE',  isin:'US00287Y1091', name:'AbbVie', type:'stock', cat:'stockUS'},
-  {sym:'ABT.DE',  isin:'US0028241000', name:'Abbott Laboratories', type:'stock', cat:'stockUS'},
+  {sym:'ABT',  isin:'US0028241000', name:'Abbott Laboratories', type:'stock', cat:'stockUS'},
   {sym:'CIS.DE',  isin:'US17275R1023', name:'Cisco', type:'stock', cat:'stockUS'},
   {sym:'IBM.DE',  isin:'US4592001014', name:'IBM', type:'stock', cat:'stockUS'},
   {sym:'TII.DE',  isin:'US8825081040', name:'Texas Instruments', type:'stock', cat:'stockUS'},
@@ -1633,18 +1672,18 @@ const CATALOG = [
   {sym:'M4I.DE',  isin:'US57636Q1040', name:'Mastercard', type:'stock', cat:'stockUS'},
   {sym:'2PP.DE',  isin:'US70450Y1038', name:'PayPal', type:'stock', cat:'stockUS'},
   {sym:'UT8.DE',  isin:'US90353T1007', name:'Uber', type:'stock', cat:'stockUS'},
-  {sym:'5AB.DE',  isin:'US0090661010', name:'Airbnb', type:'stock', cat:'stockUS'},
+  {sym:'ABNB',  isin:'US0090661010', name:'Airbnb', type:'stock', cat:'stockUS'},
   {sym:'AP2.DE',  isin:'US0382221051', name:'Applied Materials', type:'stock', cat:'stockUS'},
   {sym:'CAT1.DE', isin:'US1491231015', name:'Caterpillar', type:'stock', cat:'stockUS'},
   {sym:'BCO.DE',  isin:'US0970231058', name:'Boeing', type:'stock', cat:'stockUS'},
   {sym:'LOM.DE',  isin:'US5398301094', name:'Lockheed Martin', type:'stock', cat:'stockUS'},
-  {sym:'RTN.DE',  isin:'US75513E1010', name:'RTX', type:'stock', cat:'stockUS'},
+  {sym:'RTX',  isin:'US75513E1010', name:'RTX', type:'stock', cat:'stockUS'},
   {sym:'CHV.DE',  isin:'US1667641005', name:'Chevron', type:'stock', cat:'stockUS'},
-  {sym:'BOH.DE',  isin:'US7134481081', name:'PepsiCo', type:'stock', cat:'stockUS'},
+  {sym:'PEP.DE',  isin:'US7134481081', name:'PepsiCo', type:'stock', cat:'stockUS'},
   {sym:'AMG.DE',  isin:'US0311621009', name:'Amgen', type:'stock', cat:'stockUS'},
   {sym:'GIS.DE',  isin:'US3755581036', name:'Gilead Sciences', type:'stock', cat:'stockUS'},
-  {sym:'GEC.DE',  isin:'US3696043013', name:'GE Aerospace', type:'stock', cat:'stockUS'},
-  {sym:'ALD.DE',  isin:'US4385161066', name:'Honeywell', type:'stock', cat:'stockUS'},
+  {sym:'GCP.DE',  isin:'US3696043013', name:'GE Aerospace', type:'stock', cat:'stockUS'},
+  {sym:'HON',  isin:'US4385161066', name:'Honeywell', type:'stock', cat:'stockUS'},
   {sym:'MMM.DE',  isin:'US88579Y1010', name:'3M', type:'stock', cat:'stockUS'},
   {sym:'1QZ.DE',  isin:'US19260Q1076', name:'Coinbase', type:'stock', cat:'stockUS'},
   // ---- more German names (SDAX / TecDAX / MDAX) ----
@@ -1660,10 +1699,8 @@ const CATALOG = [
   {sym:'PBB.DE',  isin:'DE0008019001', name:'Deutsche Pfandbriefbank', type:'stock', cat:'stockDE'},
   {sym:'AT1.DE',  isin:'LU1673108939', name:'Aroundtown', type:'stock', cat:'stockDE'},
   {sym:'EVT.DE',  isin:'DE0005664809', name:'Evotec', type:'stock', cat:'stockDE'},
-  {sym:'COP.DE',  isin:'DE000A288904', name:'CompuGroup Medical', type:'stock', cat:'stockDE'},
   {sym:'AOF.DE',  isin:'DE0005104400', name:'Atoss Software', type:'stock', cat:'stockDE'},
   {sym:'DEZ.DE',  isin:'DE0006305006', name:'Deutz', type:'stock', cat:'stockDE'},
-  {sym:'KCO.DE',  isin:'DE000KC01000', name:'Klöckner & Co', type:'stock', cat:'stockDE'},
   {sym:'AG1.DE',  isin:'DE000A2LQ884', name:'Auto1 Group', type:'stock', cat:'stockDE'},
   {sym:'F3C.DE',  isin:'DE0007568578', name:'SFC Energy', type:'stock', cat:'stockDE'},
   {sym:'FIE.DE',  isin:'DE0005772206', name:'Fielmann', type:'stock', cat:'stockDE'},
@@ -1671,12 +1708,12 @@ const CATALOG = [
   {sym:'FPE3.DE', isin:'DE000A3E5D64', name:'Fuchs Vz.', type:'stock', cat:'stockDE'},
   // ---- more US names ----
   {sym:'ABEC.DE', isin:'US02079K1079', name:'Alphabet C', type:'stock', cat:'stockUS'},
-  {sym:'4W8.DE',  isin:'US81762P1021', name:'ServiceNow', type:'stock', cat:'stockUS'},
-  {sym:'TMO.DE',  isin:'US8835561023', name:'Thermo Fisher', type:'stock', cat:'stockUS'},
+  {sym:'4S0.DE',  isin:'US81762P1021', name:'ServiceNow', type:'stock', cat:'stockUS'},
+  {sym:'TN8.DE',  isin:'US8835561023', name:'Thermo Fisher', type:'stock', cat:'stockUS'},
   // ---- more European names ----
   {sym:'LIN.DE',  isin:'IE000S9YS762', name:'Linde', type:'stock', cat:'stockEU'},
-  {sym:'PRX.DE',  isin:'NL0013654783', name:'Prosus', type:'stock', cat:'stockEU'},
-  {sym:'A9E.DE',  isin:'NL0012969182', name:'Adyen', type:'stock', cat:'stockEU'},
+  {sym:'PRX.AS',  isin:'NL0013654783', name:'Prosus', type:'stock', cat:'stockEU'},
+  {sym:'ADYEN.AS',  isin:'NL0012969182', name:'Adyen', type:'stock', cat:'stockEU'},
   // ---- more funds / ETFs ----
   {sym:'SC0J.DE', isin:'IE00B60SX394', name:'Invesco MSCI World', type:'etf', cat:'world', ter:0.19},
   {sym:'VFEM.DE', isin:'IE00B3VVMM84', name:'Vanguard FTSE Emerging Markets', type:'etf', cat:'em', ter:0.22},
@@ -1684,14 +1721,14 @@ const CATALOG = [
   {sym:'XMEU.DE', isin:'LU0274209237', name:'Xtrackers MSCI Europe', type:'etf', cat:'europe', ter:0.12},
   {sym:'EXSB.DE', isin:'DE0002635273', name:'iShares DivDAX', type:'etf', cat:'europe', ter:0.31},
   {sym:'ISPA.DE', isin:'DE000A0F5UH1', name:'iShares STOXX Global Select Div 100', type:'etf', cat:'world', ter:0.46},
-  {sym:'GLDV.DE', isin:'IE00B9CQXS71', name:'SPDR Global Dividend Aristocrats', type:'etf', cat:'world', ter:0.45},
+  {sym:'ZPRG.DE', isin:'IE00B9CQXS71', name:'SPDR Global Dividend Aristocrats', type:'etf', cat:'world', ter:0.45},
   {sym:'QDVG.DE', isin:'IE00BWBXM617', name:'iShares S&P 500 Health Care', type:'etf', cat:'sector', ter:0.15},
   {sym:'QDVH.DE', isin:'IE00B4JNQZ49', name:'iShares S&P 500 Financials', type:'etf', cat:'sector', ter:0.15},
-  {sym:'ISPY.DE', isin:'IE00BYPLS672', name:'L&G Cyber Security', type:'etf', cat:'tech', ter:0.69},
-  {sym:'HDRO.DE', isin:'IE00BMDH1538', name:'VanEck Hydrogen Economy', type:'etf', cat:'sector', ter:0.55},
+  {sym:'USPY.DE', isin:'IE00BYPLS672', name:'L&G Cyber Security', type:'etf', cat:'tech', ter:0.69},
+  {sym:'HDR0.DE', isin:'IE00BMDH1538', name:'VanEck Hydrogen Economy', type:'etf', cat:'sector', ter:0.55},
   {sym:'8PSG.DE', isin:'IE00B579F325', name:'Invesco Physical Gold', type:'etf', cat:'gold', ter:0.12},
-  {sym:'VZLC.DE', isin:'JE00B1VS3333', name:'WisdomTree Physical Silver', type:'etf', cat:'gold', ter:0.49},
-  {sym:'IEGA.DE', isin:'IE00B4WXJJ64', name:'iShares Core € Govt Bond', type:'etf', cat:'bond', ter:0.09},
+  {sym:'PHAG.MI', isin:'JE00B1VS3333', name:'WisdomTree Physical Silver', type:'etf', cat:'gold', ter:0.49},
+  {sym:'EUNH.DE', isin:'IE00B4WXJJ64', name:'iShares Core € Govt Bond', type:'etf', cat:'bond', ter:0.09},
   {sym:'XDEM.DE', isin:'IE00BL25JL35', name:'Xtrackers MSCI World Momentum', type:'etf', cat:'small', ter:0.25},
   // ---- Asia / global & further growth names ----
   {sym:'TSM', isin:'US8740391003', name:"TSMC (ADR)", type:'stock', cat:'stockAsia'},
@@ -1721,6 +1758,56 @@ const CATALOG = [
   {sym:'IUSA.DE', isin:'IE0031442068', name:"iShares S&P 500 (Dist)", type:'etf', cat:'us', ter:0.07},
   {sym:'EXXW.DE', isin:'IE00B0M62X26', name:"iShares MSCI AC Far East ex-Japan", type:'etf', cat:'em', ter:0.74},
  ];
+/* Catalogue symbols that Yahoo never knew, and the listing used instead.
+   Watchlists saved with an old symbol are switched over on load.        */
+const SYM_MOVED = {
+  'SPXS.DE':'P500.DE',
+  'IMEA.DE':'EUNK.DE',
+  'DFNS.DE':'DFEN.DE',
+  'EWG2.DE':'EWG2.SG',
+  'NOVC.DE':'NOV.DE',
+  'R6C.DE':'R6C0.DE',
+  'AVGO.DE':'1YD.DE',
+  'NOTA.DE':'NOT.DE',
+  'VHYL.DE':'VGWD.DE',
+  'XONA.DE':'XOM',
+  'IHYG.DE':'EUNW.DE',
+  'WTAI.DE':'WTAI.MI',
+  'RHO5.DE':'RHO.DE',
+  'UBSG.DE':'0UB.DE',
+  'RMS.DE':'RMS.PA',
+  'INN.DE':'INGA.AS',
+  'BBVA.DE':'BBVA.MC',
+  'IDX.DE':'ITX.MC',
+  'PEU.DE':'STLAM.MI',
+  'DNQA.DE':'DNQ.F',
+  'ABT.DE':'ABT',
+  'VOL3.DE':'VOLV-B.ST',
+  '5AB.DE':'ABNB',
+  'RTN.DE':'RTX',
+  'BOH.DE':'PEP.DE',
+  'ALD.DE':'HON',
+  'GEC.DE':'GCP.DE',
+  '4W8.DE':'4S0.DE',
+  'TMO.DE':'TN8.DE',
+  'PRX.DE':'PRX.AS',
+  'A9E.DE':'ADYEN.AS',
+  'GLDV.DE':'ZPRG.DE',
+  'ISPY.DE':'USPY.DE',
+  'HDRO.DE':'HDR0.DE',
+  'IEGA.DE':'EUNH.DE',
+  'VZLC.DE':'PHAG.MI'};
+function migrateSyms(list){
+  if(!Array.isArray(list)) return list;
+  const seen = new Set(), out = [];
+  list.forEach(a => {
+    if(!a || !a.sym) return;
+    const s = SYM_MOVED[a.sym], b = s ? Object.assign({}, a, {sym:s}) : a;
+    if(seen.has(b.sym)) return;
+    seen.add(b.sym); out.push(b);
+  });
+  return out;
+}
 const CAT_INDEX = (()=>{ const m={}; CATALOG.forEach(c=>{ m[c.sym]=c; if(c.isin) m[c.isin]=c; }); return m; })();
 function catalogOf(a){ return CAT_INDEX[a.sym] || (a.isin ? CAT_INDEX[a.isin] : null) || null; }
 function terOf(a){ if(a.ter!=null) return a.ter; const c=catalogOf(a); return c && c.ter!=null ? c.ter : null; }
@@ -1737,13 +1824,44 @@ const DEFAULT_SETTINGS = {
   scanHours:3, trApp:1, mvPeriod:'d1', mvDir:'up',
   staleMin:15, status:'all', fbUrl:'', fbKey:'', contactMail:'', guestOff:false, adminNameLogin:false, sortDir:'desc', adminMail:'',
   fxMin:10, view:'auto', scHelp:false, trMode:'copy', tvTemplate:'https://www.tradingview.com/chart/?symbol={sym}', dispCur:'auto',
-  screen:null
+  screen:null, sw:null
 };
 
 /* ---------------- i18n ---------------- */
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  tab_swing:'Kurz-Trades',
+  sw_intro:'Für Trades über ein paar Tage: Du gibst an, wie viel du einsetzt, was du verdienen willst und wie viel du höchstens verlieren willst. Die Seite rechnet aus, wie stark der Kurs dafür steigen muss, wie oft das im letzten Jahr wirklich vorkam, wie oft der gleiche Rückgang kam und wie sich zwei bekannte Kurz-Trade-Muster mit genau diesen Einstellungen geschlagen hätten. Darunter stehen die Werte, die gerade so ein Muster zeigen.',
+  sw_amt:'Einsatz (€)', sw_gain:'Gewinnziel (€)', sw_loss:'Höchstverlust (€)', sw_hold:'Haltedauer', sw_fee:'Gebühr pro Order (€)',
+  sw_h3:'3 Handelstage', sw_h5:'5 Handelstage (1 Woche)', sw_h10:'10 Handelstage (2 Wochen)',
+  sw_need:'Für {gain} Gewinn aus {amt} in {h} Handelstagen muss der Kurs um {up} steigen; die {fees} Gebühren für Kauf und Verkauf sind eingerechnet. Für höchstens {loss} Verlust liegt der Stopp {down} unter dem Kaufkurs.',
+  sw_tight:'Der Höchstverlust ist nicht größer als die Gebühren. Der Stopp sitzt dann so eng, dass schon kleinste Schwankungen ihn auslösen.',
+  sw_real_h:'Wie oft kam das im letzten Jahr vor?',
+  sw_stocks:'Einzelaktien', sw_etfs:'ETFs',
+  sw_real_line:'{kind}: +{up} in {pu} aller {h}-Tage-Zeiträume, −{up} in {pd}.',
+  sw_real_rare:'Das ist selten: In den meisten Wochen passiert es nicht, und Rückgänge in gleicher Höhe sind etwa genauso häufig. Wer auf so große Sprünge setzt, nimmt dieselbe Wahrscheinlichkeit für so große Verluste mit.',
+  sw_real_some:'Das kommt vor, aber Rückgänge in gleicher Höhe sind etwa genauso häufig. Ein kleineres Ziel wird öfter erreicht.',
+  sw_rec_h:'So hätten die beiden Muster mit genau diesen Einstellungen abgeschnitten (letzte 12 Monate)',
+  sw_rec_line:'{kind}: {n} Trades · Ziel erreicht {hit} · Stopp {stop} · im Schnitt {avg} pro Trade',
+  sw_rec_none:'{kind}: kam nicht vor.',
+  sw_rec_minus:'Mit diesen Einstellungen haben beide Muster im Schnitt Geld gekostet. Kleinere Ziele werden öfter erreicht, ein größerer Einsatz senkt den Anteil der Gebühren.',
+  sw_rec_plus:'Im Schnitt im Plus: {kinds}. Das ist die Vergangenheit, keine Zusage für die nächste Woche.',
+  sw_h_now:'Gerade ein Kurz-Trade-Muster', sw_count:'{n} Werte',
+  sw_k_dip:'Rücksetzer im Aufwärtstrend', sw_k_break:'Ausbruch auf 20-Tage-Hoch',
+  sw_today:'Signal heute', sw_yday:'Signal seit gestern',
+  sw_target:'Ziel', sw_stop:'Stopp', sw_sellby:'spätestens verkaufen',
+  sw_own:'Dieses Muster hier, letzte 12 Monate: {n}× · {hit}× Ziel · {stop}× Stopp · im Schnitt {avg} pro Trade',
+  sw_own_none:'Dieses Muster kam bei diesem Wert im letzten Jahr nicht vor; bewertet nach dem Schnitt aller Werte.',
+  sw_est_plus:'bisher eher Plus', sw_est_minus:'bisher eher Minus',
+  sw_none:'Gerade zeigt kein Wert eines der beiden Muster. Neue erscheinen nach der nächsten Prüfung.',
+  sw_nodata:'Noch keine Kursdaten. Sie werden gleich automatisch geladen.',
+  sw_h_often:'Wo +{up} in {h} Tagen am häufigsten vorkam',
+  sw_often_row:'+{up} in {pu} der {h}-Tage-Zeiträume · −{up} in {pd}',
+  sw_disclaimer:'Gerechnet mit Schlusskursen des letzten Jahres: gekauft zum Schlusskurs am Signaltag, verkauft am Ziel, am Stopp (zum Schlusskurs, der auch darunter liegen kann) oder nach der Haltedauer. Innerhalb eines Tages schwanken Kurse stärker, und der Unterschied zwischen Kauf- und Verkaufskurs kostet zusätzlich. Was früher funktioniert hat, muss nicht wieder funktionieren. Keine Anlageberatung.',
+  al_r_swing:'Neue Kurz-Trades, aber nur wenn das Muster bei diesem Wert mit deinen Kurz-Trade-Einstellungen im letzten Jahr nach Gebühren im Plus lag',
+  al_k_swing:'Kurz-Trade',
+  al_w_swing:'Kurz-Trade-Muster „{kind}“. Mit deinem Ziel ({gain} aus {amt} in {h} Handelstagen) lag es bei diesem Wert im letzten Jahr nach Gebühren im Plus.',
   tab_alerts:'Signale',
   al_intro:'Hier meldet sich dein Depot, wenn sich etwas tut. Jede Prüfung wird mit der vorherigen verglichen: Was neu ein Kaufsignal zeigt, gerade anzieht oder neu in deine Filter-Regel passt, landet in dieser Liste, mit Begründung. Für Werte auf deiner Watchlist kommt eine Warnung, wenn das Signal kippt. Es sind technische Signale aus Kursdaten, keine Anlageberatung.',
   al_check:'Jetzt prüfen', al_rules:'Regeln', al_rules_h:'Was soll gemeldet werden?',
@@ -2087,6 +2205,37 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  tab_swing:'Short trades',
+  sw_intro:'For trades lasting a few days: enter how much you put in, what you want to make and the most you are willing to lose. The page works out how far the price has to rise for that, how often that really happened over the past year, how often the same drop came instead, and how two well-known short-trade patterns would have done with exactly these settings. Below that are the assets showing such a pattern right now.',
+  sw_amt:'Amount (€)', sw_gain:'Profit goal (€)', sw_loss:'Maximum loss (€)', sw_hold:'Holding time', sw_fee:'Fee per order (€)',
+  sw_h3:'3 trading days', sw_h5:'5 trading days (1 week)', sw_h10:'10 trading days (2 weeks)',
+  sw_need:'To make {gain} from {amt} within {h} trading days the price has to rise {up}; the {fees} in fees for buying and selling are included. For a loss of at most {loss} the stop sits {down} below the buying price.',
+  sw_tight:'The maximum loss is not larger than the fees. The stop then sits so close that the smallest wobble triggers it.',
+  sw_real_h:'How often did that happen over the past year?',
+  sw_stocks:'Single stocks', sw_etfs:'ETFs',
+  sw_real_line:'{kind}: +{up} in {pu} of all {h}-day periods, −{up} in {pd}.',
+  sw_real_rare:'That is rare: in most weeks it does not happen, and drops of the same size are about as common. Betting on jumps this big means taking the same odds of losses this big.',
+  sw_real_some:'It happens, but drops of the same size are about as common. A smaller goal is reached more often.',
+  sw_rec_h:'How the two patterns would have done with exactly these settings (last 12 months)',
+  sw_rec_line:'{kind}: {n} trades · goal reached {hit} · stop {stop} · on average {avg} per trade',
+  sw_rec_none:'{kind}: did not occur.',
+  sw_rec_minus:'With these settings both patterns cost money on average. Smaller goals are reached more often, a larger amount lowers the share of the fees.',
+  sw_rec_plus:'In the plus on average: {kinds}. That is the past, not a promise for next week.',
+  sw_h_now:'Showing a short-trade pattern now', sw_count:'{n} assets',
+  sw_k_dip:'Dip in an uptrend', sw_k_break:'Breakout to a 20-day high',
+  sw_today:'signal today', sw_yday:'signal since yesterday',
+  sw_target:'Goal', sw_stop:'Stop', sw_sellby:'sell by',
+  sw_own:'This pattern here, last 12 months: {n}× · {hit}× goal · {stop}× stop · on average {avg} per trade',
+  sw_own_none:'This pattern did not occur for this asset over the past year; rated by the average of all assets.',
+  sw_est_plus:'so far rather plus', sw_est_minus:'so far rather minus',
+  sw_none:'No asset shows either pattern right now. New ones appear after the next check.',
+  sw_nodata:'No price data yet. It is loaded automatically in a moment.',
+  sw_h_often:'Where +{up} within {h} days happened most often',
+  sw_often_row:'+{up} in {pu} of the {h}-day periods · −{up} in {pd}',
+  sw_disclaimer:'Calculated on the past year\'s closing prices: bought at the close on the signal day, sold at the goal, at the stop (at that close, which can be lower) or after the holding time. Prices swing more within a day, and the gap between buying and selling price costs extra. What worked before need not work again. Not investment advice.',
+  al_r_swing:'New short trades, but only if the pattern was in the plus after fees for this asset over the past year with your short-trade settings',
+  al_k_swing:'Short trade',
+  al_w_swing:'Short-trade pattern "{kind}". With your goal ({gain} from {amt} within {h} trading days) it was in the plus after fees for this asset over the past year.',
   tab_alerts:'Alerts',
   al_intro:'This is where your depot speaks up when something changes. Every check is compared with the one before: anything that newly shows a buy signal, is just starting to rise or newly fits your screener rule lands in this list, with the reason. Assets on your watchlist also raise a warning when their signal turns. These are technical signals from price data, not investment advice.',
   al_check:'Check now', al_rules:'Rules', al_rules_h:'What should be reported?',
@@ -2540,6 +2689,11 @@ de: `
 <p>Öffne die Seite auf dem Android-Handy in <strong>Chrome</strong>, tippe auf das Menü ⋮ und wähle <strong>„App installieren"</strong>. Danach liegt Depot Radar mit eigenem Symbol bei deinen anderen Apps, startet ohne Adresszeile und bringt jede neue Version der Seite von selbst mit. Auf dem iPhone geht dasselbe in Safari über „Teilen" und „Zum Home-Bildschirm".</p>
 <p>Die App ist dieselbe Seite in einem eigenen Fenster. Anmeldung, Watchlist und Regeln bleiben, wie sie sind.</p>
 </div></details>
+<details><summary>Kurz-Trades: ein paar Tage statt ein paar Jahre</summary><div class="sec-body">
+<p>Im Tab <strong>Kurz-Trades</strong> gibst du Einsatz, Gewinnziel, Höchstverlust und Haltedauer an. Daraus wird der Kursanstieg, den das Ziel braucht. Die Gebühren zählen mit: Bei Trade Republic kostet jede Order 1 €, ein Trade aus Kauf und Verkauf also 2 €. Bei 50 € Einsatz sind das schon gut 4 %, bei 1.000 € nur 0,2 %.</p>
+<p>Danach siehst du, wie oft so ein Anstieg innerhalb der Haltedauer im letzten Jahr wirklich vorkam, und direkt daneben, wie oft der gleiche Rückgang kam. Große Sprünge in wenigen Tagen sind selten, und sie gehen fast genauso oft nach unten wie nach oben.</p>
+<p>Zwei bekannte Muster werden mit deinen Einstellungen nachgespielt: der <strong>Rücksetzer im Aufwärtstrend</strong> (ein steigender Wert fällt zwei Tage kräftig) und der <strong>Ausbruch</strong> (Schlusskurs erstmals über dem Hoch der letzten 20 Tage). Jeder Trade endet am Ziel, am Stopp oder nach der Haltedauer. Die Bilanz zeigt ehrlich, ob das im letzten Jahr nach Gebühren Geld gebracht hätte. Unter „Signale“ kannst du dich benachrichtigen lassen, wenn ein neues Muster erscheint, das bei diesem Wert mit deinen Einstellungen bisher im Plus lag.</p>
+</div></details>
 <details><summary>Wichtiger Hinweis</summary><div class="sec-body">
 <p class="warnbox"><strong>Keine Anlageberatung.</strong> Diese Seite zeigt technische Kennzahlen aus Vergangenheitsdaten. Vergangene Wertentwicklung ist kein verlässlicher Indikator für die Zukunft. Signale können falsch sein – besonders an Wendepunkten. Prüfe selbst (Geschäftsmodell, Kosten, Steuern, eigene Ziele) und investiere nur Geld, dessen Verlust du tragen kannst.</p>
 </div></details>
@@ -2636,6 +2790,11 @@ en: `
 <p>Open the page in <strong>Chrome</strong> on your Android phone, tap the ⋮ menu and choose <strong>"Install app"</strong>. Depot Radar then sits among your other apps with its own icon, starts without an address bar and picks up every new version of the page by itself. On an iPhone the same works in Safari via "Share" and "Add to Home Screen".</p>
 <p>The app is the same page in its own window. Sign-in, watchlist and rules stay as they are.</p>
 </div></details>
+<details><summary>Short trades: a few days instead of a few years</summary><div class="sec-body">
+<p>In the <strong>Short trades</strong> tab you enter your amount, profit goal, maximum loss and holding time. From that comes the price rise the goal needs. Fees count: at Trade Republic every order costs 1 €, so a trade made of a buy and a sell costs 2 €. With 50 € that is already over 4 %, with 1,000 € only 0.2 %.</p>
+<p>Then you see how often such a rise within the holding time really happened over the past year, and right next to it how often the same drop came. Big jumps within a few days are rare, and they go down almost as often as up.</p>
+<p>Two well-known patterns are replayed with your settings: the <strong>dip in an uptrend</strong> (a rising asset falls sharply for two days) and the <strong>breakout</strong> (the close is above the high of the last 20 days for the first time). Every trade ends at the goal, at the stop or after the holding time. The record shows honestly whether that would have made money after fees over the past year. Under "Alerts" you can be notified when a new pattern appears that has been in the plus for that asset with your settings.</p>
+</div></details>
 <details><summary>Important notice</summary><div class="sec-body">
 <p class="warnbox"><strong>Not investment advice.</strong> This page shows technical metrics from historical data. Past performance is not a reliable indicator of future results. Signals can be wrong – especially at turning points. Do your own research (business model, costs, taxes, your goals) and only invest money you can afford to lose.</p>
 </div></details>
@@ -2643,7 +2802,7 @@ en: `
 
 /* ---------------- state ---------------- */
 let settings = Object.assign({}, DEFAULT_SETTINGS, store.get('settings', {}));
-let watchlist = store.get('watchlist', null) || DEFAULT_ASSETS.map(sym => ({...CAT_INDEX[sym]}));
+let watchlist = migrateSyms(store.get('watchlist', null) || DEFAULT_ASSETS.map(sym => ({...CAT_INDEX[sym]})));
 let seriesMap = store.get('cache', {});
 let analyses = {};
 /* ---- deployment key: replace this line with the snippet from Settings > Publishing ---- */
@@ -3867,7 +4026,7 @@ function applyLang(){
   md.textContent=t(md.dataset.i18n);
   md.classList.toggle('on', settings.mvDir==='up');
   $$('#panel-movers .chip[data-per]').forEach(x=>x.classList.toggle('on', x.dataset.per===settings.mvPeriod));
-  renderSettingsValues(); renderPlanInputs(); renderWl(); renderAccounts(); renderGCodes(); applyScHelp(); renderUniCat(); renderUniverse(); renderAll(); renderMovers(); renderScreen(); renderAlerts();
+  renderSettingsValues(); renderPlanInputs(); renderWl(); renderAccounts(); renderGCodes(); applyScHelp(); renderUniCat(); renderUniverse(); renderAll(); renderMovers(); renderScreen(); renderAlerts(); renderSwing();
   if(planState) renderPlan();
   if(detailSym){ fillDetail(); drawDetail(); }
 }
@@ -4503,7 +4662,7 @@ async function syncUsernames(){
    they belong to the file, not to a user, and must never be overwritten by
    whatever a friend happens to have set on their own phone.                  */
 const SYNC_KEYS = ['lang','theme','dispCur','fxMin','view','scHelp','gcodes','sort','sortDir','filter','status','staleMin',
-                   'planAmount','planMonthly','planProfile','screen','mvPeriod','mvDir','scanHours','al'];
+                   'planAmount','planMonthly','planProfile','screen','mvPeriod','mvDir','scanHours','al','sw'];
 let cloudTimer = null, cloudLoading = false;
 function syncPayload(){
   const prefs = {};
@@ -4531,7 +4690,7 @@ async function cloudLoad(){
       const clean = d.watchlist.filter(a => a && a.sym).map(a => ({
         sym:String(a.sym), name:a.name||'', isin:(a.isin||'').toUpperCase(),
         type: a.type === 'stock' ? 'stock' : 'etf'}));
-      if(clean.length){ watchlist = clean; store.set('watchlist', watchlist); }
+      if(clean.length){ watchlist = migrateSyms(clean); store.set('watchlist', watchlist); }
     }
     if(d.prefs){
       SYNC_KEYS.forEach(k => { if(d.prefs[k] !== undefined) settings[k] = d.prefs[k]; });
@@ -4914,6 +5073,7 @@ function bindEvents(){
     if(b.dataset.tab==='movers'){ renderMovers(); scanEnsure(); }       // opening a tab never stops a running scan
     if(b.dataset.tab==='plan' && !planState) renderPlan();
     if(b.dataset.tab==='alerts') renderAlerts();
+    if(b.dataset.tab==='swing'){ renderSwing(); scanEnsure(); }
     if(b.dataset.tab==='settings') renderRouteInfo();
     if(b.dataset.tab==='screen'){
       renderScreen(); scanEnsure();
@@ -5053,12 +5213,12 @@ function bindEvents(){
     watchlist.splice(i, 1);
     store.set('watchlist', watchlist);          // syncs to the account when signed in
     delete analyses[detailSym];
-    closeDetail(); renderWl(); renderAll(); renderMovers(); renderScreen(); renderAlerts(); bgWriteConfigSoon();
+    closeDetail(); renderWl(); renderAll(); renderMovers(); renderScreen(); renderAlerts(); renderSwing(); bgWriteConfigSoon();
     toast(t('removed'));
   });
   let rsTo; window.addEventListener('resize',()=>{ clearTimeout(rsTo); rsTo=setTimeout(()=>{
     const before = document.documentElement.dataset.view;
-    if(applyView() !== before){ renderAll(); renderMovers(); renderScreen(); renderAlerts(); if(planState) renderPlan(); }
+    if(applyView() !== before){ renderAll(); renderMovers(); renderScreen(); renderAlerts(); renderSwing(); if(planState) renderPlan(); }
     renderCards(); renderMovers(); if(detailSym) drawDetail(); if(planState) drawPlanChart();
   },150); });
   $('#btnPlan').addEventListener('click', renderPlan);
@@ -5105,7 +5265,7 @@ function bindEvents(){
     openAnySym(u.sym, Array.from($('#scList').querySelectorAll('.mv-row')).map(r=>r.dataset.sym));
   });
   function repaintMoney(){
-    renderAll(); renderMovers(); renderScreen(); renderAlerts();
+    renderAll(); renderMovers(); renderScreen(); renderAlerts(); renderSwing();
     if(planState) renderPlan();
     if(detailSym){ fillDetail(); drawDetail(); }
     const n = $('#fxNote'); if(n) n.textContent = fxNoteText();
@@ -5157,14 +5317,14 @@ function bindEvents(){
   $('#setLang').addEventListener('change',e=>{ settings.lang=e.target.value; saveSettings(); applyLang(); });
   function applyViewChoice(v){
     settings.view = v; saveSettings();
-    applyView(); renderAll(); renderMovers(); renderScreen(); renderAlerts();
+    applyView(); renderAll(); renderMovers(); renderScreen(); renderAlerts(); renderSwing();
     if(planState) renderPlan(); if(detailSym){ fillDetail(); drawDetail(); }
     toast(t('saved'));
   }
   $('#hdView').addEventListener('change', e=>applyViewChoice(e.target.value));
   $('#setView').addEventListener('change', e=>{
     settings.view = e.target.value; saveSettings();
-    applyView(); renderAll(); renderMovers(); renderScreen(); renderAlerts();
+    applyView(); renderAll(); renderMovers(); renderScreen(); renderAlerts(); renderSwing();
     if(planState) renderPlan(); if(detailSym){ fillDetail(); drawDetail(); }
     toast(t('saved'));
   });
@@ -5212,7 +5372,7 @@ function bindEvents(){
     try{
       const arr=JSON.parse($('#backupArea').value);
       if(!Array.isArray(arr)) throw new Error('x');
-      watchlist=arr.filter(a=>a&&a.sym).map(a=>({sym:String(a.sym), name:a.name||'', isin:(a.isin||'').toUpperCase(), type:a.type==='stock'?'stock':'etf'}));
+      watchlist=migrateSyms(arr.filter(a=>a&&a.sym).map(a=>({sym:String(a.sym), name:a.name||'', isin:(a.isin||'').toUpperCase(), type:a.type==='stock'?'stock':'etf'})));
       store.set('watchlist',watchlist); analyses={}; renderWl(); renderAll(); refreshAll(); toast(t('imported'));
     }catch(e){ toast(t('invalid_json')); }
   });
@@ -5613,6 +5773,7 @@ async function scanDo(queue, force){
     if(!now && n - lastPaint < 2000) return;
     lastPaint = n;
     if($('#panel-movers').classList.contains('on')) renderMovers();
+    else if($('#panel-swing').classList.contains('on')) renderSwing();
     else if($('#panel-screen').classList.contains('on') && !screenBusy
             && !/^(INPUT|SELECT)$/.test((document.activeElement || {}).tagName || '')) renderScreen();
   };
@@ -5675,6 +5836,7 @@ async function scanDo(queue, force){
       flush();
       scanUi(); renderMovers();
       if($('#panel-screen').classList.contains('on')) renderScreen();
+      renderSwing();
       renderAlerts();
       bgWriteConfigSoon();
       if(found.length){ toast(t('al_toast').replace('{n}', found.length)); alNotifySystem(found); }
@@ -5711,6 +5873,8 @@ function scanItem(d){
     turn:turnover(c, d.v, 20),
     above20:daysAboveSma(c,20), hi52:r2(high52(c)), n:c.length,
     spark:c.slice(-30).map(v=>Math.round(v*100)/100),
+    cl:c.slice(-260).map(v=>+v.toPrecision(6)),          // the year of closes, for the short-trade replay
+    sw:swNow(c),
     at:Date.now()
   };
 }
@@ -6071,12 +6235,12 @@ function openTR(isin, sym){
    the same asset stays quiet for three days after a report so a price
    hovering around a threshold does not ring the bell on every scan.
    ===================================================================== */
-const AL_DEFAULT = {sig:true, min:'positive', mom:true, rule:false, warn:true, scope:'all', risk:'any', auto:true};
+const AL_DEFAULT = {sig:true, min:'positive', mom:true, rule:false, warn:true, swing:true, scope:'all', risk:'any', auto:true};
 const AL_COOL_MS = 3*86400000, AL_KEEP = 80, AL_KEEP_MS = 30*86400000;
 let alerts = store.get('alerts', []);            // newest first
 let alCool = store.get('alCool', {});            // "SYM|kind" -> time of the last report
 let bgLast = null, bgState = 'off', swReg = null, swState = 'none', installEvt = null, alTimer = null, bgCfgTimer = null;
-function alPrefs(){ return Object.assign({}, AL_DEFAULT, settings.al || {}); }
+function alPrefs(){ return Object.assign({}, AL_DEFAULT, settings.al || {}, {swp:swPrefs()}); }
 
 /* Pure on purpose: the service worker runs the very same function when it
    checks in the background, so both always agree on what counts as news. */
@@ -6091,6 +6255,7 @@ function alertKinds(u, pm, nm, al, inWl, f){
     if(al.sig && SIG_RANK[ns.signal] >= SIG_RANK[al.min] && SIG_RANK[ns.signal] > SIG_RANK[ps.signal]) kinds.push('buy');
     if(al.mom && SIG_RANK[ns.signal] >= 2 && momentumStart(nm) && !momentumStart(pm)) kinds.push('mom');
     if(al.rule && f && ruleMatch(u, nm, f) && !ruleMatch(u, pm, f)) kinds.push('rule');
+    if(al.swing && nm.sw && nm.sw.age === 0 && !(pm.sw && pm.sw.sig) && swAlertOk(nm, al.swp || SW_DEF)) kinds.push('swing');
   }
   if(al.warn && inWl && SIG_RANK[ns.signal] <= 1 && SIG_RANK[ns.signal] < SIG_RANK[ps.signal]) kinds.push('warn');
   return kinds.length ? {kinds, from:ps.signal, to:ns.signal, score:ns.score, trend:ns.trend, risk:ns.risk} : null;
@@ -6100,7 +6265,7 @@ function alertRecord(u, m, hit, bg){
     kinds:hit.kinds, from:hit.from, to:hit.to, score:hit.score, trend:hit.trend, risk:hit.risk,
     p:m.p, cur:m.cur, bg:!!bg, seen:false,
     m:{p:m.p, sma20:m.sma20, sma50:m.sma50, sma200:m.sma200, d1:m.d1, d21:m.d21, d126:m.d126,
-       rsi:m.rsi, vol:m.vol, above20:m.above20,
+       rsi:m.rsi, vol:m.vol, above20:m.above20, sw:m.sw ? {sig:m.sw.sig} : null,
        lr:m.lr ? {r2:m.lr.r2, slope:m.lr.slope, annualPct:m.lr.annualPct} : null}};
 }
 function alertNote(evs, txt){
@@ -6137,9 +6302,10 @@ function bgCoreSource(){
   const fns = [proxyValid, proxyBenched, proxyOrder, proxyNote, fetchJson, viaProxy, runPool, parseChart,
     smaLast, smaSeries, pctBack, lastLogRets, stdev, annVol, maxDD, rsi14, linregLog, emaLast, turnover,
     high52, daysAboveSma, scanItem, scanScore, momentumStart, numOrNull, screenSteps, ruleMatch,
-    alertKinds, alertRecord, alertNote, bgRun];
+    alertKinds, alertRecord, alertNote, bgRun, swSeries, swSignalAt, swNow, swNeed, swReplay, swAgg, swAlertOk];
   return [
     'const sleep = ' + sleep.toString() + ';',
+    'const SW_DEF = ' + JSON.stringify(SW_DEF) + ';',
     'let settings = cfg.settings, lastGoodProxy = cfg.lastGood || null, mcapCache = {}, proxyPush = 0, ownRoute = cfg.route || \'\', routeWait = null;',
     'const proxyHealth = {}, PROXY_TIMEOUT = ' + PROXY_TIMEOUT + ', POOL_MAX = ' + POOL_MAX + ', POOL_MIN = ' + POOL_MIN + ';',
     'const PROXIES = {' + Object.keys(PROXIES).map(k => k + ':' + PROXIES[k].toString()).join(',') + '};',
@@ -6150,7 +6316,7 @@ function bgCoreSource(){
 }
 function alTxt(){
   return {title:t('al_n_title'), more:t('al_n_more'), buy:t('al_k_buy'), mom:t('al_k_mom'),
-          rule:t('al_k_rule'), warn:t('al_k_warn')};
+          rule:t('al_k_rule'), warn:t('al_k_warn'), swing:t('al_k_swing')};
 }
 /* Hands the background check everything it needs. It is only written for a
    signed-in user who switched notifications on; guests and locked sessions
@@ -6174,7 +6340,7 @@ async function bgWriteConfig(){
     rows.sort((a, b) => (wl.has(b.u.sym) - wl.has(a.u.sym)) || (a.gap - b.gap) || (a.at - b.at));
     const list = rows.map(x => ({sym:x.u.sym, name:x.u.name || x.u.sym, type:x.u.type, isin:x.u.isin || '', wl:wl.has(x.u.sym)}));
     const base = {};
-    list.forEach(u => { if(items[u.sym]){ const m = Object.assign({}, items[u.sym]); delete m.spark; base[u.sym] = m; } });
+    list.forEach(u => { if(items[u.sym]){ const m = Object.assign({}, items[u.sym]); delete m.spark; delete m.cl; base[u.sym] = m; } });
     const cfg = {settings:{proxy:settings.proxy, proxyCustom:settings.proxyCustom}, lastGood:lastGoodProxy, al,
       rule: al.rule ? screenFilters() : null, list, items:base, cool:alCool, coolMs:AL_COOL_MS, txt:alTxt(), budget:100000,
       notify: alNotifyState() === 'on', route: ownRoute};
@@ -6214,6 +6380,7 @@ async function bgMerge(){
         if(!$('#app').classList.contains('hidden')){
           renderMovers();
           if($('#panel-screen').classList.contains('on')) renderScreen();
+          renderSwing();
           renderAlerts();
         }
       }
@@ -6421,7 +6588,7 @@ function alMetaRender(){
 function alRulesFill(){
   const al = alPrefs();
   $('#alSig').checked = !!al.sig; $('#alMom').checked = !!al.mom; $('#alRule').checked = !!al.rule;
-  $('#alWarn').checked = !!al.warn; $('#alAuto').checked = !!al.auto;
+  $('#alWarn').checked = !!al.warn; $('#alAuto').checked = !!al.auto; $('#alSwing').checked = !!al.swing;
   $('#alMin').value = al.min; $('#alScope').value = al.scope; $('#alRisk').value = al.risk;
   $('#alHours').value = Math.max(1, +settings.scanHours || 3);
 }
@@ -6442,6 +6609,8 @@ function alertWhy(ev){
   }
   if(ev.kinds.includes('mom')) out.push(t('al_w_mom').replace('{n}', m.above20 || 0).replace('{rsi}', m.rsi != null ? fmtNum(m.rsi, 0) : '–'));
   if(ev.kinds.includes('rule')) out.push(t('al_w_rule'));
+  if(ev.kinds.includes('swing') && m.sw){ const p = swPrefs();
+    out.push(tpl('al_w_swing', {kind:t('sw_k_' + m.sw.sig), gain:fmtEur(p.gain), amt:fmtEur(p.amt), h:p.h})); }
   return out.join(' ');
 }
 function alertRowHtml(ev){
@@ -6535,10 +6704,10 @@ function bindAlertEvents(){
   });
   const save = () => {
     settings.al = {sig:$('#alSig').checked, min:$('#alMin').value, mom:$('#alMom').checked, rule:$('#alRule').checked,
-      warn:$('#alWarn').checked, scope:$('#alScope').value, risk:$('#alRisk').value, auto:$('#alAuto').checked};
+      warn:$('#alWarn').checked, swing:$('#alSwing').checked, scope:$('#alScope').value, risk:$('#alRisk').value, auto:$('#alAuto').checked};
     saveSettings(); renderAlerts(); bgWriteConfigSoon(); bgRegister(); toast(t('saved'));
   };
-  ['alSig','alMom','alRule','alWarn','alAuto','alMin','alScope','alRisk'].forEach(id => $('#' + id).addEventListener('change', save));
+  ['alSig','alMom','alRule','alWarn','alSwing','alAuto','alMin','alScope','alRisk'].forEach(id => $('#' + id).addEventListener('change', save));
   $('#alHours').addEventListener('change', e => {
     settings.scanHours = clamp(parseInt(e.target.value || '3', 10) || 3, 1, 72);
     e.target.value = settings.scanHours;
@@ -6568,6 +6737,270 @@ function bindAlertEvents(){
   });
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; renderAlertBar(); });
   window.addEventListener('appinstalled', () => { installEvt = null; renderAlertBar(); toast(t('al_installed')); });
+}
+
+/* =====================================================================
+   SHORT TRADES (Kurz-Trades): a few days, up to two weeks
+   The user says what they want ("+10 € from 100 € within 5 days, at most
+   10 € loss") and the page shows how often the past year delivered that,
+   how often the same drop came instead, and how two textbook entry rules
+   would have done with exactly those settings. Closing prices only.
+
+   dip    Rücksetzer im Aufwärtstrend: price over its 50-day line, 20-day
+          line over the 50-day line, and the 2-day RSI under 10 (two sharp
+          down days inside a rising trend).
+   break  Ausbruch: today's close is the highest of the last 20 days for
+          the first time, same uptrend, RSI(14) not yet over 75.
+   ===================================================================== */
+const SW_DEF = {amt:100, gain:10, loss:10, h:5, fee:1, type:'all'};
+function swSeries(c){
+  const n = c.length, pre = [0];
+  for(let i = 0; i < n; i++) pre.push(pre[i] + c[i]);
+  const rsiArr = len => {
+    const out = new Array(n).fill(null); let ag = 0, al = 0;
+    for(let i = 1; i < n; i++){
+      const ch = c[i] - c[i-1], g = ch > 0 ? ch : 0, l = ch < 0 ? -ch : 0;
+      if(i <= len){ ag += g / len; al += l / len; if(i < len) continue; }
+      else { ag = (ag * (len - 1) + g) / len; al = (al * (len - 1) + l) / len; }
+      out[i] = al === 0 ? 100 : 100 - 100 / (1 + ag / al);
+    }
+    return out;
+  };
+  return {c, n, sma:(i, k) => i >= k - 1 ? (pre[i + 1] - pre[i + 1 - k]) / k : null, r2:rsiArr(2), r14:rsiArr(14)};
+}
+function swSignalAt(S, i){
+  const c = S.c;
+  if(i < 50 || i >= S.n) return null;
+  const s20 = S.sma(i, 20), s50 = S.sma(i, 50);
+  if(!(c[i] > s50 && s20 > s50)) return null;                 // only inside an uptrend
+  if(S.r2[i] != null && S.r2[i] < 10) return 'dip';
+  let hi = -Infinity, hp = -Infinity;
+  for(let k = i - 20; k < i; k++) if(c[k] > hi) hi = c[k];
+  for(let k = i - 21; k < i - 1; k++) if(c[k] > hp) hp = c[k];
+  if(c[i] > hi && c[i-1] <= hp && S.r14[i] != null && S.r14[i] < 75) return 'break';
+  return null;
+}
+/* the signal on the latest close, or on the one before ("since yesterday") */
+function swNow(c){
+  if(!c || c.length < 60) return null;
+  const S = swSeries(c), last = c.length - 1;
+  const a = swSignalAt(S, last), b = a ? null : swSignalAt(S, last - 1);
+  return (a || b) ? {sig:a || b, age:a ? 0 : 1} : null;
+}
+/* What the plan needs from the price. The amount is everything spent,
+   the buy fee included, so pos is what actually goes into the asset.   */
+function swNeed(p){
+  const pos = Math.max(p.amt - p.fee, 0.01);
+  return {pos, up:(p.gain + 2 * p.fee) / pos * 100, down:Math.max(p.loss - 2 * p.fee, 0.005 * pos) / pos * 100};
+}
+/* Replays one asset's year with the user's settings.
+   any: from every single day, did the close reach +up % (and, separately,
+        the same drop) within H trading days
+   set: every signal of the two rules, bought at that close and sold at the
+        target, at the stop (at that day's close, which can be worse) or
+        after H days. One trade at a time per asset.                     */
+function swReplay(cl, p, need){
+  const H = p.h, n = cl.length, upF = 1 + need.up / 100, dnF = 1 - need.up / 100, stF = 1 - need.down / 100;
+  const any = {n:0, up:0, down:0};
+  for(let d = 0; d + H < n; d++){
+    let mx = -Infinity, mn = Infinity;
+    for(let k = d + 1; k <= d + H; k++){ const v = cl[k]; if(v > mx) mx = v; if(v < mn) mn = v; }
+    any.n++;
+    if(mx >= cl[d] * upF) any.up++;
+    if(mn <= cl[d] * dnF) any.down++;
+  }
+  const S = swSeries(cl), set = {dip:[], break:[]};
+  let i = 50;
+  while(i + H < n){
+    const k = swSignalAt(S, i);
+    if(!k){ i++; continue; }
+    const e = cl[i];
+    let exit = null, how = 'time', j = i + 1;
+    for(; j <= i + H; j++){
+      if(cl[j] <= e * stF){ exit = cl[j]; how = 'stop'; break; }
+      if(cl[j] >= e * upF){ exit = e * upF; how = 'hit'; break; }
+    }
+    if(exit == null){ exit = cl[i + H]; j = i + H; }
+    set[k].push({eur:need.pos * (exit / e - 1) - 2 * p.fee, how});
+    i = j + 1;
+  }
+  return {any, set};
+}
+function swAgg(trades){
+  const n = trades.length;
+  if(!n) return {n:0, hit:0, stop:0, avg:0};
+  let hit = 0, stop = 0, s = 0;
+  trades.forEach(x => { if(x.how === 'hit') hit++; else if(x.how === 'stop') stop++; s += x.eur; });
+  return {n, hit, stop, avg:s / n};
+}
+/* Alerts only for a fresh signal whose own record on this asset, with the
+   user's own settings, was in the plus after fees and reached the target
+   more often than the stop. Most of the time that is not the case.     */
+function swAlertOk(m, p){
+  if(!m || !m.sw || !m.cl) return false;
+  const a = swAgg(swReplay(m.cl, p, swNeed(p)).set[m.sw.sig] || []);
+  return a.n >= 4 && a.avg > 0 && a.hit > a.stop;
+}
+
+/* ---------------- page ---------------- */
+function swPrefs(){
+  const p = Object.assign({}, SW_DEF, settings.sw || {});
+  ['amt','gain','loss','h','fee'].forEach(k => { p[k] = +p[k]; if(!isFinite(p[k])) p[k] = SW_DEF[k]; });
+  if(![3, 5, 10].includes(p.h)) p.h = 5;
+  return p;
+}
+const swCache = new Map();
+function swResultFor(sym, m, p, need){
+  const key = [p.amt, p.gain, p.loss, p.h, p.fee, m.at].join('|');
+  const c = swCache.get(sym);
+  if(c && c.key === key) return c.res;
+  const res = swReplay(m.cl, p, need);
+  swCache.set(sym, {key, res});
+  return res;
+}
+function swAddDays(n){
+  const d = new Date();
+  let k = Math.max(n, 0);
+  while(k > 0){ d.setDate(d.getDate() + 1); const w = d.getDay(); if(w !== 0 && w !== 6) k--; }
+  return d;
+}
+function fmtEur(v, signed){
+  if(v == null || !isFinite(v)) return '–';
+  const s = Math.abs(v).toLocaleString(locale(), {style:'currency', currency:'EUR', minimumFractionDigits:2, maximumFractionDigits:2});
+  return signed ? (v > 0.004 ? '+' : v < -0.004 ? '−' : '') + s : s;
+}
+/* fills every {key} in a text, also when a placeholder appears twice */
+function tpl(key, map){ let s = t(key); for(const k in map) s = s.split('{' + k + '}').join(map[k]); return s; }
+function swPct(v){ return fmtPct(v, {signed:false, d:1}); }
+function swShare(a, b){ return b ? fmtPct(a / b * 100, {signed:false, d:a / b < 0.1 ? 1 : 0}) : '–'; }
+function swFill(){
+  const p = swPrefs();
+  const set = (id, v) => { const el = $('#' + id); if(el && document.activeElement !== el) el.value = v; };
+  set('swAmt', p.amt); set('swGain', p.gain); set('swLoss', p.loss); set('swHold', String(p.h)); set('swFee', p.fee); set('swType', p.type);
+}
+function swRowHtml(x, idx, p, need){
+  const u = x.u, m = x.m, inWl = watchlist.some(w => w.sym === u.sym);
+  const risk = riskTierOf(m.vol, u.type);
+  const tgt = m.p * (1 + need.up / 100), stop = m.p * (1 - need.down / 100);
+  const by = swAddDays(p.h - (m.sw.age || 0)).toLocaleDateString(locale(), {weekday:'short', day:'2-digit', month:'2-digit'});
+  const o = x.own;
+  const rec = o.n ? tpl('sw_own', {n:o.n, hit:o.hit, stop:o.stop, avg:fmtEur(o.avg, true)}) : t('sw_own_none');
+  const verdict = x.est > 0 ? `<span class="badge b-kind">${escHtml(t('sw_est_plus'))}</span>` : `<span class="badge b-minus">${escHtml(t('sw_est_minus'))}</span>`;
+  return `<div class="mv-row sw-row" data-sym="${escHtml(u.sym)}">
+    <span class="mv-rank">${idx + 1}</span>
+    <div class="mv-id"><b>${escHtml(u.name || u.sym)}</b>
+      <span>${escHtml(u.sym)} · ${u.type === 'etf' ? t('t_etf') : t('t_stock')} · ${escHtml(LABELS.risk[risk][settings.lang].replace(/^(Risiko|Risk): /, ''))} · ${escHtml(t(m.sw.age ? 'sw_yday' : 'sw_today'))}</span>
+      <div class="badges" style="margin:6px 0 4px"><span class="badge b-sig s-positive">${escHtml(t('sw_k_' + m.sw.sig))}</span>${verdict}</div>
+      <div class="sw-plan mono"><span>${escHtml(t('sw_target'))} <b class="up">${fmtMoney(tgt, m.cur)} (+${swPct(need.up)})</b></span><span>${escHtml(t('sw_stop'))} <b class="down">${fmtMoney(stop, m.cur)} (−${swPct(need.down)})</b></span><span>${escHtml(t('sw_sellby'))} <b>${escHtml(by)}</b></span></div>
+      <span class="mv-extra">${escHtml(rec)}</span></div>
+    <canvas class="mv-spark"></canvas>
+    <div class="mv-num"><b>${fmtMoney(m.p, m.cur)}</b>
+      <span>${settings.lang === 'de' ? '1T' : '1D'} <b class="${triCls(m.d1)}" style="display:inline;font-size:12px">${fmtPct(m.d1)}</b></span></div>
+    <div class="mv-act">
+      <button class="mv-add${inWl ? ' in' : ''}" ${inWl ? 'disabled' : ''} title="${inWl ? t('mv_inwl') : t('mv_add')}">${inWl ? '✓' : '+'}</button>
+      ${linkPairHtml(u.isin, u.sym)}
+    </div></div>`;
+}
+function swOftenHtml(x, idx, need, p){
+  const u = x.u, m = x.m, inWl = watchlist.some(w => w.sym === u.sym);
+  return `<div class="mv-row" data-sym="${escHtml(u.sym)}">
+    <span class="mv-rank">${idx + 1}</span>
+    <div class="mv-id"><b>${escHtml(u.name || u.sym)}</b>
+      <span>${escHtml(u.sym)} · ${u.type === 'etf' ? t('t_etf') : t('t_stock')}</span>
+      <span class="mv-extra">${escHtml(tpl('sw_often_row', {up:swPct(need.up), pu:swShare(x.a.up, x.a.n), pd:swShare(x.a.down, x.a.n), h:p.h}))}</span></div>
+    <canvas class="mv-spark"></canvas>
+    <div class="mv-num"><b>${fmtMoney(m.p, m.cur)}</b><span>Vola ${fmtPct(m.vol, {signed:false, d:0})}</span></div>
+    <div class="mv-act">
+      <button class="mv-add${inWl ? ' in' : ''}" ${inWl ? 'disabled' : ''} title="${inWl ? t('mv_inwl') : t('mv_add')}">${inWl ? '✓' : '+'}</button>
+      ${linkPairHtml(u.isin, u.sym)}
+    </div></div>`;
+}
+function swCompute(){
+  const p = swPrefs(), need = swNeed(p), items = scanData.items || {};
+  const pool = {stock:{n:0, up:0, down:0}, etf:{n:0, up:0, down:0}}, setPool = {dip:[], break:[]};
+  const rows = [], often = [];
+  let have = 0;
+  for(const u of SCAN_LIST()){
+    const m = items[u.sym];
+    if(!m || !m.cl || m.cl.length < 60) continue;
+    have++;
+    const r = swResultFor(u.sym, m, p, need);
+    const pt = pool[u.type] || pool.stock;
+    pt.n += r.any.n; pt.up += r.any.up; pt.down += r.any.down;
+    if(p.type !== 'all' && u.type !== p.type) continue;
+    r.set.dip.forEach(x => setPool.dip.push(x)); r.set.break.forEach(x => setPool.break.push(x));
+    if(r.any.n) often.push({u, m, a:r.any, f:r.any.up / r.any.n});
+    if(m.sw && m.sw.sig) rows.push({u, m, own:swAgg(r.set[m.sw.sig] || [])});
+  }
+  const agg = {dip:swAgg(setPool.dip), break:swAgg(setPool.break)};
+  rows.forEach(x => { const pl = agg[x.m.sw.sig], k = 6; x.est = (x.own.n * x.own.avg + k * pl.avg) / (x.own.n + k); });
+  rows.sort((a, b) => b.est - a.est);
+  often.sort((a, b) => b.f - a.f || (a.a.down / a.a.n) - (b.a.down / b.a.n));
+  return {p, need, have, pool, agg, rows, often};
+}
+function renderSwing(){
+  const box = $('#swOut');
+  if(!box || !$('#panel-swing').classList.contains('on')) return;
+  swFill();
+  const {p, need, have, pool, agg, rows, often} = swCompute();
+  if(!have){ box.innerHTML = `<div class="plan-empty">${escHtml(t('sw_nodata'))}</div>`; return; }
+  const amt = fmtEur(p.amt), up = swPct(need.up);
+  const needTxt = tpl('sw_need', {gain:fmtEur(p.gain), amt, h:p.h, up, fees:fmtEur(2 * p.fee), loss:fmtEur(p.loss), down:swPct(need.down)});
+  const tight = p.loss <= 2 * p.fee ? `<p class="sw-warn">${escHtml(t('sw_tight'))}</p>` : '';
+  const realLine = (k, a) => a.n ? tpl('sw_real_line', {kind:t(k), up, pu:swShare(a.up, a.n), pd:swShare(a.down, a.n), h:p.h}) : '';
+  const sp = pool.stock.n ? pool.stock.up / pool.stock.n : 0;
+  const realNote = t(sp < 0.05 ? 'sw_real_rare' : 'sw_real_some');
+  const recLine = k => { const a = agg[k]; return a.n
+    ? tpl('sw_rec_line', {kind:t('sw_k_' + k), n:a.n, hit:swShare(a.hit, a.n), stop:swShare(a.stop, a.n), avg:fmtEur(a.avg, true)})
+    : tpl('sw_rec_none', {kind:t('sw_k_' + k)}); };
+  const plus = ['dip', 'break'].filter(k => agg[k].n && agg[k].avg > 0);
+  const recVerdict = plus.length ? tpl('sw_rec_plus', {kinds:plus.map(k => t('sw_k_' + k)).join(', ')}) : t('sw_rec_minus');
+  const shown = rows.slice(0, 20);
+  box.innerHTML = `
+    <div class="sw-box"><p>${escHtml(needTxt)}</p>${tight}</div>
+    <div class="sw-box"><h4>${escHtml(t('sw_real_h'))}</h4>
+      <p>${escHtml(realLine('sw_stocks', pool.stock))}<br>${escHtml(realLine('sw_etfs', pool.etf))}</p>
+      <p class="sw-note">${escHtml(realNote)}</p></div>
+    <div class="sw-box"><h4>${escHtml(t('sw_rec_h'))}</h4>
+      <p>${escHtml(recLine('dip'))}<br>${escHtml(recLine('break'))}</p>
+      <p class="sw-note">${escHtml(recVerdict)}</p></div>
+    <h3 class="mv-h"><span class="mv-h-t">${escHtml(t('sw_h_now'))}</span><span>${rows.length ? escHtml(tpl('sw_count', {n:rows.length})) : ''}</span></h3>
+    <div id="swList">${shown.length ? shown.map((x, i) => swRowHtml(x, i, p, need)).join('') : `<div class="plan-empty">${escHtml(t('sw_none'))}</div>`}</div>
+    <h3 class="mv-h"><span class="mv-h-t">${escHtml(tpl('sw_h_often', {up, h:p.h}))}</span></h3>
+    <div id="swOften">${often.slice(0, 10).map((x, i) => swOftenHtml(x, i, need, p)).join('')}</div>
+    <p class="hint">${escHtml(t('sw_disclaimer'))}</p>`;
+  shown.concat(often.slice(0, 10)).forEach(x => {
+    box.querySelectorAll(`.mv-row[data-sym="${CSS.escape(x.u.sym)}"] canvas`).forEach(cv => {
+      if(x.m.spark) drawSpark(cv, x.m.spark, (x.m.d21 || 0) >= 0 ? cssVar('--up') : cssVar('--down'));
+    });
+  });
+}
+function bindSwingEvents(){
+  const save = () => {
+    const num = (id, d) => { const v = parseFloat(String($('#' + id).value).replace(',', '.')); return isFinite(v) ? v : d; };
+    const fee = clamp(num('swFee', SW_DEF.fee), 0, 50);
+    const before = JSON.stringify(swPrefs());
+    settings.sw = {
+      amt: clamp(num('swAmt', SW_DEF.amt), fee + 1, 1e7),
+      gain: clamp(num('swGain', SW_DEF.gain), 0.1, 1e7),
+      loss: clamp(num('swLoss', SW_DEF.loss), 0.1, 1e7),
+      h: +$('#swHold').value || 5, fee, type: $('#swType').value || 'all'};
+    /* leaving a field fires "change" a second time; redrawing then would
+       swallow the tap on a row that caused the field to lose focus      */
+    if(JSON.stringify(swPrefs()) === before) return;
+    saveSettings(); renderSwing(); bgWriteConfigSoon();
+  };
+  ['swAmt','swGain','swLoss','swFee'].forEach(id => $('#' + id).addEventListener('change', save));
+  ['swHold','swType'].forEach(id => $('#' + id).addEventListener('change', save));
+  $('#swOut').addEventListener('click', e => {
+    const row = e.target.closest('.mv-row'); if(!row) return;
+    const sym = row.dataset.sym, u = SCAN_LIST().find(x => x.sym === sym); if(!u) return;
+    const link = e.target.closest('a[data-go]');
+    if(link){ e.preventDefault(); openWith(link.dataset.go, link.dataset.isin, link.dataset.sym || sym); return; }
+    const add = e.target.closest('.mv-add');
+    if(add && !add.disabled){ addAsset({sym:u.sym, name:u.name, isin:u.isin || '', type:u.type}); renderSwing(); return; }
+    openAnySym(sym, Array.from(row.parentElement.querySelectorAll('.mv-row')).map(r => r.dataset.sym));
+  });
 }
 
 /* =====================================================================
@@ -6853,6 +7286,7 @@ applyView();
 applyTheme();
 bindEvents();
 bindAlertEvents();
+bindSwingEvents();
 routeWait = Promise.race([loadRoute(), sleep(3000)]).finally(() => { routeWait = null; });
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') loadRoute(); });
 applyLang();
