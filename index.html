@@ -971,6 +971,11 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
           <input type="text" id="setProxyCustom" placeholder="https://mein-proxy.de/?u={url}">
         </div>
         <div class="set-row">
+          <button class="btn" id="btnRouteTest" data-i18n="rt_test"></button>
+        </div>
+        <p class="hint" id="routeInfo"></p>
+        <p class="hint" id="routeDiagOut" style="font-family:var(--mono);font-size:11px"></p>
+        <div class="set-row">
           <label for="setRefresh" data-i18n="s_refresh"></label>
           <input type="number" id="setRefresh" min="0" max="720" step="5">
         </div>
@@ -2021,7 +2026,18 @@ de:{
   sort_label:'Sortieren:', sort_signal:'Signal', sort_1m:'1 Monat %', sort_6m:'6 Monate %', sort_1y:'1 Jahr %', sort_risk:'Risiko (niedrig zuerst)', sort_name:'Name',
   details:'Details', open_tr:'Trade Republic öffnen', copy_isin:'ISIN kopieren', copied:'ISIN kopiert',
   refresh:'Aktualisieren', demo:'DEMO', stale:'ALT',
-  banner_demo:'Live-Daten sind gerade nicht erreichbar – die App zeigt Demo-Daten. Tipp: In den Einstellungen einen anderen Proxy wählen.',
+  banner_demo:'Gerade kommen keine Live-Kurse an. Angezeigt werden die zuletzt gespeicherten Werte oder Beispieldaten.',
+  banner_demo_admin:'Woran es liegt, zeigt Einstellungen → Daten & Verbindung → „Datenwege prüfen“.',
+  rt_test:'Datenwege prüfen', rt_running:'Prüfe alle Datenwege …',
+  rt_info_on:'Eigener Datenweg aktiv: {host} (aus route.json). Er wird immer zuerst gefragt.',
+  rt_info_off:'Kein eigener Datenweg eingerichtet (Datei route.json fehlt). Die App hängt dann an öffentlichen Proxys, die jederzeit wegfallen können.',
+  rt_own:'Eigener Datenweg', rt_custom:'Eigener Proxy (Einstellung)', rt_direct:'Direkt',
+  rt_ok:'antwortet ({s} s)', rt_key:'verlangt jetzt einen API-Schlüssel ({code})',
+  rt_origin:'lehnt diese Seite ab ({code}), Adresse im Worker prüfen', rt_refused:'verweigert den Zugriff ({code})',
+  rt_busy:'zu viele Anfragen, später erneut ({code})', rt_http:'Fehler {code}',
+  rt_timeout:'antwortet nicht (nach {s} s abgebrochen)', rt_unreach:'nicht erreichbar oder für Browser gesperrt',
+  rt_notset:'nicht eingerichtet (route.json fehlt)',
+  rt_done_ok:'Mindestens ein Datenweg funktioniert, die Kurse werden neu geladen.', rt_done_fail:'Gerade funktioniert kein Datenweg.',
   banner_partial:'Einige Werte kamen nicht live an und zeigen zwischengespeicherte oder Demo-Daten.',
   banner_offline:'Offline – es werden zuletzt gespeicherte Daten angezeigt.',
   metrics:'Kennzahlen', why_signal:'Warum dieses Signal?', why_risk:'Warum diese Risiko-Einstufung?',
@@ -2029,7 +2045,7 @@ de:{
   m_rsi:'RSI (14)', m_vol:'Volatilität p.a.', m_dd:'Max. Rückgang 1J', m_hi:'Abstand 52W-Hoch', m_sma:'SMA-Lage', m_r2:'Trendgüte R²', m_grow:'Trend p.a.',
   sma_above:'über 50er & 200er', sma_mid:'zwischen 50er & 200er', sma_below:'unter 50er & 200er', sma_na:'zu wenig Historie',
   s_display:'Darstellung', s_lang:'Sprache', s_theme:'Design', th_dark:'Dunkel', th_light:'Hell',
-  s_data:'Daten & Verbindung', s_proxy:'CORS-Proxy', s_proxy_custom:'Eigener Proxy (mit {url})',
+  s_data:'Daten & Verbindung', s_proxy:'Öffentlicher Proxy (nur Ersatz)', s_proxy_custom:'Eigener Proxy (mit {url})',
   s_refresh:'Auto-Aktualisierung (Minuten, 0 = aus)', s_tr:'Trade-Republic-Link (mit {isin})',
   s_data_hint:'Kurse kommen von Yahoo Finance (Xetra, in EUR) über einen öffentlichen CORS-Proxy. Fällt ein Proxy aus, einfach hier umschalten. Kurse können leicht von Trade Republic (LS Exchange) abweichen.',
   s_watchlist:'Watchlist', s_search_ph:'Suchen: Name oder Symbol …', s_search:'Suchen',
@@ -2353,7 +2369,18 @@ en:{
   sort_label:'Sort:', sort_signal:'Signal', sort_1m:'1 month %', sort_6m:'6 months %', sort_1y:'1 year %', sort_risk:'Risk (low first)', sort_name:'Name',
   details:'Details', open_tr:'Open Trade Republic', copy_isin:'Copy ISIN', copied:'ISIN copied',
   refresh:'Refresh', demo:'DEMO', stale:'STALE',
-  banner_demo:'Live data is currently unreachable – showing demo data. Tip: switch to another proxy in Settings.',
+  banner_demo:'No live prices are coming through right now. Showing the last saved values or demo data.',
+  banner_demo_admin:'Settings → Data & connection → "Check data routes" shows why.',
+  rt_test:'Check data routes', rt_running:'Checking all data routes …',
+  rt_info_on:'Own data route active: {host} (from route.json). It is always asked first.',
+  rt_info_off:'No own data route set up (route.json is missing). The app then depends on public proxies that can disappear any day.',
+  rt_own:'Own data route', rt_custom:'Custom proxy (setting)', rt_direct:'Direct',
+  rt_ok:'answers ({s} s)', rt_key:'now requires an API key ({code})',
+  rt_origin:'refuses this site ({code}), check the address in the worker', rt_refused:'refuses access ({code})',
+  rt_busy:'too many requests, try again later ({code})', rt_http:'error {code}',
+  rt_timeout:'does not answer (gave up after {s} s)', rt_unreach:'not reachable or blocked for browsers',
+  rt_notset:'not set up (route.json is missing)',
+  rt_done_ok:'At least one data route works, prices are being reloaded.', rt_done_fail:'No data route works right now.',
   banner_partial:'Some assets could not load live and show cached or demo data.',
   banner_offline:'Offline – showing last saved data.',
   metrics:'Metrics', why_signal:'Why this signal?', why_risk:'Why this risk rating?',
@@ -2361,7 +2388,7 @@ en:{
   m_rsi:'RSI (14)', m_vol:'Volatility p.a.', m_dd:'Max drawdown 1Y', m_hi:'Off 52-wk high', m_sma:'SMA position', m_r2:'Trend fit R²', m_grow:'Trend p.a.',
   sma_above:'above 50 & 200 day', sma_mid:'between 50 & 200 day', sma_below:'below 50 & 200 day', sma_na:'not enough history',
   s_display:'Display', s_lang:'Language', s_theme:'Theme', th_dark:'Dark', th_light:'Light',
-  s_data:'Data & connection', s_proxy:'CORS proxy', s_proxy_custom:'Custom proxy (with {url})',
+  s_data:'Data & connection', s_proxy:'Public proxy (fallback only)', s_proxy_custom:'Custom proxy (with {url})',
   s_refresh:'Auto-refresh (minutes, 0 = off)', s_tr:'Trade Republic link (with {isin})',
   s_data_hint:'Prices come from Yahoo Finance (Xetra, in EUR) through a public CORS proxy. If one proxy fails, just switch here. Prices can differ slightly from Trade Republic (LS Exchange).',
   s_watchlist:'Watchlist', s_search_ph:'Search: name or symbol …', s_search:'Search',
@@ -2752,7 +2779,13 @@ function fmtMoney(v, cur){
 function fmtTime(ts){ if(!ts) return '–'; return new Date(ts).toLocaleString(locale(), {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'}); }
 
 /* ---------------- data layer (Yahoo via CORS proxy) ---------------- */
+/* The app's own data route (a small Cloudflare Worker). Its address lives in
+   route.json next to index.html, so it can be changed on GitHub without
+   touching this file. It is always tried first; the public proxies below are
+   only a fallback, because they can disappear or start charging any day.   */
+let ownRoute = store.get('ownRoute', ''), routeWait = null;
 const PROXIES = {
+  own: u => (ownRoute || '').replace('{url}', encodeURIComponent(u)),
   corsproxy: u => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
   allorigins: u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
   direct: u => u,
@@ -2765,12 +2798,17 @@ let lastGoodProxy = store.get('proxyGood', null);     // the proxy that answered
 const proxyHealth = {};
 let proxyPush = 0;                    // counts "too many requests" answers; the request pool watches it
 const PROXY_TIMEOUT = 7000;
-function proxyValid(p){ return !!PROXIES[p] && (p !== 'custom' || (settings.proxyCustom || '').includes('{url}')); }
+function proxyValid(p){
+  if(!PROXIES[p]) return false;
+  if(p === 'own') return !!ownRoute && ownRoute.includes('{url}');
+  if(p === 'custom') return (settings.proxyCustom || '').includes('{url}');
+  return true;
+}
 function proxyBenched(p, now){ const h = proxyHealth[p]; return !!(h && h.until > now); }
 function proxyOrder(){
   const now = Date.now();
-  const all = ['corsproxy','allorigins','direct','custom'].filter(proxyValid);
-  const rank = p => p === lastGoodProxy ? 0 : p === settings.proxy ? 1 : 2;
+  const all = ['own','corsproxy','allorigins','direct','custom'].filter(proxyValid);
+  const rank = p => p === 'own' ? 0 : p === lastGoodProxy ? 1 : p === settings.proxy ? 2 : 3;
   const up = all.filter(p => !proxyBenched(p, now)).sort((a, b) => rank(a) - rank(b));
   if(up.length) return up;
   /* every one of them is sitting out: ask the one that is due back first,
@@ -2780,6 +2818,12 @@ function proxyOrder(){
 function proxyNote(p, ok, status){
   const h = proxyHealth[p] || (proxyHealth[p] = {fail:0, until:0, bench:0});
   if(ok){ h.fail = 0; h.until = 0; h.bench = 0; return; }
+  if(status === 401 || status === 403){
+    /* refuses this site outright (wants an API key, or the address is not
+       allowed): that does not change in a few minutes, so 6 hours off      */
+    h.bench = 6 * 3600000; h.until = Date.now() + h.bench; h.fail = 0;
+    return;
+  }
   const busy = status === 429 || status === 503;
   if(busy) proxyPush++;
   if(++h.fail >= (busy ? 4 : 2)){
@@ -2797,6 +2841,7 @@ async function fetchJson(url, timeout=12000){
       let body = null; try{ body = await r.json(); }catch(e){}
       const err = new Error('HTTP '+r.status);
       err.status = r.status;
+      err.msg = body && typeof body.error === 'string' ? body.error : (body && typeof body.message === 'string' ? body.message : '');
       err.bad = !!(body && ((body.chart && body.chart.error) || (body.finance && body.finance.error)
                          || (body.quoteSummary && body.quoteSummary.error)));
       throw err;
@@ -2809,6 +2854,7 @@ async function fetchJson(url, timeout=12000){
    rates, search, market cap): its failures must not bench a proxy that
    serves the price data perfectly well.                                 */
 async function viaProxy(url, soft){
+  if(routeWait) await routeWait;                        // the first requests wait (at most 3 s) for route.json
   let err; const order = proxyOrder();
   for(let i = 0; i < order.length; i++){
     const p = order[i];
@@ -2821,6 +2867,67 @@ async function viaProxy(url, soft){
     }
   }
   throw err || new Error('all proxies failed');
+}
+/* ---------------- own data route: route.json + check ---------------- */
+async function loadRoute(){
+  try{
+    const r = await fetch('route.json', {cache:'no-cache'});
+    let p = '';
+    if(r.ok){
+      const j = await r.json();
+      p = (j && typeof j.proxy === 'string') ? j.proxy.trim() : '';
+      if(p && !p.includes('{url}')) p = p.replace(/\/+$/, '') + '/?url={url}';     // a bare worker address works too
+      if(!/^https:\/\/\S+$/.test(p)) p = '';
+    } else if(r.status !== 404) return false;          // server trouble: keep the route we know
+    if(p === ownRoute) return false;
+    ownRoute = p; store.set('ownRoute', p);
+    delete proxyHealth.own;
+    renderRouteInfo(); bgWriteConfigSoon();
+    if(p && !$('#app').classList.contains('hidden')){
+      scanPause = {until:0, step:0};
+      setTimeout(() => { refreshAll(); }, 50);         // the scan follows when the watchlist is done
+    }
+    return true;
+  }catch(e){ return false; }
+}
+function routeHost(p){ try{ return new URL(p.replace('{url}', 'x')).host; }catch(e){ return p; } }
+function renderRouteInfo(){
+  const el = $('#routeInfo'); if(!el) return;
+  el.textContent = ownRoute ? t('rt_info_on').replace('{host}', routeHost(ownRoute)) : t('rt_info_off');
+}
+const ROUTE_LABEL = {own:'rt_own', custom:'rt_custom', corsproxy:'corsproxy.io', allorigins:'allorigins.win', direct:'rt_direct'};
+async function routeProbe(p){
+  const t0 = Date.now(), secs = () => ((Date.now() - t0) / 1000).toFixed(1).replace('.', settings.lang === 'de' ? ',' : '.');
+  try{
+    parseChart(await fetchJson(PROXIES[p](chartUrl('SAP.DE', '5d')), 9000));
+    proxyNote(p, true);
+    return {p, ok:true, txt:t('rt_ok').replace('{s}', secs())};
+  }catch(e){
+    if(e && e.bad){ proxyNote(p, true); return {p, ok:true, txt:t('rt_ok').replace('{s}', secs())}; }   // it answered
+    const code = e && e.status, msg = (e && e.msg) || '';
+    let key = 'rt_unreach';
+    if(code === 401 || code === 403) key = /key|schl/i.test(msg) ? 'rt_key' : (/origin/i.test(msg) ? 'rt_origin' : 'rt_refused');
+    else if(code === 429) key = 'rt_busy';
+    else if(code) key = 'rt_http';
+    else if(e && e.name === 'AbortError') key = 'rt_timeout';
+    return {p, ok:false, txt:t(key).replace('{code}', code || '').replace('{s}', secs())};
+  }
+}
+async function routeCheck(){
+  const out = $('#routeDiagOut');
+  out.textContent = t('rt_running');
+  await loadRoute();
+  renderRouteInfo();
+  const list = ['own','custom','corsproxy','allorigins','direct'].filter(p => p !== 'custom' || proxyValid('custom'));
+  let kicked = false;                                   // reload as soon as one route answers, not after the slowest
+  const kick = () => { if(kicked) return; kicked = true; scanPause = {until:0, step:0}; refreshAll(); };
+  const res = await Promise.all(list.map(p => p === 'own' && !proxyValid('own')
+    ? Promise.resolve({p, ok:false, txt:t('rt_notset')}) : routeProbe(p).then(r => { if(r.ok) kick(); return r; })));
+  const name = p => { const k = ROUTE_LABEL[p]; return k.startsWith('rt_') ? t(k) : k; };
+  const good = res.some(r => r.ok);
+  out.innerHTML = res.map(r => (r.ok ? '✓ ' : '✗ ') + escHtml(name(r.p)) + (r.p === 'own' && ownRoute ? ' (' + escHtml(routeHost(ownRoute)) + ')' : '')
+    + ': ' + escHtml(r.txt)).join('<br>') + '<br>' + escHtml(t(good ? 'rt_done_ok' : 'rt_done_fail'));
+  return res;
 }
 /* Runs jobs side by side. Full width while answers come back. As soon as a
    request gets no answer from any proxy, or a proxy says "too many requests",
@@ -3628,7 +3735,7 @@ function setBanner(kind){
   if(!kind){ b.classList.add('hidden'); return; }
   b.classList.remove('hidden');
   b.classList.toggle('err', kind==='banner_demo');
-  b.textContent=t(kind);
+  b.textContent=t(kind) + (kind==='banner_demo' && !guestMode && isAdmin ? ' ' + t('banner_demo_admin') : '');
 }
 async function loadOne(asset, info){
   try{
@@ -3748,6 +3855,7 @@ function applyTheme(){
   if(detailSym){ fillDetail(); drawDetail(); }
 }
 function applyLang(){
+  renderRouteInfo();
   document.documentElement.lang=settings.lang;
   $$('[data-i18n]').forEach(el=>{ el.textContent=t(el.dataset.i18n); });
   $$('[data-i18n-ph]').forEach(el=>{ el.placeholder=t(el.dataset.i18nPh); });
@@ -4768,6 +4876,7 @@ function bindEvents(){
     settings.fxMin = clamp(parseInt(e.target.value||'10',10)||10, 1, 1440);
     e.target.value = settings.fxMin; saveSettings(); scheduleAuto(); toast(t('saved'));
   });
+  $('#btnRouteTest').addEventListener('click', ()=>{ routeCheck(); });
   $('#btnFxTest').addEventListener('click', async ()=>{
     $('#fxDiagOut').textContent = t('fx_loading');
     const ok = await loadFx(true);
@@ -4805,6 +4914,7 @@ function bindEvents(){
     if(b.dataset.tab==='movers'){ renderMovers(); scanEnsure(); }       // opening a tab never stops a running scan
     if(b.dataset.tab==='plan' && !planState) renderPlan();
     if(b.dataset.tab==='alerts') renderAlerts();
+    if(b.dataset.tab==='settings') renderRouteInfo();
     if(b.dataset.tab==='screen'){
       renderScreen(); scanEnsure();
     }
@@ -6030,7 +6140,7 @@ function bgCoreSource(){
     alertKinds, alertRecord, alertNote, bgRun];
   return [
     'const sleep = ' + sleep.toString() + ';',
-    'let settings = cfg.settings, lastGoodProxy = cfg.lastGood || null, mcapCache = {}, proxyPush = 0;',
+    'let settings = cfg.settings, lastGoodProxy = cfg.lastGood || null, mcapCache = {}, proxyPush = 0, ownRoute = cfg.route || \'\', routeWait = null;',
     'const proxyHealth = {}, PROXY_TIMEOUT = ' + PROXY_TIMEOUT + ', POOL_MAX = ' + POOL_MAX + ', POOL_MIN = ' + POOL_MIN + ';',
     'const PROXIES = {' + Object.keys(PROXIES).map(k => k + ':' + PROXIES[k].toString()).join(',') + '};',
     'const chartUrl = ' + chartUrl.toString() + ';',
@@ -6067,7 +6177,7 @@ async function bgWriteConfig(){
     list.forEach(u => { if(items[u.sym]){ const m = Object.assign({}, items[u.sym]); delete m.spark; base[u.sym] = m; } });
     const cfg = {settings:{proxy:settings.proxy, proxyCustom:settings.proxyCustom}, lastGood:lastGoodProxy, al,
       rule: al.rule ? screenFilters() : null, list, items:base, cool:alCool, coolMs:AL_COOL_MS, txt:alTxt(), budget:100000,
-      notify: alNotifyState() === 'on'};
+      notify: alNotifyState() === 'on', route: ownRoute};
     const hdr = {headers:{'Content-Type':'application/json'}};
     await c.put('cfg', new Response(JSON.stringify(cfg), hdr));
     await c.put('core', new Response(bgCoreSource(), {headers:{'Content-Type':'text/plain'}}));
@@ -6743,6 +6853,8 @@ applyView();
 applyTheme();
 bindEvents();
 bindAlertEvents();
+routeWait = Promise.race([loadRoute(), sleep(3000)]).finally(() => { routeWait = null; });
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') loadRoute(); });
 applyLang();
 swInit();
 const gRec = store.get('guest', null);
