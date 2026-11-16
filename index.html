@@ -284,9 +284,15 @@ textarea#backupArea{width:100%; min-height:110px; font-family:var(--mono); font-
 .al-warn .badge.b-kind{border-color:var(--warn); color:var(--warn)}
 .al-lnk{background:none; border:0; padding:0; color:var(--accent); font:inherit; cursor:pointer}
 #alBest .mv-rank{display:none}
-html[data-view="mobile"] .al-row{flex-wrap:wrap}
-html[data-view="mobile"] .al-row .mv-id{flex:1 1 60%}
-html[data-view="mobile"] .al-row .mv-act{flex:1 1 100%; justify-content:flex-end; padding-left:37px}
+.hd-tools{display:contents}
+.btn.stop{border-color:var(--warn); color:var(--warn); font-size:13px}
+.mv-extra{font-family:var(--mono); font-size:10px; color:var(--faint)}
+#scanBar{position:absolute; left:0; right:0; bottom:-1px; height:2px; pointer-events:none}
+#scanBar i{display:block; height:100%; width:0; background:var(--accent); transition:width .25s}
+.intro-more{display:none}
+.intro-more .im-less{display:none}
+.plan-intro.open + .intro-more .im-more{display:none}
+.plan-intro.open + .intro-more .im-less{display:inline}
 
 .zoom-bar{display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin:6px 0 0; min-height:26px}
 #dZoomInfo{font-size:11px; color:var(--warn)}
@@ -467,6 +473,36 @@ html[data-view="mobile"] .tbl th, html[data-view="mobile"] .tbl td{padding:6px 4
 html[data-view="mobile"] .tbl .hide-s{display:none}
 html[data-view="mobile"] .detail-in{padding:12px 10px 70px}
 html[data-view="mobile"] .d-actions .btn{flex:1 1 45%}
+/* ---- phone: header on two lines. Name and account on the first, every
+   control on the second, sharing the width so none can drop to a third ---- */
+html[data-view="mobile"] .brand{flex:1 1 0; margin-right:0}
+html[data-view="mobile"] .hd-tools{display:flex; flex:1 1 100%; gap:6px; min-width:0}
+html[data-view="mobile"] .hd-tools > .btn.icon, html[data-view="mobile"] .hd-tools > .hd-sel{flex:1 1 0; min-width:0; max-width:none; height:38px; padding:0; margin:0}
+html[data-view="mobile"] .hd-tools > .hd-sel{padding:0 2px 0 6px}
+html[data-view="mobile"] .hd-tools > #hdView{flex-grow:1.8}
+html[data-view="mobile"] .hd-tools > #hdCur{flex-grow:1.3}
+/* ---- phone: list rows. Full name and price on top, details underneath,
+   the buttons on a line of their own ---- */
+html[data-view="mobile"] .mv-row{display:grid; grid-template-columns:auto minmax(0,1fr) auto auto; column-gap:9px; row-gap:5px; align-items:start; padding:12px}
+html[data-view="mobile"] .mv-row > .mv-rank{grid-column:1; grid-row:1; min-width:14px; text-align:left; padding-top:3px}
+html[data-view="mobile"] .mv-row > .al-ico{grid-column:1; grid-row:1; width:26px}
+html[data-view="mobile"] .mv-row > .mv-id{display:contents}
+html[data-view="mobile"] .mv-row > .mv-id > b{grid-column:2; grid-row:1; white-space:normal; overflow:visible; overflow-wrap:anywhere; font-size:15.5px}
+html[data-view="mobile"] .mv-row > .mv-id > :not(b){grid-column:2 / -1; min-width:0}
+html[data-view="mobile"] .mv-row > .mv-id > span{font-size:11.5px; line-height:1.5}
+html[data-view="mobile"] .mv-row > .mv-warn{grid-column:3; grid-row:1; padding-top:2px}
+html[data-view="mobile"] .mv-row > .mv-num{grid-column:4; grid-row:1; padding-top:1px}
+html[data-view="mobile"] .mv-row > .mv-act{grid-column:1 / -1; display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); gap:8px; margin-top:4px; padding:0}
+html[data-view="mobile"] .mv-row > .mv-act button, html[data-view="mobile"] .mv-row > .mv-act a{min-width:0; width:100%; height:40px}
+/* ---- phone: the explanations fold to two lines so the list starts higher ---- */
+html[data-view="mobile"] .plan-intro{margin-bottom:2px}
+html[data-view="mobile"] .plan-intro:not(.open){display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden}
+html[data-view="mobile"] .intro-more{display:inline-block; background:none; border:0; margin:0 0 8px; padding:4px 0; color:var(--accent); font:inherit; font-size:13px; cursor:pointer}
+html[data-view="mobile"] #panel-movers .mv-bar{gap:5px}
+html[data-view="mobile"] #panel-movers .mv-bar .chip{padding:9px 7px; font-size:12.5px; white-space:nowrap; flex:1 0 auto; text-align:center}
+html[data-view="mobile"] #panel-movers .mv-bar .spacer{display:none}
+html[data-view="mobile"] #panel-movers #btnScan{flex:0 0 40px; width:40px; height:38px; padding:0}
+html[data-view="mobile"] .mv-row > .mv-id > .mv-extra{font-size:11px}
 /* forced desktop on a small screen: let it scroll rather than squash */
 html[data-view="desktop"] body{min-width:1040px}
 
@@ -568,6 +604,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
 <!-- ================= APP ================= -->
 <div id="app" class="hidden">
   <header id="appHeader">
+    <div id="scanBar"><i></i></div>
     <div class="hd-in">
       <div class="brand">
         <span class="dot" id="statusDot"></span>
@@ -577,6 +614,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
       <span id="userChip" class="hidden"></span>
       <span id="guestChip" class="hidden"></span>
       <span id="lastUpdate"></span>
+      <div class="hd-tools">
       <button class="btn icon ghost" id="btnRefresh" title="Refresh">⟳</button>
       <select id="hdView" class="hd-sel hd-view" title="Ansicht / layout">
         <option value="auto" data-i18n="v_auto_s"></option>
@@ -590,6 +628,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
       <button class="btn icon ghost" id="btnLang">EN</button>
       <button class="btn icon ghost" id="btnTheme">☀</button>
       <button class="btn icon ghost" id="btnLock" title="Lock">🔒</button>
+      </div>
     </div>
     <nav id="tabbar">
     <button class="tab on" data-tab="overview" data-i18n="tab_overview"></button>
@@ -655,6 +694,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
     <!-- ---------- ALERTS ---------- -->
     <section class="panel" id="panel-alerts">
       <p class="plan-intro" data-i18n="al_intro"></p>
+      <button type="button" class="intro-more"><span class="im-more" data-i18n="intro_more"></span><span class="im-less" data-i18n="intro_less"></span></button>
       <div class="mv-bar">
         <button class="btn primary" id="btnAlCheck" data-i18n="al_check"></button>
         <button class="btn ghost" id="btnAlNotify"></button>
@@ -709,6 +749,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
     <!-- ---------- MOVERS ---------- -->
     <section class="panel" id="panel-movers">
       <p class="plan-intro" data-i18n="mv_intro"></p>
+      <button type="button" class="intro-more"><span class="im-more" data-i18n="intro_more"></span><span class="im-less" data-i18n="intro_less"></span></button>
       <div class="mv-bar">
         <button class="chip on" data-per="d1" data-i18n="mv_day"></button>
         <button class="chip" data-per="d5" data-i18n="mv_week"></button>
@@ -725,6 +766,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
     <!-- ---------- SCREENER ---------- -->
     <section class="panel" id="panel-screen">
       <p class="plan-intro" data-i18n="sc_intro"></p>
+      <button type="button" class="intro-more"><span class="im-more" data-i18n="intro_more"></span><span class="im-less" data-i18n="intro_less"></span></button>
       <div class="sc-grid">
         <label><span data-i18n="sc_preset"></span>
           <select id="scPreset">
@@ -828,6 +870,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
     <!-- ---------- PLAN ---------- -->
     <section class="panel" id="panel-plan">
       <p class="plan-intro" data-i18n="p_intro"></p>
+      <button type="button" class="intro-more"><span class="im-more" data-i18n="intro_more"></span><span class="im-less" data-i18n="intro_less"></span></button>
       <div class="set-group">
         <h3 data-i18n="p_setup"></h3>
         <div class="set-row">
@@ -1721,7 +1764,8 @@ de:{
   al_meta:'Letzte Prüfung: {time} · {n} Werte verglichen',
   al_meta_never:'Noch keine Prüfung. Die erste speichert den Ausgangsstand, ab der zweiten werden Änderungen gemeldet.',
   al_meta_auto:'prüft automatisch alle {h} Std.', al_meta_auto_off:'automatische Prüfung aus',
-  al_meta_bg_on:'Hintergrundprüfung aktiv (Android bestimmt den Zeitpunkt)',
+  al_meta_bg_on:'Hintergrundprüfung an (Android lässt sie höchstens etwa alle 12 Stunden zu)',
+  al_sw_missing:'Die Datei sw.js fehlt auf dem Server oder heißt anders: keine Benachrichtigungen, keine Hintergrundprüfung',
   al_meta_bg_off:'meldet, solange die App offen ist oder im Hintergrund läuft',
   al_meta_bg_last:'im Hintergrund zuletzt geprüft: {time}',
   al_h_new:'Neu gemeldet', al_h_best:'Aktuell die stärksten Signale',
@@ -1946,10 +1990,12 @@ de:{
   mv_stats:'{n} bewertet · Median {med}', mv_none_class:'Keine Daten in dieser Klasse',
   mv_gainers:'Gewinner', mv_losers:'Verlierer',
   mv_scan:'Neu abfragen', mv_scanning:'Wird abgefragt …',
-  mv_meta:'{ok} von {total} Werten · Stand {time}', mv_never:'Noch nicht abgefragt — auf ⟳ tippen (dauert ca. 30 Sekunden).',
+  mv_meta:'{ok} von {total} Werten · Stand {time}', mv_never:'Noch keine Kursdaten. Sie werden gleich automatisch geladen.',
   mv_none:'Keine Daten erhalten. Anderen Proxy in den Einstellungen probieren.',
   mv_add:'Zur Watchlist', mv_inwl:'Schon in der Watchlist', mv_open:'In Trade Republic öffnen',
-  mv_partial:'Nicht alle Werte kamen durch — die Rangliste zeigt nur die erfolgreich geladenen.',
+  mv_missing:'{n} fehlen noch', mv_old:'{n} nicht mehr aktuell', mv_waiting:'{n} nach Fehler pausiert',
+  mv_noproxy:'Gerade antwortet kein Datenweg. Neuer Versuch in ein paar Minuten.',
+  intro_more:'mehr lesen', intro_less:'weniger',
   s_scan:'Top-Liste neu abfragen alle (Stunden)',
   s_trapp:'Trade-Republic-App', s_trapp_on:'App öffnen, wenn installiert', s_trapp_off:'Immer im Browser öffnen',
   card_stamp:'Stand {time} · {src}',
@@ -2050,7 +2096,8 @@ en:{
   al_meta:'Last check: {time} · {n} assets compared',
   al_meta_never:'No check yet. The first one stores the starting point, from the second one on changes are reported.',
   al_meta_auto:'checks automatically every {h} h', al_meta_auto_off:'automatic check off',
-  al_meta_bg_on:'background check active (Android decides when)',
+  al_meta_bg_on:'background check on (Android allows it about every 12 hours at most)',
+  al_sw_missing:'The file sw.js is missing on the server or has another name: no notifications, no background check',
   al_meta_bg_off:'reports while the app is open or running in the background',
   al_meta_bg_last:'last background check: {time}',
   al_h_new:'Newly reported', al_h_best:'Strongest signals right now',
@@ -2275,10 +2322,12 @@ en:{
   mv_stats:'{n} ranked · median {med}', mv_none_class:'No data in this class',
   mv_gainers:'Gainers', mv_losers:'Losers',
   mv_scan:'Fetch again', mv_scanning:'Fetching …',
-  mv_meta:'{ok} of {total} assets · as of {time}', mv_never:'Not fetched yet — tap ⟳ (takes about 30 seconds).',
+  mv_meta:'{ok} of {total} assets · as of {time}', mv_never:'No price data yet. It is loaded automatically in a moment.',
   mv_none:'No data received. Try another proxy in Settings.',
   mv_add:'Add to watchlist', mv_inwl:'Already on the watchlist', mv_open:'Open in Trade Republic',
-  mv_partial:'Not everything came through — the ranking only shows what loaded successfully.',
+  mv_missing:'{n} still missing', mv_old:'{n} out of date', mv_waiting:'{n} paused after an error',
+  mv_noproxy:'No data route is answering right now. Trying again in a few minutes.',
+  intro_more:'read more', intro_less:'less',
   s_scan:'Refetch top list every (hours)',
   s_trapp:'Trade Republic app', s_trapp_on:'Open app when installed', s_trapp_off:'Always open in browser',
   card_stamp:'as of {time} · {src}',
@@ -2458,7 +2507,7 @@ de: `
 <details><summary>Signale: wann und wo sich ein Einstieg anbietet</summary><div class="sec-body">
 <p>Der Tab <strong>Signale</strong> vergleicht jede Prüfung des Katalogs mit der vorherigen. Gemeldet wird nur, was sich <strong>geändert</strong> hat: Ein Wert steigt neu auf „Positiv" oder „Stark", eine Aufwärtsbewegung beginnt gerade, ein Wert passt neu in deine Filter-Regel, oder ein Wert deiner Watchlist fällt auf „Vorsicht" oder „Schwach". Zu jeder Meldung steht die Begründung dabei. Derselbe Wert meldet sich höchstens alle drei Tage wieder, damit ein Kurs, der um eine Schwelle pendelt, nicht bei jeder Prüfung Alarm schlägt.</p>
 <p>Darunter steht <strong>„Aktuell die stärksten Signale"</strong>. Das ist der Stand von jetzt, egal ob sich gerade etwas geändert hat, wieder getrennt nach ETFs und Aktien. Bei gleicher Punktzahl stehen gleichmäßige Trends und niedrigeres Risiko vorn. Unter „Regeln" stellst du ein, was gemeldet wird, wo gesucht wird und wie oft geprüft wird.</p>
-<p>Geprüft wird automatisch, solange die App offen ist, an Börsentagen im eingestellten Abstand, nachts und am Wochenende seltener. Mit eingeschalteten Benachrichtigungen meldet sich das Handy auch, wenn die App im Hintergrund liegt. Ist sie ganz geschlossen, darf die installierte Android-App ab und zu kurz im Hintergrund prüfen; wie oft, entscheidet Android selbst, meist etwa einmal am Tag. Eine Meldung ist ein technisches Signal und keine Kaufempfehlung.</p>
+<p>Geprüft wird automatisch, solange die App offen ist, an Börsentagen im eingestellten Abstand, nachts und am Wochenende seltener. Mit eingeschalteten Benachrichtigungen meldet sich das Handy auch, wenn die App im Hintergrund liegt. Ist sie ganz geschlossen, darf die installierte Android-App nur selten kurz im Hintergrund prüfen: frühestens alle 12 Stunden, bei seltener Nutzung nur alle ein bis zwei Tage, und nur in einem Netz, das das Handy schon kennt. Was sie dabei lädt, steht beim nächsten Öffnen schon in „Top“ und „Filter“. Eine Meldung ist ein technisches Signal und keine Kaufempfehlung.</p>
 </div></details>
 <details><summary>Depot Radar als App auf dem Handy</summary><div class="sec-body">
 <p>Öffne die Seite auf dem Android-Handy in <strong>Chrome</strong>, tippe auf das Menü ⋮ und wähle <strong>„App installieren"</strong>. Danach liegt Depot Radar mit eigenem Symbol bei deinen anderen Apps, startet ohne Adresszeile und bringt jede neue Version der Seite von selbst mit. Auf dem iPhone geht dasselbe in Safari über „Teilen" und „Zum Home-Bildschirm".</p>
@@ -2554,7 +2603,7 @@ en: `
 <details><summary>Alerts: when and where an entry may be worth a look</summary><div class="sec-body">
 <p>The <strong>Alerts</strong> tab compares every check of the catalogue with the one before. Only a <strong>change</strong> is reported: an asset newly rises to "Positive" or "Strong", a move up is just starting, an asset newly fits your screener rule, or a watchlist asset drops to "Caution" or "Weak". Every alert comes with its reason. The same asset reports at most once every three days, so a price hovering around a threshold does not ring on every check.</p>
 <p>Below that sits <strong>"Strongest signals right now"</strong>. That is the current standing whether or not anything just changed, again split into ETFs and stocks. Among equal scores, steady trends and lower risk come first. Under "Rules" you choose what is reported, where to look and how often to check.</p>
-<p>Checks run automatically while the app is open, at the chosen interval on trading days and less often at night and on weekends. With notifications on, the phone also tells you while the app sits in the background. When it is fully closed, the installed Android app may check briefly in the background now and then; how often is up to Android, usually about once a day. An alert is a technical signal, not a recommendation to buy.</p>
+<p>Checks run automatically while the app is open, at the chosen interval on trading days and less often at night and on weekends. With notifications on, the phone also tells you while the app sits in the background. When it is fully closed, the installed Android app may only check briefly in the background once in a while: every 12 hours at the earliest, only every one to two days if you rarely open it, and only on a network the phone already knows. Whatever it loads is already in "Top" and "Screener" the next time you open the app. An alert is a technical signal, not a recommendation to buy.</p>
 </div></details>
 <details><summary>Depot Radar as an app on your phone</summary><div class="sec-body">
 <p>Open the page in <strong>Chrome</strong> on your Android phone, tap the ⋮ menu and choose <strong>"Install app"</strong>. Depot Radar then sits among your other apps with its own icon, starts without an address bar and picks up every new version of the page by itself. On an iPhone the same works in Safari via "Share" and "Add to Home Screen".</p>
@@ -2625,7 +2674,7 @@ async function loadFx(force){
     const host = s.url.replace(/^https?:\/\//,'').split('/')[0];
     for(const mode of ['direkt','proxy']){
       try{
-        const j = (mode === 'direkt') ? await fetchJson(s.url, 8000) : await viaProxy(s.url);
+        const j = (mode === 'direkt') ? await fetchJson(s.url, 8000) : await viaProxy(s.url, true);
         const out = s.parse(j);
         if(out){
           fxRates = {r: Object.assign({EUR:1}, out.r), at: Date.now(), src: out.src};
@@ -2639,7 +2688,7 @@ async function loadFx(force){
   }
   const r = {EUR:1};                                   // last resort: Yahoo pairs via proxy
   for(const c of want){
-    try{ const d = parseChart(await viaProxy(chartUrl('EUR'+c+'=X','5d'))); r[c] = d.c[d.c.length-1]; }
+    try{ const d = parseChart(await viaProxy(chartUrl('EUR'+c+'=X','1mo'), true)); r[c] = d.c[d.c.length-1]; }
     catch(e){}
     await sleep(100);
   }
@@ -2709,33 +2758,115 @@ const PROXIES = {
   direct: u => u,
   custom: u => (settings.proxyCustom || '').replace('{url}', encodeURIComponent(u))
 };
-let lastGoodProxy = null;
+let lastGoodProxy = store.get('proxyGood', null);     // the proxy that answered last, also across restarts
+/* Which proxies are worth asking right now. One that fails twice in a row
+   sits out for 3 minutes (then 6, 12, at most 15), so a dead proxy costs its
+   timeout once and not again on every single request.                      */
+const proxyHealth = {};
+let proxyPush = 0;                    // counts "too many requests" answers; the request pool watches it
+const PROXY_TIMEOUT = 7000;
+function proxyValid(p){ return !!PROXIES[p] && (p !== 'custom' || (settings.proxyCustom || '').includes('{url}')); }
+function proxyBenched(p, now){ const h = proxyHealth[p]; return !!(h && h.until > now); }
 function proxyOrder(){
-  const all = ['corsproxy','allorigins','direct','custom'];
-  const sel = settings.proxy;
-  const ord = [sel];
-  if(lastGoodProxy && lastGoodProxy !== sel) ord.push(lastGoodProxy);
-  all.forEach(p => { if(!ord.includes(p)) ord.push(p); });
-  return ord.filter(p => p !== 'custom' || (settings.proxyCustom || '').includes('{url}'));
+  const now = Date.now();
+  const all = ['corsproxy','allorigins','direct','custom'].filter(proxyValid);
+  const rank = p => p === lastGoodProxy ? 0 : p === settings.proxy ? 1 : 2;
+  const up = all.filter(p => !proxyBenched(p, now)).sort((a, b) => rank(a) - rank(b));
+  if(up.length) return up;
+  /* every one of them is sitting out: ask the one that is due back first,
+     otherwise nothing could ever recover                                 */
+  return all.sort((a, b) => proxyHealth[a].until - proxyHealth[b].until).slice(0, 1);
+}
+function proxyNote(p, ok, status){
+  const h = proxyHealth[p] || (proxyHealth[p] = {fail:0, until:0, bench:0});
+  if(ok){ h.fail = 0; h.until = 0; h.bench = 0; return; }
+  const busy = status === 429 || status === 503;
+  if(busy) proxyPush++;
+  if(++h.fail >= (busy ? 4 : 2)){
+    h.bench = Math.min(h.bench ? h.bench * 2 : 180000, 900000);
+    h.until = Date.now() + h.bench; h.fail = 0;
+  }
 }
 async function fetchJson(url, timeout=12000){
   const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), timeout);
-  try{ const r = await fetch(url, {signal: ctl.signal}); if(!r.ok) throw new Error('HTTP '+r.status); return await r.json(); }
+  try{
+    const r = await fetch(url, {signal: ctl.signal});
+    if(!r.ok){
+      /* Yahoo answers an unknown ticker with an error document. That is an
+         answer about the symbol, not a broken proxy.                      */
+      let body = null; try{ body = await r.json(); }catch(e){}
+      const err = new Error('HTTP '+r.status);
+      err.status = r.status;
+      err.bad = !!(body && ((body.chart && body.chart.error) || (body.finance && body.finance.error)
+                         || (body.quoteSummary && body.quoteSummary.error)));
+      throw err;
+    }
+    return await r.json();
+  }
   finally{ clearTimeout(to); }
 }
-async function viaProxy(url){
-  let err;
-  for(const p of proxyOrder()){
-    try{ const j = await fetchJson(PROXIES[p](url)); lastGoodProxy = p; return j; }
-    catch(e){ err = e; }
+/* soft = a request that says nothing about the proxies' health (exchange
+   rates, search, market cap): its failures must not bench a proxy that
+   serves the price data perfectly well.                                 */
+async function viaProxy(url, soft){
+  let err; const order = proxyOrder();
+  for(let i = 0; i < order.length; i++){
+    const p = order[i];
+    if(i && proxyBenched(p, Date.now())) continue;       // benched by a parallel request in the meantime
+    try{ const j = await fetchJson(PROXIES[p](url), PROXY_TIMEOUT); proxyNote(p, true); lastGoodProxy = p; return j; }
+    catch(e){
+      err = e;
+      if(e && e.bad){ proxyNote(p, true); lastGoodProxy = p; throw e; }   // the proxy did its job, asking another changes nothing
+      if(!soft) proxyNote(p, false, e && e.status);
+    }
   }
   throw err || new Error('all proxies failed');
+}
+/* Runs jobs side by side. Full width while answers come back. As soon as a
+   request gets no answer from any proxy, or a proxy says "too many requests",
+   the width is halved and a pause added; both recover step by step.
+   A job returns 'ok', 'bad' (answered, but the symbol is unknown) or 'net'. */
+const POOL_MAX = 8, POOL_MIN = 2;
+async function runPool(list, job, opt){
+  opt = opt || {};
+  const max = Math.max(1, Math.min(opt.max || POOL_MAX, POOL_MAX));
+  const st = {limit:max, pause:0, okRun:0, failRun:0, i:0, broken:false, push:proxyPush, braked:0};
+  const brake = () => {
+    st.okRun = 0;
+    if(Date.now() - st.braked < 400) return;             // several lanes failing together count as one event
+    st.braked = Date.now();
+    st.limit = Math.max(Math.min(POOL_MIN, max), st.limit >> 1);
+    st.pause = Math.min(st.pause ? st.pause * 2 : 250, 3000);
+  };
+  const stopped = () => st.broken || !!(opt.stop && opt.stop());
+  async function lane(n){
+    while(st.i < list.length && !stopped()){
+      if(n >= st.limit || (opt.hold && opt.hold())){ await sleep(120); continue; }
+      const item = list[st.i++];
+      let r; try{ r = await job(item); }catch(e){ r = 'net'; }
+      if(r === 'net'){
+        brake();
+        if(++st.failRun >= (opt.breaker || 10)) st.broken = true;       // nothing answers at all: stop asking
+      } else {
+        st.failRun = 0;
+        if(proxyPush !== st.push){ st.push = proxyPush; brake(); }
+        else if(++st.okRun % 8 === 0 && Date.now() - st.braked > 3000){       // speed up again only after 3 calm seconds
+          st.limit = Math.min(max, st.limit + 1); st.pause = st.pause > 60 ? st.pause >> 1 : 0;
+        }
+      }
+      if(opt.onDone) opt.onDone(item, r);
+      if(st.pause) await sleep(st.pause);
+    }
+  }
+  const lanes = []; for(let n = 0; n < max; n++) lanes.push(lane(n));
+  await Promise.all(lanes);
+  return {broken:st.broken, left:list.length - st.i};
 }
 const chartUrl = (sym, range) => 'https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(sym) + '?range=' + (range||'2y') + '&interval=1d';
 const searchUrl = q => 'https://query1.finance.yahoo.com/v1/finance/search?q=' + encodeURIComponent(q) + '&quotesCount=8&newsCount=0&listsCount=0';
 function parseChart(j){
   const r = j && j.chart && j.chart.result && j.chart.result[0];
-  if(!r) throw new Error('no result');
+  if(!r) throw Object.assign(new Error('no result'), {bad:true});      // the source answered: it does not know this symbol
   const ts = r.timestamp || [];
   const q = (((r.indicators||{}).quote||[])[0]||{});
   const cl = q.close || [], vl = q.volume || [];
@@ -2743,7 +2874,7 @@ function parseChart(j){
   for(let i=0;i<ts.length;i++){
     if(cl[i]!=null && isFinite(cl[i])){ tArr.push(ts[i]*1000); cArr.push(cl[i]); vArr.push(isFinite(vl[i])?vl[i]:0); }
   }
-  if(cArr.length < 10) throw new Error('too few points');
+  if(cArr.length < 10) throw Object.assign(new Error('too few points'), {bad:true});
   const meta = r.meta || {};
   return {t:tArr, c:cArr, v:vArr, cur: meta.currency || 'EUR', name: meta.shortName || meta.longName || null};
 }
@@ -2753,7 +2884,7 @@ async function fetchSeries(sym){
   return Object.assign(d, {fetchedAt: Date.now(), live: true, demo: false});
 }
 async function searchSymbols(q){
-  const j = await viaProxy(searchUrl(q));
+  const j = await viaProxy(searchUrl(q), true);
   return (j && j.quotes || [])
     .filter(x => x.symbol && (x.quoteType === 'ETF' || x.quoteType === 'EQUITY'))
     .map(x => ({sym: x.symbol, name: x.shortname || x.longname || x.symbol,
@@ -3499,7 +3630,7 @@ function setBanner(kind){
   b.classList.toggle('err', kind==='banner_demo');
   b.textContent=t(kind);
 }
-async function loadOne(asset){
+async function loadOne(asset, info){
   try{
     const s=await fetchSeries(asset.sym);
     clearFail(asset.sym);
@@ -3507,6 +3638,7 @@ async function loadOne(asset){
     seriesMap[asset.sym]=s;
     return 'live';
   }catch(e){
+    if(info) info.bad=!!(e && e.bad);
     const old=seriesMap[asset.sym];
     if(old && !old.demo){ old.live=false; return 'stale'; }
     markFail(asset.sym);
@@ -3522,22 +3654,42 @@ async function refreshAll(){
   refreshing=true;
   const dot=$('#statusDot'); dot.className='dot busy';
   $('#btnRefresh').disabled=true;
-  let live=0, stale=0, demo=0;
-  const failed=[];
-  for(const asset of watchlist){
-    const res=await loadOne(asset);
-    if(res==='live') live++; else failed.push(asset);
-    renderAll();
-    await sleep(260);
+  let live=0, stale=0, demo=0, lastPaint=0;
+  const failed=[], tried=new Set(), unknown=new Set();
+  const paint=()=>{ const n=Date.now(); if(n-lastPaint>600){ lastPaint=n; renderAll(); } };
+  const kind=(res,info)=> res==='live' ? 'ok' : info.bad ? 'bad' : 'net';
+  try{
+    /* side by side instead of one after another; the pool slows down by
+       itself when a proxy pushes back and gives up when none answers     */
+    const res=await runPool(watchlist.slice(), async asset=>{
+      const info={}; tried.add(asset.sym);
+      const r=await loadOne(asset, info);
+      if(r==='live') live++;
+      else if(info.bad){ unknown.add(asset.sym); scanFailMark(asset.sym, true); }   // the source does not know it: asking again changes nothing
+      else failed.push(asset);
+      paint();
+      return kind(r,info);
+    }, {max:6, breaker:8});
+    if(!res.broken && failed.length){          // second pass: proxy rate limits are usually transient
+      await sleep(400);
+      await runPool(failed.splice(0), async asset=>{
+        const info={};
+        const r=await loadOne(asset, info);
+        if(r==='live') live++; else failed.push(asset);
+        return kind(r,info);
+      }, {max:2, breaker:6});
+    }
+    failed.concat(watchlist.filter(a=>unknown.has(a.sym))).forEach(asset=>{ const s=seriesMap[asset.sym]; if(s && !s.demo) stale++; else demo++; });
+    watchlist.forEach(asset=>{                 // never reached because no proxy answered
+      if(tried.has(asset.sym)) return;
+      const s=seriesMap[asset.sym];
+      if(s && !s.demo){ s.live=false; stale++; } else demo++;
+    });
+    saveCache(); store.set('watchlist', watchlist);
+    if(lastGoodProxy) store.set('proxyGood', lastGoodProxy);
+  } finally {
+    refreshing=false; $('#btnRefresh').disabled=false;
   }
-  for(const asset of failed){          // second pass: proxy rate limits are usually transient
-    await sleep(500);
-    const res=await loadOne(asset);
-    if(res==='live') live++; else if(res==='stale') stale++; else demo++;
-    renderAll();
-  }
-  saveCache(); store.set('watchlist', watchlist);
-  refreshing=false; $('#btnRefresh').disabled=false;
   dot.className='dot'+(live===0 ? ' err' : (stale||demo) ? ' busy' : '');
   if(!navigator.onLine) setBanner('banner_offline');
   else if(live===0) setBanner('banner_demo');
@@ -3546,6 +3698,7 @@ async function refreshAll(){
   renderAll();
   if(planState) renderPlan();
   if(detailSym){ fillDetail(); drawDetail(); }
+  setTimeout(alTick, 250);                     // the catalogue scan was waiting for the watchlist
 }
 async function refreshOne(sym){
   const asset=assetBySym(sym); if(!asset) return;
@@ -4649,12 +4802,11 @@ function bindEvents(){
   $$('#tabbar .tab').forEach(b=>b.addEventListener('click',()=>{
     $$('#tabbar .tab').forEach(x=>x.classList.toggle('on',x===b));
     $$('.panel').forEach(p=>p.classList.toggle('on', p.id==='panel-'+b.dataset.tab));
-    if(b.dataset.tab==='movers'){ Object.keys(scanData.items||{}).length ? scanUniverse(false) : renderMovers(); }
+    if(b.dataset.tab==='movers'){ renderMovers(); scanEnsure(); }       // opening a tab never stops a running scan
     if(b.dataset.tab==='plan' && !planState) renderPlan();
     if(b.dataset.tab==='alerts') renderAlerts();
     if(b.dataset.tab==='screen'){
-      renderScreen();
-      if(!Object.keys((scanData&&scanData.items)||{}).length) scanUniverse(false).then(renderScreen);
+      renderScreen(); scanEnsure();
     }
   }));
   $$('.controls .chip[data-filter]').forEach(ch=>ch.addEventListener('click',()=>{
@@ -4806,8 +4958,8 @@ function bindEvents(){
     const row=e.target.closest('tr[data-sym]');
     if(row) openAnySym(row.dataset.sym, Array.from($('#planOut').querySelectorAll('tr[data-sym]')).map(r=>r.dataset.sym));
   });
-  $('#btnScan').addEventListener('click', ()=>scanUniverse(true));
-  $('#btnScScan').addEventListener('click', ()=>scanUniverse(true).then(renderScreen));
+  $('#btnScan').addEventListener('click', ()=>scanToggle());
+  $('#btnScScan').addEventListener('click', ()=>scanToggle().then(renderScreen));
   $('#btnScreen').addEventListener('click', async ()=>{
     renderScreen();
     if(numOrNull(screenFilters().mcap) != null){ await loadMcaps(screenRows()); renderScreen(); }
@@ -4907,8 +5059,9 @@ function bindEvents(){
     toast(t('saved'));
   });
   $('#setTheme').addEventListener('change',e=>{ settings.theme=e.target.value; saveSettings(); applyTheme(); });
-  $('#setProxy').addEventListener('change',e=>{ settings.proxy=e.target.value; saveSettings(); toast(t('saved')); });
-  $('#setProxyCustom').addEventListener('change',e=>{ settings.proxyCustom=e.target.value.trim(); saveSettings(); toast(t('saved')); });
+  const proxyReset=()=>{ lastGoodProxy=null; store.del('proxyGood'); Object.keys(proxyHealth).forEach(k=>delete proxyHealth[k]); scanPause={until:0, step:0}; bgWriteConfigSoon(); };
+  $('#setProxy').addEventListener('change',e=>{ settings.proxy=e.target.value; proxyReset(); saveSettings(); toast(t('saved')); });
+  $('#setProxyCustom').addEventListener('change',e=>{ settings.proxyCustom=e.target.value.trim(); proxyReset(); saveSettings(); toast(t('saved')); });
   $('#setRefresh').addEventListener('change',e=>{ settings.refreshMin=clamp(parseInt(e.target.value||'0',10)||0,0,720); e.target.value=settings.refreshMin; saveSettings(); scheduleAuto(); toast(t('saved')); });
   $('#setTr').addEventListener('change',e=>{ settings.trTemplate=e.target.value.trim()||DEFAULT_SETTINGS.trTemplate; e.target.value=settings.trTemplate; saveSettings(); renderAll(); toast(t('saved')); });
   $('#wlList').addEventListener('click',e=>{
@@ -5173,7 +5326,9 @@ function SCAN_LIST(){
   const seen=new Set(CATALOG.map(c=>c.sym));
   return CATALOG.concat(watchlist.filter(w=>!seen.has(w.sym)).map(w=>({sym:w.sym,isin:w.isin||'',name:w.name||w.sym,type:w.type,cat:'watch'})));
 }
-let scanning = false, scanAbort = false;
+let scanning = false, scanAbort = false, scanGen = 0, scanBeat = 0, scanRun = null, scanFlush = null;
+let scanFail = store.get('scanFail', {});      // sym -> {n, k, until}: symbols that sit out after a failure
+let scanPause = {until:0, step:0};             // no automatic scan before this time (no proxy answered, or the user pressed stop)
 let scanProg = {done:0, total:0, ok:0};
 let scanData = store.get('scan', {at:0, ok:0, total:0, items:{}});
 
@@ -5215,74 +5370,210 @@ function riskTierOf(vol, type){
   if(type==='stock' && tier<1) tier=1;
   return ['low','med','high','vhigh'][tier];
 }
-async function scanUniverse(force){
-  if(scanning){ scanAbort = true; return; }   // tapping again stops the scan
-  scanAbort = false;
-  const fresh = scanData.at && (Date.now()-scanData.at) < Math.max(1,+settings.scanHours||3)*3600000;
-  if(!force && fresh && Object.keys(scanData.items||{}).length){ renderMovers(); return; }
-  scanning = true;
-  const scanT0 = Date.now();
-  const btn=$('#btnScan'); btn.classList.add('spin'); btn.title = t('mv_stop');
-  const bar=$('#mvProgress'); bar.classList.remove('hidden');
-  const prev = (scanData && scanData.items) || {};
-  const maxAge = Math.max(1, +settings.scanHours||3)*3600000;
-  const full = SCAN_LIST();
-  const items = {};
-  for(const u of full){ if(prev[u.sym]) items[u.sym] = prev[u.sym]; }
-  const queue = full.filter(u => !isDead(u.sym) && (force || !items[u.sym] || (Date.now()-items[u.sym].at) > maxAge));
-  let done=0, ok=0;
-  const total = queue.length;
-  if(!total){ scanning=false; btn.classList.remove('spin'); bar.classList.add('hidden'); renderMovers(); alMetaRender(); return; }
-  /* same object reference, so the leagues can render while it fills up */
-  scanData = {at: scanData.at || Date.now(), ok: Object.keys(items).length, total: full.length, items};
+/* ---------------- when is a snapshot due again ---------------- */
+/* Exchange hours in the phone's local time, written for a user in Germany:
+   Xetra opens at 9:00 and Wall Street closes at 22:00. While they are open a
+   snapshot ages after the chosen number of hours. While they are shut there
+   is exactly one thing left to fetch, the closing price, and after that
+   nothing can change until the next open.                                  */
+function marketOpen(now){
+  const d = new Date(now), wd = d.getDay(), h = d.getHours() + d.getMinutes()/60;
+  return wd >= 1 && wd <= 5 && h >= 9 && h < 22.75;
+}
+function lastClose(now){
+  const d = new Date(now);
+  for(let i = 0; i < 8; i++){
+    const c = new Date(d.getFullYear(), d.getMonth(), d.getDate() - i, 22, 45, 0, 0);
+    if(c.getDay() >= 1 && c.getDay() <= 5 && c.getTime() <= now) return c.getTime();
+  }
+  return now - 7*86400000;
+}
+function scanStale(m, now){
+  if(!m) return true;
+  if(marketOpen(now)) return now - m.at > Math.max(1, +settings.scanHours || 3) * 3600000;
+  return m.at < lastClose(now);
+}
+/* A symbol that failed sits out before it is asked again. Without this the
+   automatic refill would find the same gap every minute and never stop.
+   Unknown to the data source: 6 hours, then a day, then three days.
+   No answer at all (more likely the proxy's fault): 10 minutes, doubling
+   up to 6 hours. Any success clears the record.                          */
+const SCAN_BAD_WAIT = [6, 24, 72];
+function scanWaiting(sym, now){ const f = scanFail[sym]; return !!(f && f.until > now); }
+function scanFailMark(sym, bad){
+  const f = scanFail[sym] || (scanFail[sym] = {n:0, k:0, until:0});
+  if(bad){ f.n++; f.until = Date.now() + SCAN_BAD_WAIT[Math.min(f.n, SCAN_BAD_WAIT.length) - 1] * 3600000; }
+  else { f.k++; f.until = Date.now() + Math.min(10 * Math.pow(2, f.k - 1), 360) * 60000; }
+}
+function scanQueue(force){
+  const now = Date.now(), items = scanData.items || {};
+  const at = u => (items[u.sym] || {}).at || 0;
+  return SCAN_LIST()
+    .filter(u => force || (!scanWaiting(u.sym, now) && scanStale(items[u.sym], now)))
+    .sort((a, b) => at(a) - at(b));                  // what is missing first, then the oldest
+}
+function scanStats(){
+  const now = Date.now(), items = scanData.items || (scanData.items = {}), list = SCAN_LIST();
+  let have = 0, miss = 0, old = 0, wait = 0;
+  list.forEach(u => {
+    const m = items[u.sym], due = scanStale(m, now);
+    if(m) have++;
+    if(due && scanWaiting(u.sym, now)) wait++;
+    else if(!m) miss++;
+    else if(due) old++;
+  });
+  scanData.ok = have; scanData.total = list.length;
+  return {have, miss, old, wait, total:list.length};
+}
+function scanUi(){
+  const pct = scanning && scanProg.total ? (scanProg.done / scanProg.total * 100).toFixed(1) + '%' : '0';
+  const btn = $('#btnScan'), b2 = $('#btnScScan'), bar = $('#mvProgress'), top = $('#scanBar');
+  [btn, b2].forEach(b => {
+    if(!b) return;
+    b.classList.remove('spin'); b.classList.toggle('stop', scanning);
+    b.textContent = scanning ? '■' : '⟳';
+    b.title = scanning ? t('mv_stop') : t('mv_scan');
+    b.setAttribute('aria-label', b.title);
+  });
+  if(bar){ bar.classList.toggle('hidden', !scanning); bar.firstElementChild.style.width = pct; }
+  if(top) top.firstElementChild.style.width = pct;
+  if(scanning){
+    const have = Object.keys(scanData.items || {}).length;
+    $('#mvMeta').textContent = t('mv_scanning') + ' ' + scanProg.done + '/' + scanProg.total + (have ? ' · ' + t('mv_live') : '');
+  }
+  alMetaRender();
+}
+/* Fills what is missing or out of date. Calling it while a scan is running
+   never cancels that scan; only scanStop() does, and only the button calls it. */
+function scanUniverse(force){
+  if(scanning){
+    /* A run that has not finished one request in 90 seconds was frozen along
+       with the tab. What it fetched is already saved, so let it go and carry
+       on from there instead of waiting for it forever.                      */
+    if(Date.now() - scanBeat > 90000){ scanGen++; scanning = false; scanFlush = null; }
+    else return scanRun || Promise.resolve(null);
+  }
+  const queue = scanQueue(force);
+  if(!queue.length){ scanUi(); renderMovers(); return Promise.resolve(null); }
+  scanRun = scanDo(queue, !!force).catch(() => null);
+  return scanRun;
+}
+function scanStop(){
+  if(!scanning) return;
+  scanAbort = true;
+  scanPause = {until: Date.now() + 5*60000, step: 0};      // the user said stop: no automatic restart for five minutes
+}
+function scanToggle(){
+  if(scanning){ scanStop(); return scanRun || Promise.resolve(null); }
+  scanPause = {until:0, step:0};
+  return scanUniverse(true);
+}
+/* opening a tab that needs the data: fill gaps, but respect a recent stop */
+function scanEnsure(){
+  if(!scanning && Date.now() >= scanPause.until && navigator.onLine !== false) scanUniverse(false);
+}
+async function scanDo(queue, force){
+  const gen = ++scanGen, t0 = Date.now(), total = queue.length;
+  const alive = () => gen === scanGen;
+  const items = scanData.items || (scanData.items = {});
+  scanning = true; scanAbort = false; scanBeat = t0;
+  let done = 0, ok = 0, cmp = 0, prev = {}, lastSave = t0, lastPaint = 0, broken = false;
+  const found = [], noAnswer = [];
   scanProg = {done:0, total, ok:0};
-  const tick = () => {
-    scanProg = {done, total, ok};
-    bar.firstElementChild.style.width = (done/total*100).toFixed(1)+'%';
-    if(done % 10 === 0 || done === total) renderMovers(); else $('#mvMeta').textContent = t('mv_scanning')+' '+done+'/'+total;
-    alMetaRender();
+  /* Saved every few seconds and whenever the app goes to the background, so a
+     tab that Android suspends or throws away continues where it stopped.
+     The signal check runs on the same chunk, so nothing fetched is ever
+     stored without having been compared.                                   */
+  const flush = () => {
+    let r = {found:[], compared:0};
+    try{ r = alertsAfterScan(prev, items, t0); }catch(e){}
+    prev = {}; cmp += r.compared; r.found.forEach(e => found.push(e));
+    if(ok) scanData.at = Date.now();
+    scanStats();
+    try{ store.set('scan', scanData); }catch(e){}
+    try{
+      store.set('alStat', {at:Date.now(), compared:cmp, found:found.length});
+      store.set('scanFail', scanFail);
+      if(lastGoodProxy) store.set('proxyGood', lastGoodProxy);
+    }catch(e){}
+    lastSave = Date.now();
   };
-  tick();
-  const failed = [];
-  async function worker(){
-    while(queue.length){
-      if(scanAbort){ queue.length = 0; break; }
-      const u = queue.shift();
-      try{
-        const j = await viaProxy(chartUrl(u.sym, '1y'));
-        const d = parseChart(j), c = d.c;
-        items[u.sym] = scanItem(d);
-        ok++;
-      }catch(e){ failed.push(u); /* skipped on purpose: never fake a mover with demo data */ }
-      done++; tick();
-      await sleep(140);
+  const paint = now => {
+    const n = Date.now();
+    if(!now && n - lastPaint < 2000) return;
+    lastPaint = n;
+    if($('#panel-movers').classList.contains('on')) renderMovers();
+    else if($('#panel-screen').classList.contains('on') && !screenBusy
+            && !/^(INPUT|SELECT)$/.test((document.activeElement || {}).tagName || '')) renderScreen();
+  };
+  const one = async u => {
+    let j;
+    try{ j = await viaProxy(chartUrl(u.sym, '1y')); }
+    catch(e){
+      if(e && e.bad){ scanFailMark(u.sym, true); return 'bad'; }
+      noAnswer.push(u); return 'net';        /* skipped on purpose: never fake a mover with demo data */
+    }
+    try{
+      const nm = scanItem(parseChart(j));
+      if(items[u.sym] && !prev[u.sym]) prev[u.sym] = items[u.sym];
+      items[u.sym] = nm; ok++;
+      if(scanFail[u.sym]) delete scanFail[u.sym];
+      clearFail(u.sym);
+      return 'ok';
+    }catch(e){ scanFailMark(u.sym, true); return 'bad'; }
+  };
+  const ctl = {
+    stop: () => scanAbort || !alive(),
+    hold: () => { if(refreshing){ scanBeat = Date.now(); return true; } return false; },   // the watchlist goes first
+    onDone: () => {
+      done++; scanBeat = Date.now();
+      if(!alive()) return;
+      scanProg = {done:Math.min(done, total), total, ok};
+      scanUi();
+      if(Date.now() - lastSave > 4000) flush();
+      paint(false);
+    }
+  };
+  let result = null;
+  try{
+    scanFlush = flush;
+    scanUi(); paint(true);
+    let res = await runPool(queue, one, ctl);
+    broken = res.broken;
+    /* one more try for requests that got no answer: free proxies drop some under
+       load, and a missing row silently changes the ranking                       */
+    if(alive() && !scanAbort && !broken && noAnswer.length){
+      const again = noAnswer.splice(0);
+      res = await runPool(again, one, {max:3, stop:ctl.stop, hold:ctl.hold, onDone:() => { scanBeat = Date.now(); }});
+      broken = res.broken;
+    }
+  } finally {
+    if(alive()){
+      const aborted = scanAbort;
+      scanning = false; scanAbort = false; scanFlush = null;
+      if(broken){
+        /* no proxy answers: stop asking, try again in 2 minutes, then 4, 8 ... at most 30 */
+        scanPause.step = Math.min(scanPause.step ? scanPause.step * 2 : 120000, 1800000);
+        scanPause.until = Date.now() + scanPause.step;
+      } else {
+        if(!aborted) scanPause = {until:0, step:0};
+        noAnswer.forEach(u => scanFailMark(u.sym, false));
+      }
+      const known = new Set(SCAN_LIST().map(u => u.sym));
+      Object.keys(items).forEach(k => { if(!known.has(k)) delete items[k]; });
+      Object.keys(scanFail).forEach(k => { if(!known.has(k)) delete scanFail[k]; });
+      flush();
+      scanUi(); renderMovers();
+      if($('#panel-screen').classList.contains('on')) renderScreen();
+      renderAlerts();
+      bgWriteConfigSoon();
+      if(found.length){ toast(t('al_toast').replace('{n}', found.length)); alNotifySystem(found); }
+      else if(aborted) toast(t('mv_aborted'));
+      else if(broken && force) toast(t('mv_noproxy'));
+      result = {ok, broken, aborted, found:found.length};
     }
   }
-  await Promise.all([worker(), worker(), worker()]);
-  /* one retry pass: free proxies drop requests under load, and a skipped row
-     silently changes the ranking, so it is worth asking twice before giving up */
-  if(!scanAbort && failed.length){
-    for(const u of failed){
-      if(scanAbort) break;
-      await sleep(300);
-      try{
-        const j = await viaProxy(chartUrl(u.sym, '1y'));
-        const d = parseChart(j), c = d.c;
-        items[u.sym] = scanItem(d);
-        ok++; tick();
-      }catch(e){}
-    }
-  }
-  const wasAborted = scanAbort;
-  scanning=false; scanAbort=false;
-  btn.classList.remove('spin'); btn.title='';
-  bar.classList.add('hidden');
-  const freshCount = Object.values(items).filter(x => (Date.now()-x.at) <= maxAge).length;
-  scanData = {at:Date.now(), ok:freshCount, total:full.length, items};
-  try{ store.set('scan', scanData); }catch(e){}
-  renderMovers();
-  try{ alertsAfterScan(prev, items, scanT0); }catch(e){}
-  if(wasAborted) toast(t('mv_aborted'));
+  return result;
 }
 function median(a){
   if(!a.length) return null;
@@ -5371,8 +5662,11 @@ function renderMovers(){
   } else if(!scanData.at || !have){
     meta.textContent=t('mv_never'); list.innerHTML=''; return;
   } else {
-    meta.textContent = t('mv_meta').replace('{ok}',scanData.ok).replace('{total}',scanData.total).replace('{time}',fmtTime(scanData.at))
-      + (scanData.ok < scanData.total ? ' · '+t('mv_partial') : '');
+    const st = scanStats();
+    meta.textContent = t('mv_meta').replace('{ok}',st.have).replace('{total}',st.total).replace('{time}',fmtTime(scanData.at))
+      + (st.miss ? ' · '+t('mv_missing').replace('{n}',st.miss) : '')
+      + (st.old ? ' · '+t('mv_old').replace('{n}',st.old) : '')
+      + (st.wait ? ' · '+t('mv_waiting').replace('{n}',st.wait) : '');
   }
   const per = settings.mvPeriod;
   const etf = moverRows('etf'), stock = moverRows('stock');
@@ -5493,19 +5787,23 @@ async function loadMcaps(rows){
   if(!todo.length) return 0;
   screenBusy = true; renderScreen();
   let got = 0;
-  for(const x of todo){
-    try{
-      const j = await viaProxy('https://query1.finance.yahoo.com/v10/finance/quoteSummary/'
-        + encodeURIComponent(x.u.sym) + '?modules=price');
-      const res = j && j.quoteSummary && j.quoteSummary.result && j.quoteSummary.result[0];
-      const raw = res && res.price && res.price.marketCap && res.price.marketCap.raw;
-      mcapCache[x.u.sym] = isFinite(raw) ? raw : null;
-      if(isFinite(raw)) got++;
-    }catch(e){ mcapCache[x.u.sym] = null; }
-    await sleep(160);
-  }
-  try{ store.set('mcap', mcapCache); }catch(e){}
-  screenBusy = false;
+  try{
+    await runPool(todo, async x => {
+      try{
+        const j = await viaProxy('https://query1.finance.yahoo.com/v10/finance/quoteSummary/'
+          + encodeURIComponent(x.u.sym) + '?modules=price', true);
+        const res = j && j.quoteSummary && j.quoteSummary.result && j.quoteSummary.result[0];
+        const raw = res && res.price && res.price.marketCap && res.price.marketCap.raw;
+        mcapCache[x.u.sym] = isFinite(raw) ? raw : null;
+        if(isFinite(raw)) got++;
+        return 'ok';
+      }catch(e){
+        if(e && e.bad){ mcapCache[x.u.sym] = null; return 'bad'; }      // the source has no figure: remember that
+        return 'net';                                                    // no answer: ask again next time
+      }
+    }, {max:4, breaker:6});
+    try{ store.set('mcap', mcapCache); }catch(e){}
+  } finally { screenBusy = false; }
   return got;
 }
 function fmtBig(v){
@@ -5523,14 +5821,15 @@ function screenRowHtml(x, idx){
   const risk = riskTierOf(m.vol, u.type);
   const mc = mcapCache[u.sym];
   const chips = [
-    ['1T', m.d1], ['1W', m.d5], ['1M', m.d21]
+    ['1W', m.d5], ['1M', m.d21], ['3M', m.d63]
   ].map(([l,v]) => `<span>${l} <b class="${triCls(v)}">${fmtPct(v)}</b></span>`).join('');
   const extra = [
     m.rsi != null ? 'RSI '+fmtNum(m.rsi,0) : null,
+    m.vol != null ? 'Vola '+fmtPct(m.vol,{signed:false,d:0}) : null,
     m.turn != null ? (settings.lang==='de'?'Umsatz ':'Turnover ')+fmtBig(m.turn) : null,
     mc != null ? (settings.lang==='de'?'MK ':'Cap ')+fmtBig(mc) : null,
     m.above20 ? (settings.lang==='de'?m.above20+' T über SMA20':m.above20+'d above SMA20') : null
-  ].filter(Boolean).join(' · ');
+  ].filter(Boolean).map(x => x.replace(/ /g, '\u00a0')).join(' · ');     // wraps between items, never inside one
   const sc = scanScore(m, u.type);
   const rate = sc ? `<span class="badge b-sig s-${sc.signal}">${escHtml(LABELS.signal[sc.signal][settings.lang])}</span>`
       + `<span class="badge">${escHtml(LABELS.trend[sc.trend][settings.lang])}</span>` : '';
@@ -5540,10 +5839,10 @@ function screenRowHtml(x, idx){
       <span>${escHtml(u.sym)} · ${u.type==='etf'?t('t_etf'):t('t_stock')} · ${escHtml(LABELS.risk[risk][settings.lang].replace(/^(Risiko|Risk): /,''))}</span>
       <div class="chips mono" style="margin-top:5px">${chips}</div>
       <div class="badges" style="margin:5px 0 3px">${rate}</div>
-      <span style="font-family:var(--mono);font-size:10px;color:var(--faint)">${escHtml(extra)}</span></div>
+      <span class="mv-extra">${escHtml(extra)}</span></div>
     <canvas class="mv-spark"></canvas>
     <div class="mv-num"><b>${fmtMoney(m.p, m.cur)}</b>
-      <span>${m.vol!=null?fmtPct(m.vol,{signed:false,d:0}):'–'}</span></div>
+      <span>${settings.lang==='de'?'1T':'1D'} <b class="${triCls(m.d1)}" style="display:inline;font-size:12px">${fmtPct(m.d1)}</b></span></div>
     <div class="mv-act">
       <button class="mv-add${inWl?' in':''}" ${inWl?'disabled':''} title="${inWl?t('mv_inwl'):t('mv_add')}">${inWl?'✓':'+'}</button>
       ${linkPairHtml(u.isin, u.sym)}
@@ -5666,7 +5965,7 @@ const AL_DEFAULT = {sig:true, min:'positive', mom:true, rule:false, warn:true, s
 const AL_COOL_MS = 3*86400000, AL_KEEP = 80, AL_KEEP_MS = 30*86400000;
 let alerts = store.get('alerts', []);            // newest first
 let alCool = store.get('alCool', {});            // "SYM|kind" -> time of the last report
-let bgLast = null, bgState = 'off', swReg = null, installEvt = null, alTimer = null, bgCfgTimer = null;
+let bgLast = null, bgState = 'off', swReg = null, swState = 'none', installEvt = null, alTimer = null, bgCfgTimer = null;
 function alPrefs(){ return Object.assign({}, AL_DEFAULT, settings.al || {}); }
 
 /* Pure on purpose: the service worker runs the very same function when it
@@ -5702,38 +6001,37 @@ function alertNote(evs, txt){
 /* Runs inside the service worker while the app is closed. The browser grants
    a background task a few minutes at most, so the list is capped and the
    loop watches the clock instead of trusting the network.                  */
-async function bgRun(cfg){
-  const out = {events:[], items:{}, at:Date.now(), checked:0, note:null};
-  const queue = cfg.list.slice();
-  const deadline = Date.now() + 150000;
-  async function worker(){
-    while(queue.length && Date.now() < deadline){
-      const u = queue.shift();
-      try{
-        const nm = scanItem(parseChart(await viaProxy(chartUrl(u.sym, '1y'))));
-        delete nm.spark;
-        out.checked++;
-        const hit = alertKinds(u, cfg.items[u.sym], nm, cfg.al, !!u.wl, cfg.rule);
-        out.items[u.sym] = nm;
-        if(hit){
-          hit.kinds = hit.kinds.filter(k => !((cfg.cool[u.sym + '|' + k] || 0) > Date.now() - cfg.coolMs));
-          if(hit.kinds.length) out.events.push(alertRecord(u, nm, hit, true));
-        }
-      }catch(e){}
-      await sleep(120);
+async function bgRun(cfg, flush){
+  const out = {events:[], items:{}, at:Date.now(), checked:0, note:null, broken:false};
+  const deadline = Date.now() + (cfg.budget || 100000);
+  let lastFlush = Date.now();
+  const res = await runPool(cfg.list, async u => {
+    let nm;
+    try{ nm = scanItem(parseChart(await viaProxy(chartUrl(u.sym, '1y')))); }
+    catch(e){ return e && e.bad ? 'bad' : 'net'; }
+    out.checked++;
+    const hit = alertKinds(u, cfg.items[u.sym], nm, cfg.al, !!u.wl, cfg.rule);
+    out.items[u.sym] = nm;
+    if(hit){
+      hit.kinds = hit.kinds.filter(k => !((cfg.cool[u.sym + '|' + k] || 0) > Date.now() - cfg.coolMs));
+      if(hit.kinds.length) out.events.push(alertRecord(u, nm, hit, true));
     }
-  }
-  await Promise.all([worker(), worker(), worker()]);
+    if(flush && Date.now() - lastFlush > 15000){ lastFlush = Date.now(); try{ await flush(out); }catch(e){} }
+    return 'ok';
+  }, {max:6, stop:() => Date.now() > deadline});
+  out.broken = !!res.broken;
   if(out.events.length) out.note = alertNote(out.events, cfg.txt);
   return out;
 }
 function bgCoreSource(){
-  const fns = [proxyOrder, fetchJson, viaProxy, parseChart, smaLast, smaSeries, pctBack, lastLogRets, stdev,
-    annVol, maxDD, rsi14, linregLog, emaLast, turnover, high52, daysAboveSma, scanItem, scanScore,
-    momentumStart, numOrNull, screenSteps, ruleMatch, alertKinds, alertRecord, alertNote, bgRun];
+  const fns = [proxyValid, proxyBenched, proxyOrder, proxyNote, fetchJson, viaProxy, runPool, parseChart,
+    smaLast, smaSeries, pctBack, lastLogRets, stdev, annVol, maxDD, rsi14, linregLog, emaLast, turnover,
+    high52, daysAboveSma, scanItem, scanScore, momentumStart, numOrNull, screenSteps, ruleMatch,
+    alertKinds, alertRecord, alertNote, bgRun];
   return [
     'const sleep = ' + sleep.toString() + ';',
-    'let settings = cfg.settings, lastGoodProxy = null, mcapCache = {};',
+    'let settings = cfg.settings, lastGoodProxy = cfg.lastGood || null, mcapCache = {}, proxyPush = 0;',
+    'const proxyHealth = {}, PROXY_TIMEOUT = ' + PROXY_TIMEOUT + ', POOL_MAX = ' + POOL_MAX + ', POOL_MIN = ' + POOL_MIN + ';',
     'const PROXIES = {' + Object.keys(PROXIES).map(k => k + ':' + PROXIES[k].toString()).join(',') + '};',
     'const chartUrl = ' + chartUrl.toString() + ';',
     'const SIG_RANK = ' + JSON.stringify(SIG_RANK) + ', RISK_RANK = ' + JSON.stringify(RISK_RANK) + ';',
@@ -5752,19 +6050,24 @@ async function bgWriteConfig(){
   try{
     const c = await caches.open('dr-bg');
     const locked = $('#app').classList.contains('hidden');
-    if(guestMode || locked || !store.get('alNotify', false) || !alPrefs().auto){ await c.delete('cfg'); return; }
-    const al = alPrefs(), items = scanData.items || {};
+    if(guestMode || locked || !alPrefs().auto){ await c.delete('cfg'); return; }
+    const al = alPrefs(), items = scanData.items || {}, now = Date.now();
     const wl = new Set(watchlist.map(w => w.sym));
     const edge = al.min === 'strong' ? 3.5 : 1.5;      // the score where a new signal would appear
-    const list = SCAN_LIST().filter(u => items[u.sym] && !isDead(u.sym))
-      .map(u => ({u, s:scanScore(items[u.sym], u.type)})).filter(x => x.s)
-      .sort((a, b) => (wl.has(b.u.sym) - wl.has(a.u.sym)) || (Math.abs(a.s.score - edge) - Math.abs(b.s.score - edge)))
-      .slice(0, 160)
-      .map(x => ({sym:x.u.sym, name:x.u.name || x.u.sym, type:x.u.type, isin:x.u.isin || '', wl:wl.has(x.u.sym)}));
+    /* The whole catalogue goes in, most useful first: the watchlist, then
+       what is closest to a new signal, then the oldest. The background
+       check stops when its time is up, so the order decides what it gets. */
+    const rows = SCAN_LIST().filter(u => !scanWaiting(u.sym, now)).map(u => {
+      const m = items[u.sym], s = m ? scanScore(m, u.type) : null;
+      return {u, at: m ? m.at : 0, gap: s ? Math.abs(s.score - edge) : 99};
+    });
+    rows.sort((a, b) => (wl.has(b.u.sym) - wl.has(a.u.sym)) || (a.gap - b.gap) || (a.at - b.at));
+    const list = rows.map(x => ({sym:x.u.sym, name:x.u.name || x.u.sym, type:x.u.type, isin:x.u.isin || '', wl:wl.has(x.u.sym)}));
     const base = {};
-    list.forEach(u => { const m = Object.assign({}, items[u.sym]); delete m.spark; base[u.sym] = m; });
-    const cfg = {settings:{proxy:settings.proxy, proxyCustom:settings.proxyCustom}, al,
-      rule: al.rule ? screenFilters() : null, list, items:base, cool:alCool, coolMs:AL_COOL_MS, txt:alTxt()};
+    list.forEach(u => { if(items[u.sym]){ const m = Object.assign({}, items[u.sym]); delete m.spark; base[u.sym] = m; } });
+    const cfg = {settings:{proxy:settings.proxy, proxyCustom:settings.proxyCustom}, lastGood:lastGoodProxy, al,
+      rule: al.rule ? screenFilters() : null, list, items:base, cool:alCool, coolMs:AL_COOL_MS, txt:alTxt(), budget:100000,
+      notify: alNotifyState() === 'on'};
     const hdr = {headers:{'Content-Type':'application/json'}};
     await c.put('cfg', new Response(JSON.stringify(cfg), hdr));
     await c.put('core', new Response(bgCoreSource(), {headers:{'Content-Type':'text/plain'}}));
@@ -5772,7 +6075,7 @@ async function bgWriteConfig(){
 }
 function bgWriteConfigSoon(){ clearTimeout(bgCfgTimer); bgCfgTimer = setTimeout(bgWriteConfig, 1500); }
 async function bgClear(){
-  try{ if('caches' in window){ const c = await caches.open('dr-bg'); await c.delete('cfg'); await c.delete('pending'); } }catch(e){}
+  try{ if('caches' in window){ const c = await caches.open('dr-bg'); await c.delete('cfg'); await c.delete('pending'); await c.delete('items'); } }catch(e){}
 }
 /* Whatever the background check found while the app was closed is folded
    into the normal list the next time the app is in front.                */
@@ -5780,6 +6083,31 @@ async function bgMerge(){
   if(!('caches' in window)) return;
   try{
     const c = await caches.open('dr-bg');
+    /* prices first: they become the new baseline, so the next scan does not
+       report the same change a second time                                 */
+    const ir = await c.match('items');
+    if(ir){
+      const got = await ir.json();
+      await c.delete('items');
+      const items = scanData.items || (scanData.items = {});
+      const known = new Set(SCAN_LIST().map(u => u.sym));
+      let n = 0, newest = 0;
+      Object.keys(got || {}).forEach(sym => {
+        const m = got[sym];
+        if(!m || !m.at || !known.has(sym) || (items[sym] && items[sym].at >= m.at)) return;
+        items[sym] = m; n++; if(m.at > newest) newest = m.at;
+      });
+      if(n){
+        scanData.at = Math.max(scanData.at || 0, newest);
+        scanStats();
+        try{ store.set('scan', scanData); }catch(e){}
+        if(!$('#app').classList.contains('hidden')){
+          renderMovers();
+          if($('#panel-screen').classList.contains('on')) renderScreen();
+          renderAlerts();
+        }
+      }
+    }
     const r = await c.match('pending');
     if(r){
       const pend = await r.json();
@@ -5800,7 +6128,7 @@ async function bgRegister(){
     if(!('serviceWorker' in navigator)) return false;
     const reg = swReg || await navigator.serviceWorker.getRegistration();
     if(!reg || !('periodicSync' in reg)) return false;
-    if(!store.get('alNotify', false) || !alPrefs().auto){
+    if(guestMode || !alPrefs().auto){
       try{ await reg.periodicSync.unregister('dr-check'); }catch(e){}
       return false;
     }
@@ -5814,7 +6142,9 @@ async function bgRegister(){
 }
 function swInit(){
   if(!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register('sw.js').then(r => { swReg = r; bgRegister(); }).catch(() => {});
+  navigator.serviceWorker.register('sw.js')
+    .then(r => { swReg = r; swState = 'ok'; bgRegister(); })
+    .catch(() => { swState = 'missing'; alMetaRender(); });      // most often: the file is not on the server under that exact name
   navigator.serviceWorker.addEventListener('message', e => {
     if(e.data && e.data.type === 'open-alerts'){ bgMerge().then(openAlertsTab); }
   });
@@ -5855,22 +6185,18 @@ function alertsAfterScan(prev, items, t0){
     hit.kinds.forEach(k => { alCool[u.sym + '|' + k] = now; });
     found.push(alertRecord(u, nm, hit, false));
   }
-  store.set('alStat', {at:now, compared, found:found.length});
-  if(found.length) alertsAdd(found, true); else renderAlerts();
-  bgWriteConfigSoon();
-  return found;
+  if(found.length) alertsAdd(found, false);       // stored at once; the scan announces them together when it ends
+  return {found, compared};
 }
 /* Exchanges are shut at night and on weekends, so asking 300 times for prices
    that cannot have moved only wears out the free proxies. The window is
    written in local time for a user in Germany: Xetra opens at 9:00 and Wall
    Street closes at 22:00.                                                    */
 function alDue(){
-  if(!alPrefs().auto || scanning || refreshing) return false;
-  if($('#app').classList.contains('hidden')) return false;
-  const h = Math.max(1, +settings.scanHours || 3);
-  const d = new Date(), wd = d.getDay(), hr = d.getHours() + d.getMinutes()/60;
-  const open = wd >= 1 && wd <= 5 && hr >= 8 && hr < 22.75;
-  return (Date.now() - (scanData.at || 0)) >= (open ? h : Math.max(h, 12)) * 3600000;
+  if(refreshing || $('#app').classList.contains('hidden') || navigator.onLine === false) return false;
+  if(scanning) return Date.now() - scanBeat > 90000;        // only to pick up a run that froze with the tab
+  if(!alPrefs().auto || Date.now() < scanPause.until) return false;
+  return scanQueue(false).length > 0;
 }
 function alTick(){
   if(alDue()) scanUniverse(false);
@@ -5879,11 +6205,19 @@ function alStart(){
   if(!alTimer){
     alTimer = setInterval(alTick, 60000);
     document.addEventListener('visibilitychange', () => {
-      if(document.visibilityState === 'visible'){ bgMerge(); setTimeout(alTick, 4000); }
+      if(document.visibilityState === 'visible') bgMerge().then(() => setTimeout(alTick, 600));
+      else if(scanFlush) scanFlush();                         // going to the background: keep what is already fetched
+    });
+    window.addEventListener('pagehide', () => { if(scanFlush) scanFlush(); });
+    window.addEventListener('online', () => {                 // a new connection: forget who was failing
+      Object.keys(proxyHealth).forEach(k => delete proxyHealth[k]);
+      scanPause = {until:0, step:0};
     });
   }
-  setTimeout(alTick, 12000);          // let the watchlist refresh go first
-  bgMerge(); bgWriteConfigSoon(); bgRegister();
+  /* what the background check fetched goes in first, then the gaps are filled;
+     the watchlist refresh that is running now starts the scan when it is done */
+  bgMerge().then(() => { setTimeout(alTick, 1500); bgWriteConfigSoon(); });
+  bgRegister();
   if(location.hash === '#signale'){
     try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
     openAlertsTab();
@@ -5901,7 +6235,7 @@ function alNotifyState(){
   return (Notification.permission === 'granted' && store.get('alNotify', false)) ? 'on' : 'off';
 }
 async function alShow(title, body){
-  const opt = {body, tag:'dr-alerts', renotify:true, icon:'icon-192.png', badge:'badge-96.png', data:{url:'./#signale'}};
+  const opt = {body, tag:'dr-alerts', renotify:true, icon:'icon-192.png', data:{url:'./#signale'}};
   /* Android refuses "new Notification()" outright; there it has to come
      from the service worker.                                           */
   try{
@@ -5928,7 +6262,7 @@ async function alToggleNotify(){
     if(p !== 'granted'){ renderAlertBar(); toast(t('al_n_blocked_hint')); return; }
     store.set('alNotify', true);
     const ok = await alShow(t('al_n_test_t'), t('al_n_test_b'));
-    toast(t(ok ? 'al_n_enabled' : 'al_n_unsupported'));
+    toast(t(ok ? 'al_n_enabled' : swState === 'missing' ? 'al_sw_missing' : 'al_n_unsupported'));
   }
   renderAlertBar(); bgWriteConfigSoon(); bgRegister();
 }
@@ -5968,7 +6302,9 @@ function alMetaRender(){
   if(!scanData.at) parts.push(t('al_meta_never'));
   else parts.push(t('al_meta').replace('{time}', fmtTime(scanData.at)).replace('{n}', st ? st.compared : 0));
   parts.push(al.auto ? t('al_meta_auto').replace('{h}', Math.max(1, +settings.scanHours || 3)) : t('al_meta_auto_off'));
-  if(alNotifyState() === 'on') parts.push(t(bgState === 'on' ? 'al_meta_bg_on' : 'al_meta_bg_off'));
+  if(swState === 'missing') parts.push(t('al_sw_missing'));
+  else if(bgState === 'on') parts.push(t('al_meta_bg_on'));
+  else if(alNotifyState() === 'on') parts.push(t('al_meta_bg_off'));
   if(bgLast && bgLast.at) parts.push(t('al_meta_bg_last').replace('{time}', fmtTime(bgLast.at)));
   el.textContent = parts.join(' · ');
 }
@@ -6072,8 +6408,8 @@ function renderAlerts(){
 function bindAlertEvents(){
   $('#btnAlCheck').addEventListener('click', () => {
     const was = scanning;
-    scanUniverse(true).then(() => {
-      if(!was && !alUnseen() && !(store.get('alStat', {}).found)) toast(t('al_toast_none'));
+    scanToggle().then(r => {
+      if(!was && r && !r.broken && !r.aborted && !r.found) toast(t('al_toast_none'));
     });
     alMetaRender();
   });
@@ -6116,6 +6452,10 @@ function bindAlertEvents(){
   };
   $('#alList').addEventListener('click', rowClick($('#alList')));
   $('#alBest').addEventListener('click', rowClick($('#alBest')));
+  document.addEventListener('click', e => {               // "mehr lesen" under a folded explanation (phone view)
+    const b = e.target.closest('.intro-more');
+    if(b && b.previousElementSibling) b.previousElementSibling.classList.toggle('open');
+  });
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; renderAlertBar(); });
   window.addEventListener('appinstalled', () => { installEvt = null; renderAlertBar(); toast(t('al_installed')); });
 }
