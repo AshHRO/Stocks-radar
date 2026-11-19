@@ -297,6 +297,46 @@ textarea#backupArea{width:100%; min-height:110px; font-family:var(--mono); font-
 .badge.b-minus{border-color:var(--down); color:var(--down)}
 .mv-h .mv-h-t{margin:0; color:inherit; font-size:inherit; letter-spacing:inherit; text-transform:inherit}
 #panel-swing .sc-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+/* ---- bought ---- */
+#posDlg{position:fixed; inset:0; z-index:55; display:flex; align-items:flex-start; justify-content:center; padding:24px 12px 40px;
+  overflow-y:auto; background:color-mix(in srgb, var(--bg) 62%, black)}
+#posDlg.hidden{display:none !important}
+.pd-card{width:100%; max-width:520px; margin:auto 0; background:var(--panel); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); padding:18px 16px}
+.pd-card h2{margin:0 0 3px; font-size:18px}
+#pdSub{margin:0 0 14px; font-size:11.5px; color:var(--faint)}
+.pd-grid{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px}
+.pd-grid label{display:flex; flex-direction:column; gap:4px; min-width:0; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--faint); font-family:var(--mono)}
+.pd-grid input{width:100%; min-width:0; box-sizing:border-box; font-size:15px; text-transform:none; letter-spacing:0; font-family:var(--sans)}
+.pd-grid input[type=date]{border:1px solid var(--line); background:var(--panel2); color:var(--ink); border-radius:var(--r-s); padding:7px 10px; color-scheme:light dark}
+.pd-wide{grid-column:1 / -1}
+#pdCalc{margin:13px 0 0; font-size:13px; color:var(--ink); min-height:1.2em}
+#pdHint{margin-top:8px; line-height:1.45}
+.pd-btns{display:flex; gap:8px; justify-content:flex-end; margin-top:14px}
+.badge.b-held{border-color:var(--accent); color:var(--accent)}
+.mv-act button.pos-buy, .mv-act button.pos-sell, .mv-act button.al-sold, .mv-act button.al-gopos{font-size:12.5px; padding:0 10px; white-space:nowrap}
+.mv-act button.pos-buy, .mv-act button.pos-sell, .mv-act button.al-sold{border-color:var(--accent); color:var(--accent)}
+#dPosLine b{font-weight:600}
+#dPosLine .al-lnk{font-size:inherit}
+.al-search{margin:0 0 12px}
+.al-search input{width:100%; box-sizing:border-box; border:1px solid var(--line); background:var(--panel2); color:var(--ink);
+  border-radius:var(--r-s); padding:10px 12px; font-size:15px; font-family:inherit}
+.al-search input:focus{outline:none; border-color:var(--accent)}
+#alFind{margin-bottom:18px}
+.al-filter{gap:6px; margin-bottom:10px}
+.al-filter .chip{padding:5px 11px; font-size:12.5px}
+/* ---- search ---- */
+#findDlg{position:fixed; inset:0; z-index:45; display:flex; justify-content:center; align-items:flex-start; padding:16px 12px 40px; overflow-y:auto;
+  background:color-mix(in srgb, var(--bg) 70%, black)}
+#findDlg.hidden{display:none !important}
+.fd-card{width:100%; max-width:760px; background:var(--panel); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); padding:14px}
+.fd-bar{display:flex; gap:8px; align-items:center; position:sticky; top:0}
+#fdInput{flex:1; min-width:0; box-sizing:border-box; border:1px solid var(--accent); background:var(--panel2); color:var(--ink);
+  border-radius:var(--r-s); padding:11px 12px; font-size:16px; font-family:inherit}
+#fdInput:focus{outline:none}
+#fdMeta{margin:8px 0 6px; min-height:1em}
+#fdList .mv-h{margin-top:16px}
+html[data-view="mobile"] #findDlg{padding:0}
+html[data-view="mobile"] .fd-card{border-radius:0; border:0; min-height:100%; padding:10px}
 .btn.stop{border-color:var(--warn); color:var(--warn); font-size:13px}
 .mv-extra{font-family:var(--mono); font-size:10px; color:var(--faint)}
 #scanBar{position:absolute; left:0; right:0; bottom:-1px; height:2px; pointer-events:none}
@@ -520,6 +560,13 @@ html[data-view="desktop"] body{min-width:1040px}
 
 /* ============ Footer ============ */
 footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--faint); font-size:12px; text-align:center}
+/* very narrow phones: the dropdowns give a little room to the icon buttons */
+@media (max-width:340px){
+  html[data-view="mobile"] .hd-tools{gap:4px}
+  html[data-view="mobile"] .hd-tools > #hdView{flex-grow:1.2}
+  html[data-view="mobile"] .hd-tools > #hdCur{flex-grow:1}
+}
+html[data-view="mobile"] .al-filter .chip{padding:7px 12px; font-size:13px}
 </style>
 </head>
 <body>
@@ -627,6 +674,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
       <span id="guestChip" class="hidden"></span>
       <span id="lastUpdate"></span>
       <div class="hd-tools">
+      <button class="btn icon ghost" id="btnFind" title="Suchen / Search">🔍</button>
       <button class="btn icon ghost" id="btnRefresh" title="Refresh">⟳</button>
       <select id="hdView" class="hd-sel hd-view" title="Ansicht / layout">
         <option value="auto" data-i18n="v_auto_s"></option>
@@ -647,6 +695,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
     <button class="tab" data-tab="alerts" data-i18n="tab_alerts"></button>
     <button class="tab" data-tab="movers" data-i18n="tab_movers"></button>
     <button class="tab" data-tab="swing" data-i18n="tab_swing"></button>
+    <button class="tab" data-tab="pos" data-i18n="tab_pos"></button>
     <button class="tab" data-tab="screen" data-i18n="tab_screen"></button>
     <button class="tab" data-tab="plan" data-i18n="tab_plan"></button>
     <button class="tab" data-tab="universe" data-i18n="tab_universe"></button>
@@ -711,6 +760,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
       <div class="mv-bar">
         <button class="btn primary" id="btnAlCheck" data-i18n="al_check"></button>
         <button class="btn ghost" id="btnAlNotify"></button>
+        <button class="btn ghost hidden" id="btnPushTest" data-i18n="ps_test"></button>
         <button class="btn ghost hidden" id="btnAlInstall" data-i18n="al_install"></button>
         <span class="spacer"></span>
         <button class="btn ghost" id="btnAlRules" data-i18n="al_rules"></button>
@@ -727,6 +777,13 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
           <label><input type="checkbox" id="alAuto"><span data-i18n="al_r_auto"></span></label>
         </div>
         <div class="sc-grid">
+          <label><span data-i18n="al_r_level"></span>
+            <select id="alLevel">
+              <option value="strict" data-i18n="al_lv_strict"></option>
+              <option value="all" data-i18n="al_lv_all"></option>
+            </select></label>
+          <label><span data-i18n="al_r_cap"></span>
+            <input type="number" id="alCap" min="1" max="20" step="1" inputmode="numeric"></label>
           <label><span data-i18n="al_r_min"></span>
             <select id="alMin">
               <option value="positive" data-i18n="sg_positive"></option>
@@ -749,12 +806,22 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
           <label><span data-i18n="al_r_hours"></span>
             <input type="number" id="alHours" min="1" max="72" step="1"></label>
         </div>
+        <p class="hint" data-i18n="al_lv_hint"></p>
         <p class="hint" data-i18n="al_rules_hint"></p>
       </div>
+      <div class="al-search"><input type="search" id="alSearch" data-i18n-ph="al_search_ph" autocomplete="off" enterkeyhint="search"></div>
+      <div id="alFind" class="hidden"></div>
       <h3 class="mv-h"><span style="margin:0;color:inherit;font-size:inherit;letter-spacing:inherit;text-transform:inherit" data-i18n="al_h_new"></span> <span id="alCount" style="margin-left:0"></span>
         <span id="alHeadAct" class="hidden"><button class="al-lnk" id="btnAlMark" data-i18n="al_mark"></button> · <button class="al-lnk" id="btnAlClear" data-i18n="al_clear"></button></span></h3>
+      <div class="mv-bar al-filter" id="alFilter">
+        <button class="chip on" data-alf="all" data-i18n="alf_all"></button>
+        <button class="chip" data-alf="buy" data-i18n="alf_buy"></button>
+        <button class="chip" data-alf="swing" data-i18n="alf_swing"></button>
+        <button class="chip" data-alf="sell" data-i18n="alf_sell"></button>
+        <button class="chip" data-alf="warn" data-i18n="alf_warn"></button>
+      </div>
       <div id="alList" style="margin-bottom:24px"></div>
-      <h3 class="mv-h"><span style="margin:0;color:inherit;font-size:inherit;letter-spacing:inherit;text-transform:inherit" data-i18n="al_h_best"></span><span id="alBestSub"></span></h3>
+      <h3 class="mv-h"><span id="alBestH" style="margin:0;color:inherit;font-size:inherit;letter-spacing:inherit;text-transform:inherit" data-i18n="al_h_best"></span><span id="alBestSub"></span></h3>
       <div id="alBest"></div>
       <p class="hint" data-i18n="al_disclaimer"></p>
       <p class="hint" id="alAppHint"></p>
@@ -800,6 +867,19 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
           </select></label>
       </div>
       <div id="swOut"></div>
+    </section>
+
+    <!-- ---------- BOUGHT ---------- -->
+    <section class="panel" id="panel-pos">
+      <p class="plan-intro" data-i18n="ps_intro"></p>
+      <button type="button" class="intro-more"><span class="im-more" data-i18n="intro_more"></span><span class="im-less" data-i18n="intro_less"></span></button>
+      <div class="mv-bar"><button class="btn primary" id="btnPosAdd" data-i18n="ps_add"></button></div>
+      <div class="sw-box hidden" id="posSum"></div>
+      <h3 class="mv-h"><span class="mv-h-t" data-i18n="ps_h_open"></span> <span id="posOpenN" style="margin-left:0"></span></h3>
+      <div id="posOpen" style="margin-bottom:24px"></div>
+      <h3 class="mv-h"><span class="mv-h-t" data-i18n="ps_h_closed"></span> <span id="posClosedN" style="margin-left:0"></span></h3>
+      <div id="posClosed"></div>
+      <p class="hint" data-i18n="ps_disclaimer"></p>
     </section>
 
     <!-- ---------- SCREENER ---------- -->
@@ -1274,6 +1354,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
       <div class="d-price-row"><span id="dPrice" class="mono"></span><span id="dDay" class="mono"></span></div>
       <div class="badges" id="dBadges"></div>
       <p class="amt-line hidden" id="dAmountLine"></p>
+      <p class="amt-line hidden" id="dPosLine"></p>
 
       <div id="dChartWrap"><canvas id="dChart"></canvas></div>
       <div class="legend" id="dLegend"></div>
@@ -1318,6 +1399,7 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
 
       <div class="d-actions">
         <a class="btn primary" id="dTR" target="_blank" rel="noopener"></a>
+        <button class="btn" id="dBuy" data-i18n="ps_add"></button>
         <a class="btn" id="dTV" target="_blank" rel="noopener">TradingView ↗</a>
         <a class="btn" id="dYF" target="_blank" rel="noopener">Yahoo Finance ↗</a>
         <button class="btn" id="dCopyIsin" data-i18n="copy_isin"></button>
@@ -1327,6 +1409,36 @@ footer{max-width:1080px; margin:10px auto 0; padding:0 14px 30px; color:var(--fa
       </div>
       <p id="dStamp"></p>
     </div>
+  </div>
+</div>
+
+<!-- ================= SEARCH ================= -->
+<div id="findDlg" class="hidden" role="dialog" aria-modal="true" aria-label="Suche">
+  <div class="fd-card">
+    <div class="fd-bar"><input type="search" id="fdInput" data-i18n-ph="fd_ph" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"><button class="btn ghost" id="fdClose" data-i18n="fd_close"></button></div>
+    <p id="fdMeta" class="hint"></p>
+    <div id="fdList"></div>
+  </div>
+</div>
+
+<!-- ================= BUY / SELL ================= -->
+<div id="posDlg" class="hidden" role="dialog" aria-modal="true" aria-labelledby="pdTitle">
+  <div class="pd-card">
+    <h2 id="pdTitle"></h2>
+    <p id="pdSub" class="mono"></p>
+    <div class="pd-grid">
+      <label class="pd-wide" id="pdAssetRow"><span data-i18n="pd_asset"></span><input type="text" id="pdAsset" list="pdAssetList" autocomplete="off"><datalist id="pdAssetList"></datalist></label>
+      <label><span data-i18n="pd_amt"></span><input type="number" id="pdAmt" min="1" step="any" inputmode="decimal"></label>
+      <label><span id="pdPxLbl"></span><input type="number" id="pdPx" min="0" step="any" inputmode="decimal"></label>
+      <label><span data-i18n="pd_date"></span><input type="date" id="pdDate"></label>
+      <label><span data-i18n="pd_fee"></span><input type="number" id="pdFee" min="0" max="50" step="any" inputmode="decimal"></label>
+      <label><span data-i18n="pd_tgt"></span><input type="number" id="pdTgt" min="0" step="any" inputmode="decimal"></label>
+      <label><span data-i18n="pd_stop"></span><input type="number" id="pdStop" min="0" step="any" inputmode="decimal"></label>
+      <label class="pd-wide"><span data-i18n="pd_until"></span><input type="date" id="pdUntil"></label>
+    </div>
+    <p id="pdCalc" class="mono"></p>
+    <p id="pdHint" class="hint"></p>
+    <div class="pd-btns"><button class="btn ghost" id="pdCancel" data-i18n="pd_cancel"></button><button class="btn primary" id="pdSave"></button></div>
   </div>
 </div>
 
@@ -1352,7 +1464,8 @@ const store = {
   ok(){ try{ localStorage.setItem('dr_t','1'); localStorage.removeItem('dr_t'); return true; }catch(e){ return false; } },
   get(k, fb){ try{ const v = localStorage.getItem('dr_'+k); return v==null ? (k in memStore ? memStore[k] : fb) : JSON.parse(v); }catch(e){ return k in memStore ? memStore[k] : fb; } },
   set(k, v){ memStore[k]=v; try{ localStorage.setItem('dr_'+k, JSON.stringify(v)); }catch(e){}
-    if(k === 'watchlist' || k === 'settings'){ try{ cloudSaveSoon(); }catch(e){} } },
+    if(k === 'watchlist' || k === 'settings' || k === 'positions'){ try{ cloudSaveSoon(); }catch(e){} }
+    if(k === 'watchlist' || k === 'settings' || k === 'positions' || k === 'alCool'){ try{ pushSyncSoon(); }catch(e){} } },
   del(k){ delete memStore[k]; try{ localStorage.removeItem('dr_'+k); }catch(e){} },
   clear(){ for(const k of Object.keys(memStore)) delete memStore[k];
     try{ Object.keys(localStorage).filter(k=>k.startsWith('dr_')).forEach(k=>localStorage.removeItem(k)); }catch(e){} }
@@ -1824,13 +1937,79 @@ const DEFAULT_SETTINGS = {
   scanHours:3, trApp:1, mvPeriod:'d1', mvDir:'up',
   staleMin:15, status:'all', fbUrl:'', fbKey:'', contactMail:'', guestOff:false, adminNameLogin:false, sortDir:'desc', adminMail:'',
   fxMin:10, view:'auto', scHelp:false, trMode:'copy', tvTemplate:'https://www.tradingview.com/chart/?symbol={sym}', dispCur:'auto',
-  screen:null, sw:null
+  screen:null, sw:null, pid:null, push:false
 };
 
 /* ---------------- i18n ---------------- */
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  tab_pos:'Gekauft',
+  ps_intro:'Hier trägst du ein, was du gekauft hast: Betrag, Kurs und Datum. Die App behält deinen Plan im Blick, also Ziel, Stopp und den Tag, an dem du spätestens verkaufen willst, und meldet sich, sobald einer davon erreicht ist. Mit eingeschalteten Benachrichtigungen (Tab „Signale“) kommt die Meldung auch, wenn die App geschlossen ist. Wenn du verkauft hast, tippst du auf „Verkauft“, dann wandert der Kauf in die Liste darunter. Gekauft und verkauft wird nur in deinem Depot, nicht hier.',
+  ps_add:'Kauf eintragen', ps_h_open:'Offen', ps_h_closed:'Verkauft',
+  ps_none:'Noch nichts eingetragen. Tippe bei einem Signal oder einem Kurz-Trade auf „Gekauft“ oder oben auf „Kauf eintragen“.',
+  ps_none_closed:'Noch nichts verkauft.',
+  ps_bought:'{sym} · gekauft {date} · {amt} zu {px}',
+  ps_closed_line:'{sym} · {amt} · gekauft {d1} zu {px1} · verkauft {d2} zu {px2}',
+  ps_st_run:'läuft', ps_st_old:'noch kein Kurs', ps_st_sold:'verkauft',
+  ps_st_tgt:'Ziel erreicht – verkaufen?', ps_st_stop:'Stopp erreicht – verkaufen?', ps_st_time:'Haltedauer vorbei – verkaufen?',
+  ps_sell_btn:'Verkauf eintragen', ps_sell_short:'Verkauft', ps_edit:'Bearbeiten', ps_del:'Löschen',
+  ps_del_ask:'Diesen Eintrag löschen? An deinem Depot ändert das nichts.',
+  ps_sum_open:'{n} offen · eingesetzt {inv} · Wert jetzt {val} · bei Verkauf jetzt {pnl} nach Gebühren',
+  ps_sum_partial:'(für manche gibt es noch keinen Kurs)',
+  ps_sum_closed:'{n} verkauft · {w} davon mit Gewinn · zusammen {pnl}',
+  ps_fx_note:'Werte in fremder Währung: Das Ergebnis rechnet nur mit der Kursänderung, Wechselkurse bleiben außen vor.',
+  ps_detail:'Gekauft {date}: {amt} zu {px}',
+  ps_badge:'gekauft {date}', ps_buy_btn:'Gekauft', ps_buy_title:'Kauf eintragen: Betrag, Kurs, Ziel und Stopp',
+  ps_disclaimer:'Die Meldungen erinnern an deinen eigenen Plan, sie sind keine Empfehlung. Kurse kommen mit bis zu 15 Minuten Verzögerung, und zwischen zwei Prüfungen kann der Kurs schon weitergelaufen sein. Wer sicher zu einem bestimmten Kurs verkaufen will, legt bei seiner Bank eine Stop- oder Limit-Order an.',
+  pd_t_buy:'Kauf eintragen', pd_t_edit:'Kauf bearbeiten', pd_t_sell:'Verkauf eintragen',
+  pd_asset:'Wert (Name oder Symbol)', pd_amt:'Betrag in € (mit Gebühr)', pd_px:'Kaufkurs ({cur})', pd_px_sell:'Verkaufskurs ({cur})',
+  pd_date:'Kaufdatum', pd_fee:'Gebühr pro Order (€)', pd_tgt:'Ziel-Kurs', pd_stop:'Stopp-Kurs', pd_until:'Spätestens verkaufen am',
+  pd_hint:'Ziel, Stopp und Datum kommen aus deinen Kurz-Trade-Einstellungen ({gain} Gewinn, höchstens {loss} Verlust je {amt}, {h} Handelstage) und passen sich dem Betrag an. Ein leeres Feld heißt: dafür keine Meldung.',
+  pd_hint_sell:'Trag den Kurs ein, zu dem du verkauft hast. Das Ergebnis rechnet beide Gebühren mit ein.',
+  pd_calc_tgt:'am Ziel ({pct}): {res}', pd_calc_stop:'am Stopp ({pct}): {res}', pd_calc_sell:'Ergebnis nach Gebühren: {res} ({pct})',
+  pd_now:'jetzt', pd_save:'Speichern', pd_save_sell:'Verkauf speichern', pd_cancel:'Abbrechen',
+  pd_err_px:'Bitte einen Kurs eingeben.', pd_err_asset:'Wert nicht gefunden. Bitte aus der Liste wählen.', pd_err_amt:'Bitte einen Betrag über der Gebühr eingeben.',
+  pd_saved:'Kauf gespeichert. Du bekommst eine Meldung bei Ziel, Stopp oder Datum.', pd_sold_toast:'Verkauf gespeichert: {res}',
+  al_k_sell_tgt:'Ziel erreicht', al_k_sell_stop:'Stopp erreicht', al_k_sell_time:'Haltedauer vorbei',
+  al_sell_line:'{sym} · gekauft {date} für {amt} zu {px}',
+  al_sell_why_tgt:'Dein Ziel ist erreicht. Wenn du jetzt verkaufst, bleiben etwa {res} ({pct}) nach Gebühren.',
+  al_sell_why_stop:'Dein Stopp ist erreicht. Ein Verkauf jetzt begrenzt das Ergebnis auf etwa {res} ({pct}) nach Gebühren.',
+  al_sell_why_time:'Deine geplante Haltedauer ist vorbei. Jetzt verkauft wären es etwa {res} ({pct}) nach Gebühren.',
+  al_sell_done:'erledigt', al_go_pos:'Gekauft ›',
+  ps_n_one:'Verkaufen? {name}: {what}', ps_n_many:'Depot Radar: {n} Verkaufshinweise', ps_n_line:'{name}: {what} · jetzt {res}',
+  ps_push_on:'Benachrichtigungen an. Sie kommen jetzt auch, wenn die App geschlossen ist.',
+  ps_push_local:'Benachrichtigungen an, aber nur bei offener App: {why}',
+  ps_why_nokv:'auf dem Server fehlt noch der Speicher (KV-Namespace „DR“)', ps_why_noroute:'kein eigener Datenweg eingerichtet',
+  ps_why_nopush:'dieser Browser kann keine Push-Nachrichten', ps_why_full:'auf dem Server ist kein Platz für weitere Nutzer',
+  ps_why_denied:'Benachrichtigungen sind blockiert', ps_why_net:'Server gerade nicht erreichbar', ps_why_err:'Server-Fehler ({why})',
+  ps_test:'Test-Nachricht', ps_test_t:'Depot Radar: Test', ps_test_b:'So kommen Meldungen an, wenn die App geschlossen ist.',
+  ps_test_ok:'Test geschickt. Die Nachricht kommt in ein paar Sekunden, auch bei geschlossener App.',
+  ps_test_fail:'Test hat nicht geklappt: {why}',
+  ps_meta_on:'Server-Push an: Prüfung alle 10 Minuten zu Börsenzeiten, auch bei geschlossener App',
+  ps_meta_last:'Server zuletzt geprüft {time}', ps_meta_err:'Server-Push: {why}',
+  ps_meta_wait:'Server-Push an. Die erste Prüfung kommt zu Börsenzeiten innerhalb von 10 Minuten; bleibt diese Zeile so, fehlt auf Cloudflare der Cron-Trigger',
+  ps_why_old:'auf Cloudflare läuft noch die alte worker.js',
+  al_r_level:'Was melden?', al_lv_strict:'Nur echte Kandidaten (empfohlen)', al_lv_all:'Alle Signale (viele Meldungen)',
+  al_r_cap:'Höchstens pro Tag',
+  al_lv_hint:'Echter Kandidat heißt: über der 200-Tage-Linie, 50-Tage-Linie über der 200-Tage-Linie, in 6 Monaten mindestens +10 % (ETFs +4 %) und in 3 Monaten im Plus, gleichmäßig gestiegen, nicht überhitzt (RSI bis 70), nicht mehr als 10 % über der 50-Tage-Linie (ETFs 6 %), keine extremen Schwankungen, kein Einbruch über 45 % im letzten Jahr und bei Aktien mindestens 1 Mio. € Umsatz am Tag. Dazu muss er neu sein, also in den letzten 10 Tagen kein Kandidat gewesen. Was du schon gekauft hast, wird nicht noch einmal gemeldet. Von den neuen Kandidaten eines Tages kommen nur die besten, höchstens so viele wie eingestellt.',
+  al_search_ph:'Suchen: Name, Symbol oder ISIN', al_find_h:'Treffer im Katalog',
+  al_find_none:'Kein Wert gefunden. Neue Werte fügst du im Tab „Auswahl“ hinzu.',
+  alf_all:'Alle', alf_buy:'Kaufen', alf_swing:'Kurz-Trades', alf_sell:'Verkaufen', alf_warn:'Warnungen',
+  al_none_f:'Keine Meldung passt zu Suche oder Filter.',
+  al_h_best_c:'Beste Kandidaten gerade', al_best_n_c:'{n} Werte sind gerade Kandidaten',
+  al_best_none_c:'Gerade erfüllt kein Wert alle Bedingungen. Das kommt vor, wenn der Markt unruhig ist.',
+  cd_badge:'Kandidat', cd_nodata:'Noch keine Kursdaten für diesen Wert.',
+  cd_yes:'Echter Kandidat: {why}.', cd_no:'Kein Kandidat: {why}.',
+  cd_p_m6:'6 Monate {x}', cd_p_clean:'gleichmäßiger Anstieg (R² {x})', cd_p_turn:'Umsatz {x}/Tag',
+  cd_f_a200:'unter der 200-Tage-Linie', cd_f_golden:'50-Tage-Linie unter der 200-Tage-Linie', cd_f_m6:'6 Monate nur {x} (nötig {need})',
+  cd_f_m3:'3 Monate {x}', cd_f_clean:'Trend unruhig (R² {x})', cd_f_down:'kein Aufwärtstrend', cd_f_hot:'überhitzt (RSI {x})',
+  cd_f_ext:'schon {x} über der 50-Tage-Linie', cd_f_vola:'schwankt sehr stark', cd_f_dd:'tiefer Einbruch im letzten Jahr ({x})',
+  cd_f_thin:'wenig Umsatz ({x}/Tag)',
+  fd_ph:'ETF oder Aktie suchen: Name, Symbol oder ISIN', fd_close:'Schließen',
+  fd_hint:'Ein paar Buchstaben reichen. Gefunden wird alles aus deinen Käufen, deiner Watchlist und dem Katalog, dazu weitere Werte über Yahoo Finance. Antippen öffnet den Chart; mit „+“ kommt der Wert auf die Watchlist, mit „Gekauft“ trägst du einen Kauf ein.',
+  fd_more:'Weitere Treffer (Yahoo Finance)', fd_none:'Nichts gefunden. Probier den Namen anders oder das Symbol.',
+  fd_searching:'sucht weitere Werte …', fd_tap:'Antippen für Chart, Signal und ob es gerade ein Kandidat ist.', fd_inwl:'auf der Watchlist',
   tab_swing:'Kurz-Trades',
   sw_intro:'Für Trades über ein paar Tage: Du gibst an, wie viel du einsetzt, was du verdienen willst und wie viel du höchstens verlieren willst. Die Seite rechnet aus, wie stark der Kurs dafür steigen muss, wie oft das im letzten Jahr wirklich vorkam, wie oft der gleiche Rückgang kam und wie sich zwei bekannte Kurz-Trade-Muster mit genau diesen Einstellungen geschlagen hätten. Darunter stehen die Werte, die gerade so ein Muster zeigen.',
   sw_amt:'Einsatz (€)', sw_gain:'Gewinnziel (€)', sw_loss:'Höchstverlust (€)', sw_hold:'Haltedauer', sw_fee:'Gebühr pro Order (€)',
@@ -1863,7 +2042,7 @@ de:{
   al_k_swing:'Kurz-Trade',
   al_w_swing:'Kurz-Trade-Muster „{kind}“. Mit deinem Ziel ({gain} aus {amt} in {h} Handelstagen) lag es bei diesem Wert im letzten Jahr nach Gebühren im Plus.',
   tab_alerts:'Signale',
-  al_intro:'Hier meldet sich dein Depot, wenn sich etwas tut. Jede Prüfung wird mit der vorherigen verglichen: Was neu ein Kaufsignal zeigt, gerade anzieht oder neu in deine Filter-Regel passt, landet in dieser Liste, mit Begründung. Für Werte auf deiner Watchlist kommt eine Warnung, wenn das Signal kippt. Es sind technische Signale aus Kursdaten, keine Anlageberatung.',
+  al_intro:'Hier meldet sich dein Depot, wenn sich etwas tut. Gemeldet werden nur echte Kandidaten: Werte, die gerade neu alle Bedingungen für einen sauberen Aufwärtstrend erfüllen (welche, steht unter „Regeln“), wenige am Tag und die besten zuerst. Dazu kommen Verkaufshinweise für das, was du unter „Gekauft“ eingetragen hast, und Warnungen, wenn bei einem Wert deiner Watchlist das Signal kippt. Mit der Suche findest du jeden Wert und siehst, ob er gerade ein Kandidat ist und warum nicht. Es sind technische Signale aus Kursdaten, keine Anlageberatung.',
   al_check:'Jetzt prüfen', al_rules:'Regeln', al_rules_h:'Was soll gemeldet werden?',
   al_r_sig:'Neue Kaufsignale (ein Wert steigt auf die gewählte Stufe)',
   al_r_mom:'Momentum beginnt (der Kurs fängt gerade an zu steigen)',
@@ -2205,6 +2384,72 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  tab_pos:'Bought',
+  ps_intro:'Record what you bought here: amount, price and date. The app keeps an eye on your plan, meaning the goal, the stop and the day you want to sell by at the latest, and tells you as soon as one of them is reached. With notifications on (tab "Alerts") the message also comes while the app is closed. Once you have sold, tap "Sold" and the purchase moves to the list below. Buying and selling happens in your broker account only, not here.',
+  ps_add:'Record a buy', ps_h_open:'Open', ps_h_closed:'Sold',
+  ps_none:'Nothing recorded yet. Tap "Bought" on an alert or a short trade, or "Record a buy" above.',
+  ps_none_closed:'Nothing sold yet.',
+  ps_bought:'{sym} · bought {date} · {amt} at {px}',
+  ps_closed_line:'{sym} · {amt} · bought {d1} at {px1} · sold {d2} at {px2}',
+  ps_st_run:'running', ps_st_old:'no price yet', ps_st_sold:'sold',
+  ps_st_tgt:'Goal reached – sell?', ps_st_stop:'Stop reached – sell?', ps_st_time:'Holding time over – sell?',
+  ps_sell_btn:'Record the sale', ps_sell_short:'Sold', ps_edit:'Edit', ps_del:'Delete',
+  ps_del_ask:'Delete this entry? It does not change anything in your broker account.',
+  ps_sum_open:'{n} open · put in {inv} · worth now {val} · selling now {pnl} after fees',
+  ps_sum_partial:'(no price yet for some)',
+  ps_sum_closed:'{n} sold · {w} of them with a profit · together {pnl}',
+  ps_fx_note:'Assets in another currency: the result only uses the price change, exchange rates are left out.',
+  ps_detail:'Bought {date}: {amt} at {px}',
+  ps_badge:'bought {date}', ps_buy_btn:'Bought', ps_buy_title:'Record a buy: amount, price, goal and stop',
+  ps_disclaimer:'The messages remind you of your own plan, they are not a recommendation. Prices arrive up to 15 minutes late, and between two checks the price may already have moved on. To be sure of selling at a given price, place a stop or limit order with your broker.',
+  pd_t_buy:'Record a buy', pd_t_edit:'Edit buy', pd_t_sell:'Record the sale',
+  pd_asset:'Asset (name or symbol)', pd_amt:'Amount in € (fee included)', pd_px:'Buy price ({cur})', pd_px_sell:'Sell price ({cur})',
+  pd_date:'Date bought', pd_fee:'Fee per order (€)', pd_tgt:'Goal price', pd_stop:'Stop price', pd_until:'Sell by',
+  pd_hint:'Goal, stop and date come from your short-trade settings ({gain} profit, at most {loss} loss per {amt}, {h} trading days) and scale with the amount. An empty field means: no message for it.',
+  pd_hint_sell:'Enter the price you sold at. The result includes both fees.',
+  pd_calc_tgt:'at the goal ({pct}): {res}', pd_calc_stop:'at the stop ({pct}): {res}', pd_calc_sell:'Result after fees: {res} ({pct})',
+  pd_now:'now', pd_save:'Save', pd_save_sell:'Save the sale', pd_cancel:'Cancel',
+  pd_err_px:'Please enter a price.', pd_err_asset:'Asset not found. Please pick it from the list.', pd_err_amt:'Please enter an amount above the fee.',
+  pd_saved:'Buy saved. You will get a message at the goal, the stop or the date.', pd_sold_toast:'Sale saved: {res}',
+  al_k_sell_tgt:'Goal reached', al_k_sell_stop:'Stop reached', al_k_sell_time:'Holding time over',
+  al_sell_line:'{sym} · bought {date} for {amt} at {px}',
+  al_sell_why_tgt:'Your goal is reached. Selling now leaves about {res} ({pct}) after fees.',
+  al_sell_why_stop:'Your stop is reached. Selling now limits the result to about {res} ({pct}) after fees.',
+  al_sell_why_time:'Your planned holding time is over. Sold now it would be about {res} ({pct}) after fees.',
+  al_sell_done:'done', al_go_pos:'Bought ›',
+  ps_n_one:'Sell? {name}: {what}', ps_n_many:'Depot Radar: {n} sell hints', ps_n_line:'{name}: {what} · now {res}',
+  ps_push_on:'Notifications on. They now also come while the app is closed.',
+  ps_push_local:'Notifications on, but only while the app is open: {why}',
+  ps_why_nokv:'the server still lacks its storage (KV namespace "DR")', ps_why_noroute:'no own data route set up',
+  ps_why_nopush:'this browser cannot receive push messages', ps_why_full:'the server has no room for more users',
+  ps_why_denied:'notifications are blocked', ps_why_net:'server not reachable right now', ps_why_err:'server error ({why})',
+  ps_test:'Test message', ps_test_t:'Depot Radar: test', ps_test_b:'This is how messages arrive while the app is closed.',
+  ps_test_ok:'Test sent. The message arrives in a few seconds, also with the app closed.',
+  ps_test_fail:'The test did not work: {why}',
+  ps_meta_on:'server push on: checks every 10 minutes during trading hours, also with the app closed',
+  ps_meta_last:'server last checked {time}', ps_meta_err:'server push: {why}',
+  ps_meta_wait:'server push on. The first check comes within 10 minutes during trading hours; if this line stays, the Cron Trigger is missing on Cloudflare',
+  ps_why_old:'Cloudflare still runs the old worker.js',
+  al_r_level:'What to report', al_lv_strict:'Real candidates only (recommended)', al_lv_all:'Every signal (many alerts)',
+  al_r_cap:'At most per day',
+  al_lv_hint:'A real candidate is above its 200-day line with the 50-day line above the 200-day line, up at least 10 % in 6 months (ETFs 4 %) and up over 3 months, has risen steadily, is not overheated (RSI up to 70), is no more than 10 % above its 50-day line (ETFs 6 %), does not swing extremely, has not fallen more than 45 % within the year and, for stocks, trades at least 1 million € a day. It also has to be new: no candidate at any time in the last 10 days. What you already bought is not reported again. Of one day\'s new candidates only the best come through, at most as many as set.',
+  al_search_ph:'Search: name, symbol or ISIN', al_find_h:'Found in the catalogue',
+  al_find_none:'Nothing found. New assets are added in the "Universe" tab.',
+  alf_all:'All', alf_buy:'Buy', alf_swing:'Short trades', alf_sell:'Sell', alf_warn:'Warnings',
+  al_none_f:'No alert matches the search or filter.',
+  al_h_best_c:'Best candidates right now', al_best_n_c:'{n} assets are candidates right now',
+  al_best_none_c:'No asset meets every condition right now. That happens when the market is rough.',
+  cd_badge:'Candidate', cd_nodata:'No price data for this asset yet.',
+  cd_yes:'Real candidate: {why}.', cd_no:'Not a candidate: {why}.',
+  cd_p_m6:'6 months {x}', cd_p_clean:'steady rise (R² {x})', cd_p_turn:'turnover {x}/day',
+  cd_f_a200:'below the 200-day line', cd_f_golden:'50-day line below the 200-day line', cd_f_m6:'6 months only {x} (needs {need})',
+  cd_f_m3:'3 months {x}', cd_f_clean:'choppy trend (R² {x})', cd_f_down:'no uptrend', cd_f_hot:'overheated (RSI {x})',
+  cd_f_ext:'already {x} above the 50-day line', cd_f_vola:'swings very strongly', cd_f_dd:'deep fall within the year ({x})',
+  cd_f_thin:'thin trading ({x}/day)',
+  fd_ph:'Find an ETF or stock: name, symbol or ISIN', fd_close:'Close',
+  fd_hint:'A few letters are enough. It finds everything in your purchases, your watchlist and the catalogue, plus more through Yahoo Finance. Tap to open the chart; "+" puts it on the watchlist, "Bought" records a purchase.',
+  fd_more:'More results (Yahoo Finance)', fd_none:'Nothing found. Try the name another way, or the symbol.',
+  fd_searching:'searching for more …', fd_tap:'Tap for the chart, the signal and whether it is a candidate right now.', fd_inwl:'on the watchlist',
   tab_swing:'Short trades',
   sw_intro:'For trades lasting a few days: enter how much you put in, what you want to make and the most you are willing to lose. The page works out how far the price has to rise for that, how often that really happened over the past year, how often the same drop came instead, and how two well-known short-trade patterns would have done with exactly these settings. Below that are the assets showing such a pattern right now.',
   sw_amt:'Amount (€)', sw_gain:'Profit goal (€)', sw_loss:'Maximum loss (€)', sw_hold:'Holding time', sw_fee:'Fee per order (€)',
@@ -2237,7 +2482,7 @@ en:{
   al_k_swing:'Short trade',
   al_w_swing:'Short-trade pattern "{kind}". With your goal ({gain} from {amt} within {h} trading days) it was in the plus after fees for this asset over the past year.',
   tab_alerts:'Alerts',
-  al_intro:'This is where your depot speaks up when something changes. Every check is compared with the one before: anything that newly shows a buy signal, is just starting to rise or newly fits your screener rule lands in this list, with the reason. Assets on your watchlist also raise a warning when their signal turns. These are technical signals from price data, not investment advice.',
+  al_intro:'This is where your depot speaks up when something happens. Only real candidates are reported: assets that newly meet every condition for a clean uptrend (listed under "Rules"), a few a day and the best first. On top come sell hints for what you recorded under "Bought", and warnings when the signal of a watchlist asset turns. The search finds any asset and shows whether it is a candidate right now, and why not. These are technical signals from price data, not investment advice.',
   al_check:'Check now', al_rules:'Rules', al_rules_h:'What should be reported?',
   al_r_sig:'New buy signals (an asset rises to the chosen level)',
   al_r_mom:'Momentum starting (the price has just begun to rise)',
@@ -2681,9 +2926,9 @@ de: `
 <p>Jeder Wert hat drei Links. <strong>TradingView</strong> und <strong>Yahoo Finance</strong> öffnen ohne Anmeldung direkt die richtige Seite, deshalb ist TradingView voreingestellt. <strong>Trade Republic</strong> kann das grundsätzlich nicht: es ist eine Bank-App, jede Seite verlangt einen Login, und für einzelne Werte gibt es keine öffentliche Adresse. Der Link landet daher immer auf der Übersichtsseite. Beim Klick wird die ISIN kopiert, damit du sie nach dem Login in die TR-Suche einfügen kannst. TR ist zum Kaufen da, zum Nachschauen nimm TradingView. Bei ETFs führt „Zusammensetzung" zu justETF, wo die tatsächlichen Bestandteile stehen.</p>
 </div></details>
 <details><summary>Signale: wann und wo sich ein Einstieg anbietet</summary><div class="sec-body">
-<p>Der Tab <strong>Signale</strong> vergleicht jede Prüfung des Katalogs mit der vorherigen. Gemeldet wird nur, was sich <strong>geändert</strong> hat: Ein Wert steigt neu auf „Positiv" oder „Stark", eine Aufwärtsbewegung beginnt gerade, ein Wert passt neu in deine Filter-Regel, oder ein Wert deiner Watchlist fällt auf „Vorsicht" oder „Schwach". Zu jeder Meldung steht die Begründung dabei. Derselbe Wert meldet sich höchstens alle drei Tage wieder, damit ein Kurs, der um eine Schwelle pendelt, nicht bei jeder Prüfung Alarm schlägt.</p>
-<p>Darunter steht <strong>„Aktuell die stärksten Signale"</strong>. Das ist der Stand von jetzt, egal ob sich gerade etwas geändert hat, wieder getrennt nach ETFs und Aktien. Bei gleicher Punktzahl stehen gleichmäßige Trends und niedrigeres Risiko vorn. Unter „Regeln" stellst du ein, was gemeldet wird, wo gesucht wird und wie oft geprüft wird.</p>
-<p>Geprüft wird automatisch, solange die App offen ist, an Börsentagen im eingestellten Abstand, nachts und am Wochenende seltener. Mit eingeschalteten Benachrichtigungen meldet sich das Handy auch, wenn die App im Hintergrund liegt. Ist sie ganz geschlossen, darf die installierte Android-App nur selten kurz im Hintergrund prüfen: frühestens alle 12 Stunden, bei seltener Nutzung nur alle ein bis zwei Tage, und nur in einem Netz, das das Handy schon kennt. Was sie dabei lädt, steht beim nächsten Öffnen schon in „Top“ und „Filter“. Eine Meldung ist ein technisches Signal und keine Kaufempfehlung.</p>
+<p>Der Tab <strong>Signale</strong> vergleicht jede Prüfung mit der vorherigen. Gemeldet werden nur <strong>echte Kandidaten</strong>: Werte, die gerade neu alle Bedingungen für einen sauberen Aufwärtstrend erfüllen. Über der 200-Tage-Linie, 50-Tage-Linie über der 200-Tage-Linie, in sechs Monaten deutlich im Plus und in drei Monaten auch, gleichmäßig gestiegen statt im Zickzack, nicht überhitzt und nicht schon weit über der 50-Tage-Linie, keine extremen Schwankungen und bei Aktien genug Umsatz, damit Kauf und Verkauf nicht teuer werden. Ein Wert, der in den letzten 10 Tagen schon Kandidat war, zählt nicht als neu. Was du unter „Gekauft“ eingetragen hast, wird nicht noch einmal zum Kauf gemeldet. Von den neuen Kandidaten eines Tages kommen nur die besten, standardmäßig höchstens drei.</p>
+<p>Dazu kommen Kurz-Trades (nur wenn das Muster bei diesem Wert bisher im Plus lag und der Wert genug Umsatz hat), Verkaufshinweise für deine Käufe und Warnungen, wenn bei einem Wert deiner Watchlist das Signal kippt. Mit der <strong>Suche</strong> findest du jeden Wert im Katalog und siehst sofort, ob er gerade ein Kandidat ist, und wenn nicht, woran es liegt. Unter „Regeln“ kannst du auf „Alle Signale“ zurückschalten; dann kommen deutlich mehr Meldungen.</p>
+<p>Darunter stehen die <strong>besten Kandidaten von jetzt</strong>, getrennt nach ETFs und Aktien, geordnet nach gleichmäßigem Plus der letzten sechs Monate im Verhältnis zur Schwankung. Geprüft wird, solange die App offen ist, und mit eingeschalteten Benachrichtigungen auch vom eigenen Server, wenn sie geschlossen ist. Ein Kandidat ist ein technisches Signal und keine Kaufempfehlung: Auch saubere Trends können jederzeit drehen.</p>
 </div></details>
 <details><summary>Depot Radar als App auf dem Handy</summary><div class="sec-body">
 <p>Öffne die Seite auf dem Android-Handy in <strong>Chrome</strong>, tippe auf das Menü ⋮ und wähle <strong>„App installieren"</strong>. Danach liegt Depot Radar mit eigenem Symbol bei deinen anderen Apps, startet ohne Adresszeile und bringt jede neue Version der Seite von selbst mit. Auf dem iPhone geht dasselbe in Safari über „Teilen" und „Zum Home-Bildschirm".</p>
@@ -2693,6 +2938,15 @@ de: `
 <p>Im Tab <strong>Kurz-Trades</strong> gibst du Einsatz, Gewinnziel, Höchstverlust und Haltedauer an. Daraus wird der Kursanstieg, den das Ziel braucht. Die Gebühren zählen mit: Bei Trade Republic kostet jede Order 1 €, ein Trade aus Kauf und Verkauf also 2 €. Bei 50 € Einsatz sind das schon gut 4 %, bei 1.000 € nur 0,2 %.</p>
 <p>Danach siehst du, wie oft so ein Anstieg innerhalb der Haltedauer im letzten Jahr wirklich vorkam, und direkt daneben, wie oft der gleiche Rückgang kam. Große Sprünge in wenigen Tagen sind selten, und sie gehen fast genauso oft nach unten wie nach oben.</p>
 <p>Zwei bekannte Muster werden mit deinen Einstellungen nachgespielt: der <strong>Rücksetzer im Aufwärtstrend</strong> (ein steigender Wert fällt zwei Tage kräftig) und der <strong>Ausbruch</strong> (Schlusskurs erstmals über dem Hoch der letzten 20 Tage). Jeder Trade endet am Ziel, am Stopp oder nach der Haltedauer. Die Bilanz zeigt ehrlich, ob das im letzten Jahr nach Gebühren Geld gebracht hätte. Unter „Signale“ kannst du dich benachrichtigen lassen, wenn ein neues Muster erscheint, das bei diesem Wert mit deinen Einstellungen bisher im Plus lag.</p>
+</div></details>
+<details><summary>Gekauft: Verkaufshinweise für deinen Plan</summary><div class="sec-body">
+<p>Wenn du etwas gekauft hast, tippst du beim Signal, beim Kurz-Trade oder in der Detailansicht auf <strong>Gekauft</strong> und trägst Betrag und Kurs ein. Ziel, Stopp und den Tag, an dem du spätestens verkaufen willst, schlägt die App aus deinen Kurz-Trade-Einstellungen vor. Du kannst sie ändern oder leer lassen.</p>
+<p>Sobald der Kurs das Ziel oder den Stopp erreicht oder der Tag gekommen ist, kommt eine Meldung, für jeden Punkt einmal. Im Tab <strong>Gekauft</strong> siehst du jederzeit, was du wann zu welchem Kurs gekauft hast und was ein Verkauf jetzt nach Gebühren bringen würde. Nach dem Verkauf tippst du auf <strong>Verkauft</strong>, dann wandert der Eintrag zu den abgeschlossenen Trades.</p>
+<p>Die App kauft und verkauft nichts. Eine Meldung erinnert dich an deinen eigenen Plan. Wer sicher zu einem bestimmten Kurs verkaufen will, legt bei seiner Bank eine Stop- oder Limit-Order an.</p>
+</div></details>
+<details><summary>Meldungen bei geschlossener App</summary><div class="sec-body">
+<p>Android lässt eine Web-App im Hintergrund nur selten selbst prüfen, höchstens etwa alle 12 Stunden. Deshalb prüft der eigene Server (der Cloudflare Worker, über den auch die Kurse laufen) während der Börsenzeiten alle 10 Minuten und schickt eine Push-Nachricht. Dafür bekommt er eine Kopie von dem, was er braucht: deine offenen Käufe mit Plan, deine Signal-Regeln und die Liste der Werte. Die Nachrichten sind verschlüsselt, der Push-Dienst von Google sieht nur, dass etwas ankommt.</p>
+<p>Pro Durchgang schaut sich der Server nur eine Handvoll Werte genau an, damit er im kostenlosen Rahmen bleibt. Gekaufte Werte prüft er jedes Mal, die Watchlist reihum etwa alle ein bis zwei Stunden, den übrigen Katalog ein- bis zweimal am Tag. Wer sich abmeldet (Schloss), bekommt auf diesem Gerät keine Meldungen mehr, bis er sich wieder anmeldet.</p>
 </div></details>
 <details><summary>Wichtiger Hinweis</summary><div class="sec-body">
 <p class="warnbox"><strong>Keine Anlageberatung.</strong> Diese Seite zeigt technische Kennzahlen aus Vergangenheitsdaten. Vergangene Wertentwicklung ist kein verlässlicher Indikator für die Zukunft. Signale können falsch sein – besonders an Wendepunkten. Prüfe selbst (Geschäftsmodell, Kosten, Steuern, eigene Ziele) und investiere nur Geld, dessen Verlust du tragen kannst.</p>
@@ -2782,9 +3036,9 @@ en: `
 <p>Every asset has three links. <strong>TradingView</strong> and <strong>Yahoo Finance</strong> open the right page directly without a login, which is why TradingView is the default. <strong>Trade Republic</strong> fundamentally cannot: it is a banking app, every page requires a login, and single securities have no public address. The link therefore always lands on the dashboard. Clicking copies the ISIN so you can paste it into TR's search after signing in. TR is for buying; for looking things up, use TradingView. For ETFs, "Holdings" leads to justETF, where the actual constituents are listed.</p>
 </div></details>
 <details><summary>Alerts: when and where an entry may be worth a look</summary><div class="sec-body">
-<p>The <strong>Alerts</strong> tab compares every check of the catalogue with the one before. Only a <strong>change</strong> is reported: an asset newly rises to "Positive" or "Strong", a move up is just starting, an asset newly fits your screener rule, or a watchlist asset drops to "Caution" or "Weak". Every alert comes with its reason. The same asset reports at most once every three days, so a price hovering around a threshold does not ring on every check.</p>
-<p>Below that sits <strong>"Strongest signals right now"</strong>. That is the current standing whether or not anything just changed, again split into ETFs and stocks. Among equal scores, steady trends and lower risk come first. Under "Rules" you choose what is reported, where to look and how often to check.</p>
-<p>Checks run automatically while the app is open, at the chosen interval on trading days and less often at night and on weekends. With notifications on, the phone also tells you while the app sits in the background. When it is fully closed, the installed Android app may only check briefly in the background once in a while: every 12 hours at the earliest, only every one to two days if you rarely open it, and only on a network the phone already knows. Whatever it loads is already in "Top" and "Screener" the next time you open the app. An alert is a technical signal, not a recommendation to buy.</p>
+<p>The <strong>Alerts</strong> tab compares every check with the one before. Only <strong>real candidates</strong> are reported: assets that newly meet every condition for a clean uptrend. Above the 200-day line, the 50-day line above the 200-day line, clearly up over six months and over three months as well, a steady rise rather than a zigzag, not overheated and not already far above the 50-day line, no extreme swings and, for stocks, enough turnover so that buying and selling stay cheap. An asset that was a candidate at any time in the last 10 days does not count as new. Whatever you recorded under "Bought" is not reported as a buy again. Of one day's new candidates only the best come through, three at most by default.</p>
+<p>On top come short trades (only where the pattern has been in the plus for that asset and it trades enough), sell hints for your purchases and warnings when the signal of a watchlist asset turns. The <strong>search</strong> finds any asset in the catalogue and shows at once whether it is a candidate right now and, if not, what is missing. Under "Rules" you can switch back to "Every signal"; that brings many more alerts.</p>
+<p>Below sit the <strong>best candidates right now</strong>, split into ETFs and stocks, ordered by their steady six-month gain relative to how much they swing. Checks run while the app is open and, with notifications on, on the own server while it is closed. A candidate is a technical signal, not a recommendation to buy: clean trends can turn at any time too.</p>
 </div></details>
 <details><summary>Depot Radar as an app on your phone</summary><div class="sec-body">
 <p>Open the page in <strong>Chrome</strong> on your Android phone, tap the ⋮ menu and choose <strong>"Install app"</strong>. Depot Radar then sits among your other apps with its own icon, starts without an address bar and picks up every new version of the page by itself. On an iPhone the same works in Safari via "Share" and "Add to Home Screen".</p>
@@ -2794,6 +3048,15 @@ en: `
 <p>In the <strong>Short trades</strong> tab you enter your amount, profit goal, maximum loss and holding time. From that comes the price rise the goal needs. Fees count: at Trade Republic every order costs 1 €, so a trade made of a buy and a sell costs 2 €. With 50 € that is already over 4 %, with 1,000 € only 0.2 %.</p>
 <p>Then you see how often such a rise within the holding time really happened over the past year, and right next to it how often the same drop came. Big jumps within a few days are rare, and they go down almost as often as up.</p>
 <p>Two well-known patterns are replayed with your settings: the <strong>dip in an uptrend</strong> (a rising asset falls sharply for two days) and the <strong>breakout</strong> (the close is above the high of the last 20 days for the first time). Every trade ends at the goal, at the stop or after the holding time. The record shows honestly whether that would have made money after fees over the past year. Under "Alerts" you can be notified when a new pattern appears that has been in the plus for that asset with your settings.</p>
+</div></details>
+<details><summary>Bought: sell hints for your plan</summary><div class="sec-body">
+<p>When you have bought something, tap <strong>Bought</strong> on the alert, the short trade or in the detail view and enter amount and price. The app suggests a goal, a stop and the day to sell by from your short-trade settings. You can change them or leave them empty.</p>
+<p>As soon as the price reaches the goal or the stop, or the day has come, you get a message, once for each. The <strong>Bought</strong> tab always shows what you bought when and at what price, and what selling now would bring after fees. After selling, tap <strong>Sold</strong> and the entry moves to the closed trades.</p>
+<p>The app does not buy or sell anything. A message reminds you of your own plan. To be sure of selling at a given price, place a stop or limit order with your broker.</p>
+</div></details>
+<details><summary>Messages while the app is closed</summary><div class="sec-body">
+<p>Android rarely lets a web app check by itself in the background, about every 12 hours at most. So the own server (the Cloudflare Worker that also delivers the prices) checks every 10 minutes during trading hours and sends a push message. For that it gets a copy of what it needs: your open purchases with their plan, your alert rules and the list of assets. The messages are encrypted; Google's push service only sees that something arrives.</p>
+<p>Each round the server looks closely at only a handful of assets so it stays within the free plan. Bought assets are checked every time, the watchlist in turn about every one to two hours, the rest of the catalogue once or twice a day. Signing out (lock) stops the messages on this device until you sign in again.</p>
 </div></details>
 <details><summary>Important notice</summary><div class="sec-body">
 <p class="warnbox"><strong>Not investment advice.</strong> This page shows technical metrics from historical data. Past performance is not a reliable indicator of future results. Signals can be wrong – especially at turning points. Do your own research (business model, costs, taxes, your goals) and only invest money you can afford to lose.</p>
@@ -3620,7 +3883,7 @@ function openDetail(sym){
   $('#detail').classList.remove('hidden');
   requestAnimationFrame(drawDetail);
 }
-function closeDetail(){ detailSym=null; $('#detail').classList.add('hidden'); document.body.style.overflow=''; }
+function closeDetail(){ detailSym=null; $('#detail').classList.add('hidden'); document.body.style.overflow = $('#findDlg').classList.contains('hidden') ? '' : 'hidden'; }
 function detailBlank(msg){
   ['dTitle','dSub','dPrice','dDay','dProjText','dStamp'].forEach(id=>{ const e=$('#'+id); if(e) e.textContent=''; });
   ['dBadges','dMetrics','dWhySignal','dWhyRisk','dLegend'].forEach(id=>{ const e=$('#'+id); if(e) e.innerHTML=''; });
@@ -3648,6 +3911,7 @@ function fillDetail(){
       : t('p_amt_short').replace('{amt}',am).replace('{sw}','±'+sw);
     al.classList.remove('hidden');
   } else al.classList.add('hidden');
+  posDetailLine(detailSym);
   const smaPos = a.sma200==null ? t('sma_na')
     : (a.sma50!=null && a.price>a.sma50 && a.price>a.sma200) ? t('sma_above')
     : (a.sma50!=null && a.price<a.sma50 && a.price<a.sma200) ? t('sma_below')
@@ -3962,6 +4226,7 @@ async function refreshAll(){
   else if(stale||demo) setBanner('banner_partial');
   else setBanner(null);
   renderAll();
+  posCheck(true);
   if(planState) renderPlan();
   if(detailSym){ fillDetail(); drawDetail(); }
   setTimeout(alTick, 250);                     // the catalogue scan was waiting for the watchlist
@@ -4026,7 +4291,7 @@ function applyLang(){
   md.textContent=t(md.dataset.i18n);
   md.classList.toggle('on', settings.mvDir==='up');
   $$('#panel-movers .chip[data-per]').forEach(x=>x.classList.toggle('on', x.dataset.per===settings.mvPeriod));
-  renderSettingsValues(); renderPlanInputs(); renderWl(); renderAccounts(); renderGCodes(); applyScHelp(); renderUniCat(); renderUniverse(); renderAll(); renderMovers(); renderScreen(); renderAlerts(); renderSwing();
+  renderSettingsValues(); renderPlanInputs(); renderWl(); renderAccounts(); renderGCodes(); applyScHelp(); renderUniCat(); renderUniverse(); renderAll(); renderMovers(); renderScreen(); renderAlerts(); renderSwing(); renderPos();
   if(planState) renderPlan();
   if(detailSym){ fillDetail(); drawDetail(); }
 }
@@ -4662,16 +4927,23 @@ async function syncUsernames(){
    they belong to the file, not to a user, and must never be overwritten by
    whatever a friend happens to have set on their own phone.                  */
 const SYNC_KEYS = ['lang','theme','dispCur','fxMin','view','scHelp','gcodes','sort','sortDir','filter','status','staleMin',
-                   'planAmount','planMonthly','planProfile','screen','mvPeriod','mvDir','scanHours','al','sw'];
+                   'planAmount','planMonthly','planProfile','screen','mvPeriod','mvDir','scanHours','al','sw','pid','push'];
 let cloudTimer = null, cloudLoading = false;
 function syncPayload(){
   const prefs = {};
   SYNC_KEYS.forEach(k => { if(settings[k] !== undefined && settings[k] !== null) prefs[k] = settings[k]; });
-  return {watchlist: watchlist, prefs: prefs, at: Date.now()};
+  return {watchlist: watchlist, prefs: prefs, positions: {n: positions.length, at: store.get('posAt', 0), list: positions}, at: Date.now()};
 }
 async function cloudSave(){
   if(!fbAuthOn() || !fbSession) return false;
-  try{ return await fbAuthSet('/userdata/' + fbSession.uid, syncPayload()); }
+  try{
+    const body = syncPayload();
+    if(await fbAuthSet('/userdata/' + fbSession.uid, body)) return true;
+    /* database rules written before "Gekauft" existed may refuse the new
+       part; the watchlist and the settings still have to get through     */
+    delete body.positions;
+    return await fbAuthSet('/userdata/' + fbSession.uid, body);
+  }
   catch(e){ return false; }
 }
 function cloudSaveSoon(){
@@ -4685,6 +4957,7 @@ async function cloudLoad(){
   try{ d = await fbAuthGet('/userdata/' + fbSession.uid); }catch(e){ return false; }
   if(!d) return false;
   cloudLoading = true;
+  let posNewer = false;
   try{
     if(Array.isArray(d.watchlist)){
       const clean = d.watchlist.filter(a => a && a.sym).map(a => ({
@@ -4696,7 +4969,16 @@ async function cloudLoad(){
       SYNC_KEYS.forEach(k => { if(d.prefs[k] !== undefined) settings[k] = d.prefs[k]; });
       saveSettings();
     }
+    /* purchases: the newer side wins; an empty list is stored as {n:0} */
+    const cp = d.positions;
+    if(cp && typeof cp === 'object' && typeof cp.n === 'number'){
+      if((+cp.at || 0) >= store.get('posAt', 0)){
+        positions = sanitizePositions(cp.list || []);
+        store.set('positions', positions); store.set('posAt', +cp.at || 0);
+      } else posNewer = true;
+    } else if(positions.length) posNewer = true;
   } finally { cloudLoading = false; }
+  if(posNewer) cloudSaveSoon();               // this device changed its purchases more recently
   return true;
 }
 /* One record per browser per account, so the admin can see real devices
@@ -4950,6 +5232,7 @@ function lockNow(){
   if(fbAuthOn() && fbSession){ clearTimeout(cloudTimer); cloudSave(); }
   store.del('authed'); $('#liPw').value=''; currentUser=''; isAdmin=true;
   bgClear();
+  if(store.get('pushOn', false)) pushUnsubscribe();
   if(guestMode){ endGuest(); return; }
   closeDetail(); showLock();
 }
@@ -5074,6 +5357,7 @@ function bindEvents(){
     if(b.dataset.tab==='plan' && !planState) renderPlan();
     if(b.dataset.tab==='alerts') renderAlerts();
     if(b.dataset.tab==='swing'){ renderSwing(); scanEnsure(); }
+    if(b.dataset.tab==='pos') renderPos();
     if(b.dataset.tab==='settings') renderRouteInfo();
     if(b.dataset.tab==='screen'){
       renderScreen(); scanEnsure();
@@ -5134,7 +5418,7 @@ function bindEvents(){
   $('#dNext').addEventListener('click', ()=>detailStep(1));
   $('#detail').addEventListener('click',e=>{ if(e.target.id==='detail'||e.target.classList.contains('detail-in')) closeDetail(); });
   document.addEventListener('keydown',e=>{
-    if(!detailSym) return;
+    if(!detailSym || !$('#posDlg').classList.contains('hidden')) return;      // typing in the buy form
     if(e.key==='Escape') closeDetail();
     else if(e.key==='ArrowLeft'){ e.preventDefault(); detailStep(-1); }
     else if(e.key==='ArrowRight'){ e.preventDefault(); detailStep(1); }
@@ -5213,12 +5497,12 @@ function bindEvents(){
     watchlist.splice(i, 1);
     store.set('watchlist', watchlist);          // syncs to the account when signed in
     delete analyses[detailSym];
-    closeDetail(); renderWl(); renderAll(); renderMovers(); renderScreen(); renderAlerts(); renderSwing(); bgWriteConfigSoon();
+    closeDetail(); renderWl(); renderAll(); renderMovers(); renderScreen(); renderAlerts(); renderSwing(); renderPos(); bgWriteConfigSoon();
     toast(t('removed'));
   });
   let rsTo; window.addEventListener('resize',()=>{ clearTimeout(rsTo); rsTo=setTimeout(()=>{
     const before = document.documentElement.dataset.view;
-    if(applyView() !== before){ renderAll(); renderMovers(); renderScreen(); renderAlerts(); renderSwing(); if(planState) renderPlan(); }
+    if(applyView() !== before){ renderAll(); renderMovers(); renderScreen(); renderAlerts(); renderSwing(); renderPos(); if(planState) renderPlan(); }
     renderCards(); renderMovers(); if(detailSym) drawDetail(); if(planState) drawPlanChart();
   },150); });
   $('#btnPlan').addEventListener('click', renderPlan);
@@ -5265,7 +5549,7 @@ function bindEvents(){
     openAnySym(u.sym, Array.from($('#scList').querySelectorAll('.mv-row')).map(r=>r.dataset.sym));
   });
   function repaintMoney(){
-    renderAll(); renderMovers(); renderScreen(); renderAlerts(); renderSwing();
+    renderAll(); renderMovers(); renderScreen(); renderAlerts(); renderSwing(); renderPos();
     if(planState) renderPlan();
     if(detailSym){ fillDetail(); drawDetail(); }
     const n = $('#fxNote'); if(n) n.textContent = fxNoteText();
@@ -5317,14 +5601,14 @@ function bindEvents(){
   $('#setLang').addEventListener('change',e=>{ settings.lang=e.target.value; saveSettings(); applyLang(); });
   function applyViewChoice(v){
     settings.view = v; saveSettings();
-    applyView(); renderAll(); renderMovers(); renderScreen(); renderAlerts(); renderSwing();
+    applyView(); renderAll(); renderMovers(); renderScreen(); renderAlerts(); renderSwing(); renderPos();
     if(planState) renderPlan(); if(detailSym){ fillDetail(); drawDetail(); }
     toast(t('saved'));
   }
   $('#hdView').addEventListener('change', e=>applyViewChoice(e.target.value));
   $('#setView').addEventListener('change', e=>{
     settings.view = e.target.value; saveSettings();
-    applyView(); renderAll(); renderMovers(); renderScreen(); renderAlerts(); renderSwing();
+    applyView(); renderAll(); renderMovers(); renderScreen(); renderAlerts(); renderSwing(); renderPos();
     if(planState) renderPlan(); if(detailSym){ fillDetail(); drawDetail(); }
     toast(t('saved'));
   });
@@ -5839,6 +6123,7 @@ async function scanDo(queue, force){
       renderSwing();
       renderAlerts();
       bgWriteConfigSoon();
+      posCheck(true);
       if(found.length){ toast(t('al_toast').replace('{n}', found.length)); alNotifySystem(found); }
       else if(aborted) toast(t('mv_aborted'));
       else if(broken && force) toast(t('mv_noproxy'));
@@ -6235,7 +6520,7 @@ function openTR(isin, sym){
    the same asset stays quiet for three days after a report so a price
    hovering around a threshold does not ring the bell on every scan.
    ===================================================================== */
-const AL_DEFAULT = {sig:true, min:'positive', mom:true, rule:false, warn:true, swing:true, scope:'all', risk:'any', auto:true};
+const AL_DEFAULT = {sig:true, min:'positive', mom:true, rule:false, warn:true, swing:true, scope:'all', risk:'any', auto:true, level:'strict', cap:3};
 const AL_COOL_MS = 3*86400000, AL_KEEP = 80, AL_KEEP_MS = 30*86400000;
 let alerts = store.get('alerts', []);            // newest first
 let alCool = store.get('alCool', {});            // "SYM|kind" -> time of the last report
@@ -6250,22 +6535,29 @@ function alertKinds(u, pm, nm, al, inWl, f){
   if(!ns || !ps) return null;
   const inScope = al.scope === 'all' || (al.scope === 'watch' ? inWl : u.type === al.scope);
   const riskOk = al.risk === 'any' || RISK_RANK[ns.risk] <= RISK_RANK[al.risk];
+  /* strict (the default): every candidate check, new within 10 days, and
+     nothing that is already bought                                       */
+  const strict = al.level !== 'all', held = !!(al.held && al.held[u.sym]);
+  const fresh = !strict || !(al.seen && al.seen[u.sym] >= Math.floor(nm.at / 86400000) - CAND.seenDays);
   const kinds = [];
-  if(inScope && riskOk){
-    if(al.sig && SIG_RANK[ns.signal] >= SIG_RANK[al.min] && SIG_RANK[ns.signal] > SIG_RANK[ps.signal]) kinds.push('buy');
-    if(al.mom && SIG_RANK[ns.signal] >= 2 && momentumStart(nm) && !momentumStart(pm)) kinds.push('mom');
+  if(inScope && riskOk && !held){
+    if(al.sig && (strict ? alGood(nm, u.type, al) && !alGood(pm, u.type, al) && fresh
+                         : SIG_RANK[ns.signal] >= SIG_RANK[al.min] && SIG_RANK[ns.signal] > SIG_RANK[ps.signal])) kinds.push('buy');
+    if(al.mom && SIG_RANK[ns.signal] >= 2 && momentumStart(nm) && !momentumStart(pm)
+       && (!strict || (SIG_RANK[ns.signal] >= SIG_RANK[al.min] && candOk(nm, u.type, CAND.momKeys) && fresh))) kinds.push('mom');
     if(al.rule && f && ruleMatch(u, nm, f) && !ruleMatch(u, pm, f)) kinds.push('rule');
-    if(al.swing && nm.sw && nm.sw.age === 0 && !(pm.sw && pm.sw.sig) && swAlertOk(nm, al.swp || SW_DEF)) kinds.push('swing');
+    if(al.swing && nm.sw && nm.sw.age === 0 && !(pm.sw && pm.sw.sig) && swAlertOk(nm, al.swp || SW_DEF)
+       && (!strict || candOk(nm, u.type, CAND.swingKeys))) kinds.push('swing');
   }
   if(al.warn && inWl && SIG_RANK[ns.signal] <= 1 && SIG_RANK[ns.signal] < SIG_RANK[ps.signal]) kinds.push('warn');
-  return kinds.length ? {kinds, from:ps.signal, to:ns.signal, score:ns.score, trend:ns.trend, risk:ns.risk} : null;
+  return kinds.length ? {kinds, from:ps.signal, to:ns.signal, score:ns.score, trend:ns.trend, risk:ns.risk, q:candQ(nm)} : null;
 }
 function alertRecord(u, m, hit, bg){
   return {id:u.sym + '|' + m.at, sym:u.sym, name:u.name || u.sym, type:u.type, isin:u.isin || '', at:m.at,
-    kinds:hit.kinds, from:hit.from, to:hit.to, score:hit.score, trend:hit.trend, risk:hit.risk,
+    kinds:hit.kinds, from:hit.from, to:hit.to, score:hit.score, q:+(+(hit.q || 0)).toFixed(3), trend:hit.trend, risk:hit.risk,
     p:m.p, cur:m.cur, bg:!!bg, seen:false,
-    m:{p:m.p, sma20:m.sma20, sma50:m.sma50, sma200:m.sma200, d1:m.d1, d21:m.d21, d126:m.d126,
-       rsi:m.rsi, vol:m.vol, above20:m.above20, sw:m.sw ? {sig:m.sw.sig} : null,
+    m:{p:m.p, sma20:m.sma20, sma50:m.sma50, sma200:m.sma200, d1:m.d1, d21:m.d21, d63:m.d63, d126:m.d126,
+       rsi:m.rsi, vol:m.vol, dd:m.dd, turn:m.turn, above20:m.above20, sw:m.sw ? {sig:m.sw.sig} : null,
        lr:m.lr ? {r2:m.lr.r2, slope:m.lr.slope, annualPct:m.lr.annualPct} : null}};
 }
 function alertNote(evs, txt){
@@ -6280,6 +6572,8 @@ async function bgRun(cfg, flush){
   const out = {events:[], items:{}, at:Date.now(), checked:0, note:null, broken:false};
   const deadline = Date.now() + (cfg.budget || 100000);
   let lastFlush = Date.now();
+  let capLeft = cfg.al.level === 'all' ? Infinity
+    : Math.max(1, +cfg.al.cap || 3) - (cfg.usedDay === Math.floor(Date.now() / 86400000) ? (cfg.used || 0) : 0);
   const res = await runPool(cfg.list, async u => {
     let nm;
     try{ nm = scanItem(parseChart(await viaProxy(chartUrl(u.sym, '1y')))); }
@@ -6289,7 +6583,7 @@ async function bgRun(cfg, flush){
     out.items[u.sym] = nm;
     if(hit){
       hit.kinds = hit.kinds.filter(k => !((cfg.cool[u.sym + '|' + k] || 0) > Date.now() - cfg.coolMs));
-      if(hit.kinds.length) out.events.push(alertRecord(u, nm, hit, true));
+      if(hit.kinds.length && (!alCapped(hit.kinds) || capLeft-- > 0)) out.events.push(alertRecord(u, nm, hit, true));
     }
     if(flush && Date.now() - lastFlush > 15000){ lastFlush = Date.now(); try{ await flush(out); }catch(e){} }
     return 'ok';
@@ -6302,10 +6596,12 @@ function bgCoreSource(){
   const fns = [proxyValid, proxyBenched, proxyOrder, proxyNote, fetchJson, viaProxy, runPool, parseChart,
     smaLast, smaSeries, pctBack, lastLogRets, stdev, annVol, maxDD, rsi14, linregLog, emaLast, turnover,
     high52, daysAboveSma, scanItem, scanScore, momentumStart, numOrNull, screenSteps, ruleMatch,
-    alertKinds, alertRecord, alertNote, bgRun, swSeries, swSignalAt, swNow, swNeed, swReplay, swAgg, swAlertOk];
+    alertKinds, alertRecord, alertNote, bgRun, swSeries, swSignalAt, swNow, swNeed, swReplay, swAgg, swAlertOk,
+    candChecks, candOk, candQ, alGood, alCapped];
   return [
     'const sleep = ' + sleep.toString() + ';',
     'const SW_DEF = ' + JSON.stringify(SW_DEF) + ';',
+    'const CAND = ' + JSON.stringify(CAND) + ';',
     'let settings = cfg.settings, lastGoodProxy = cfg.lastGood || null, mcapCache = {}, proxyPush = 0, ownRoute = cfg.route || \'\', routeWait = null;',
     'const proxyHealth = {}, PROXY_TIMEOUT = ' + PROXY_TIMEOUT + ', POOL_MAX = ' + POOL_MAX + ', POOL_MIN = ' + POOL_MIN + ';',
     'const PROXIES = {' + Object.keys(PROXIES).map(k => k + ':' + PROXIES[k].toString()).join(',') + '};',
@@ -6316,7 +6612,9 @@ function bgCoreSource(){
 }
 function alTxt(){
   return {title:t('al_n_title'), more:t('al_n_more'), buy:t('al_k_buy'), mom:t('al_k_mom'),
-          rule:t('al_k_rule'), warn:t('al_k_warn'), swing:t('al_k_swing')};
+          rule:t('al_k_rule'), warn:t('al_k_warn'), swing:t('al_k_swing'),
+          sell_tgt:t('al_k_sell_tgt'), sell_stop:t('al_k_sell_stop'), sell_time:t('al_k_sell_time'),
+          sellOne:t('ps_n_one'), sellN:t('ps_n_many'), sellLine:t('ps_n_line')};
 }
 /* Hands the background check everything it needs. It is only written for a
    signed-in user who switched notifications on; guests and locked sessions
@@ -6327,7 +6625,7 @@ async function bgWriteConfig(){
     const c = await caches.open('dr-bg');
     const locked = $('#app').classList.contains('hidden');
     if(guestMode || locked || !alPrefs().auto){ await c.delete('cfg'); return; }
-    const al = alPrefs(), items = scanData.items || {}, now = Date.now();
+    const al = Object.assign(alPrefs(), {held:alHeld(), seen:alSeen || {}}), items = scanData.items || {}, now = Date.now();
     const wl = new Set(watchlist.map(w => w.sym));
     const edge = al.min === 'strong' ? 3.5 : 1.5;      // the score where a new signal would appear
     /* The whole catalogue goes in, most useful first: the watchlist, then
@@ -6343,7 +6641,8 @@ async function bgWriteConfig(){
     list.forEach(u => { if(items[u.sym]){ const m = Object.assign({}, items[u.sym]); delete m.spark; delete m.cl; base[u.sym] = m; } });
     const cfg = {settings:{proxy:settings.proxy, proxyCustom:settings.proxyCustom}, lastGood:lastGoodProxy, al,
       rule: al.rule ? screenFilters() : null, list, items:base, cool:alCool, coolMs:AL_COOL_MS, txt:alTxt(), budget:100000,
-      notify: alNotifyState() === 'on', route: ownRoute};
+      notify: alNotifyState() === 'on', route: ownRoute, pushOn: !!store.get('pushOn', false),
+      used: alUsedToday(alCool, now, new Date().getTimezoneOffset()), usedDay: alDay(now)};
     const hdr = {headers:{'Content-Type':'application/json'}};
     await c.put('cfg', new Response(JSON.stringify(cfg), hdr));
     await c.put('core', new Response(bgCoreSource(), {headers:{'Content-Type':'text/plain'}}));
@@ -6385,13 +6684,24 @@ async function bgMerge(){
         }
       }
     }
+    const pn = await c.match('posnote');
+    if(pn){
+      const list = await pn.json();
+      await c.delete('posnote');
+      if(posNoteMerge(list) && $('#panel-pos').classList.contains('on')) renderPos();
+    }
     const r = await c.match('pending');
     if(r){
-      const pend = await r.json();
+      const pend = (await r.json() || []).filter(e => e && e.id && Array.isArray(e.kinds));
       await c.delete('pending');
-      if(Array.isArray(pend) && pend.length){
-        pend.forEach(e => (e.kinds || []).forEach(k => {
-          alCool[e.sym + '|' + k] = Math.max(alCool[e.sym + '|' + k] || 0, e.at); }));
+      if(pend.length){
+        const cat = new Map(SCAN_LIST().map(u => [u.sym, u]));
+        pend.forEach(e => {
+          if(e.pid) return;
+          const u = cat.get(e.sym);                   // the server only knows Yahoo's short name
+          if(u){ e.name = u.name || e.name; e.type = u.type; e.isin = u.isin || e.isin || ''; }
+          e.kinds.forEach(k => { alCool[e.sym + '|' + k] = Math.max(alCool[e.sym + '|' + k] || 0, e.at); });
+        });
         alertsAdd(pend, false);
       }
     }
@@ -6423,7 +6733,10 @@ function swInit(){
     .then(r => { swReg = r; swState = 'ok'; bgRegister(); })
     .catch(() => { swState = 'missing'; alMetaRender(); });      // most often: the file is not on the server under that exact name
   navigator.serviceWorker.addEventListener('message', e => {
-    if(e.data && e.data.type === 'open-alerts'){ bgMerge().then(openAlertsTab); }
+    const d = e.data || {};
+    if(d.type === 'open-alerts') bgMerge().then(openAlertsTab);
+    else if(d.type === 'open-tab') bgMerge().then(() => { if(d.tab === 'pos') openPosTab(); else openAlertsTab(); });
+    else if(d.type === 'push-merge' && !$('#app').classList.contains('hidden')) bgMerge();
   });
 }
 
@@ -6447,23 +6760,26 @@ function alertsAdd(found, notify){
   }
 }
 function alertsAfterScan(prev, items, t0){
-  const al = alPrefs(), f = al.rule ? screenFilters() : null;
+  const al = Object.assign(alPrefs(), {held:alHeld(), seen:alSeen || {}}), f = al.rule ? screenFilters() : null;
   const wl = new Set(watchlist.map(w => w.sym));
-  const now = Date.now(), found = [];
+  const now = Date.now(), found = [], looked = [];
   let compared = 0;
   for(const u of SCAN_LIST()){
     const nm = items[u.sym], pm = prev[u.sym];
     if(!nm || !pm || nm === pm || nm.at < t0) continue;
-    compared++;
+    compared++; looked.push(u.sym);
     const hit = alertKinds(u, pm, nm, al, wl.has(u.sym), f);
     if(!hit) continue;
     hit.kinds = hit.kinds.filter(k => !((alCool[u.sym + '|' + k] || 0) > now - AL_COOL_MS));
     if(!hit.kinds.length) continue;
-    hit.kinds.forEach(k => { alCool[u.sym + '|' + k] = now; });
     found.push(alertRecord(u, nm, hit, false));
   }
-  if(found.length) alertsAdd(found, false);       // stored at once; the scan announces them together when it ends
-  return {found, compared};
+  /* the best of the new candidates, up to the daily limit; warnings always */
+  const keep = alCapPick(found, al, alUsedToday(alCool, now, new Date().getTimezoneOffset()));
+  keep.forEach(e => e.kinds.forEach(k => { alCool[e.sym + '|' + k] = now; }));
+  if(alSeen) alSeenNote(items, looked, al);
+  if(keep.length) alertsAdd(keep, false);       // stored at once; the scan announces them together when it ends
+  return {found:keep, compared};
 }
 /* Exchanges are shut at night and on weekends, so asking 300 times for prices
    that cannot have moved only wears out the free proxies. The window is
@@ -6477,6 +6793,7 @@ function alDue(){
 }
 function alTick(){
   if(alDue()) scanUniverse(false);
+  posRefreshTick();
 }
 function alStart(){
   if(!alTimer){
@@ -6493,11 +6810,14 @@ function alStart(){
   }
   /* what the background check fetched goes in first, then the gaps are filled;
      the watchlist refresh that is running now starts the scan when it is done */
-  bgMerge().then(() => { setTimeout(alTick, 1500); bgWriteConfigSoon(); });
+  alSeenInit();
+  bgMerge().then(() => { setTimeout(alTick, 1500); bgWriteConfigSoon(); posCheck(true); });
   bgRegister();
-  if(location.hash === '#signale'){
+  pushResume();
+  if(location.hash === '#signale' || location.hash === '#gekauft'){
+    const h = location.hash;
     try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
-    openAlertsTab();
+    if(h === '#gekauft') openPosTab(); else openAlertsTab();
   }
 }
 function openAlertsTab(){
@@ -6511,21 +6831,25 @@ function alNotifyState(){
   if(Notification.permission === 'denied') return 'blocked';
   return (Notification.permission === 'granted' && store.get('alNotify', false)) ? 'on' : 'off';
 }
-async function alShow(title, body){
-  const opt = {body, tag:'dr-alerts', renotify:true, icon:'icon-192.png', data:{url:'./#signale'}};
+async function alShow(title, body, url, tag){
+  const opt = {body, tag:tag || 'dr-alerts', renotify:true, icon:'icon-192.png', data:{url:url || './#signale'}};
   /* Android refuses "new Notification()" outright; there it has to come
      from the service worker.                                           */
   try{
     const reg = swReg || (navigator.serviceWorker && await navigator.serviceWorker.getRegistration());
     if(reg && reg.showNotification){ await reg.showNotification(title, opt); return true; }
   }catch(e){}
-  try{ const n = new Notification(title, opt); n.onclick = () => { window.focus(); openAlertsTab(); n.close(); }; return true; }
+  try{
+    const n = new Notification(title, opt);
+    n.onclick = () => { window.focus(); if(String(url || '').indexOf('#gekauft') >= 0) openPosTab(); else openAlertsTab(); n.close(); };
+    return true;
+  }
   catch(e){ return false; }
 }
 function alNotifySystem(evs){
   if(alNotifyState() !== 'on') return;
-  const n = alertNote(evs, alTxt());
-  alShow(n.title, n.body);
+  const n = noteFor(evs, pushTxt());
+  alShow(n.title, n.body, n.url, n.tag);
 }
 async function alToggleNotify(){
   const st = alNotifyState();
@@ -6533,15 +6857,22 @@ async function alToggleNotify(){
   if(st === 'blocked'){ toast(t('al_n_blocked_hint')); return; }
   if(st === 'on'){
     store.set('alNotify', false); toast(t('al_n_disabled'));
+    pushUnsubscribe().then(() => { renderAlertBar(); alMetaRender(); bgWriteConfigSoon(); });
   } else {
     let p = Notification.permission;
     if(p !== 'granted'){ try{ p = await Notification.requestPermission(); }catch(e){ p = 'denied'; } }
     if(p !== 'granted'){ renderAlertBar(); toast(t('al_n_blocked_hint')); return; }
     store.set('alNotify', true);
     const ok = await alShow(t('al_n_test_t'), t('al_n_test_b'));
-    toast(t(ok ? 'al_n_enabled' : swState === 'missing' ? 'al_sw_missing' : 'al_n_unsupported'));
+    if(!ok) toast(t(swState === 'missing' ? 'al_sw_missing' : 'al_n_unsupported'));
+    else {
+      toast(t('al_n_enabled'));
+      /* and the server, so messages also come while the app is closed */
+      const r = await pushSubscribe();
+      toast(r.ok ? t('ps_push_on') : tpl('ps_push_local', {why:pushWhy(r.why)}));
+    }
   }
-  renderAlertBar(); bgWriteConfigSoon(); bgRegister();
+  renderAlertBar(); alMetaRender(); bgWriteConfigSoon(); bgRegister();
 }
 
 /* ---------------- rendering ---------------- */
@@ -6569,6 +6900,7 @@ function renderAlertBar(){
   nb.classList.toggle('on', st === 'on');
   const standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
   $('#btnAlInstall').classList.toggle('hidden', !installEvt || standalone);
+  const pt = $('#btnPushTest'); if(pt) pt.classList.toggle('hidden', !store.get('pushOn', false) || st !== 'on');
   $('#alAppHint').textContent = standalone ? t('al_app_standalone') : (installEvt ? t('al_app_ready') : t('al_app_hint'));
 }
 function alMetaRender(){
@@ -6579,7 +6911,9 @@ function alMetaRender(){
   if(!scanData.at) parts.push(t('al_meta_never'));
   else parts.push(t('al_meta').replace('{time}', fmtTime(scanData.at)).replace('{n}', st ? st.compared : 0));
   parts.push(al.auto ? t('al_meta_auto').replace('{h}', Math.max(1, +settings.scanHours || 3)) : t('al_meta_auto_off'));
+  const pm = pushMetaText();
   if(swState === 'missing') parts.push(t('al_sw_missing'));
+  else if(pm) parts.push(pm);
   else if(bgState === 'on') parts.push(t('al_meta_bg_on'));
   else if(alNotifyState() === 'on') parts.push(t('al_meta_bg_off'));
   if(bgLast && bgLast.at) parts.push(t('al_meta_bg_last').replace('{time}', fmtTime(bgLast.at)));
@@ -6590,6 +6924,7 @@ function alRulesFill(){
   $('#alSig').checked = !!al.sig; $('#alMom').checked = !!al.mom; $('#alRule').checked = !!al.rule;
   $('#alWarn').checked = !!al.warn; $('#alAuto').checked = !!al.auto; $('#alSwing').checked = !!al.swing;
   $('#alMin').value = al.min; $('#alScope').value = al.scope; $('#alRisk').value = al.risk;
+  $('#alLevel').value = al.level === 'all' ? 'all' : 'strict'; $('#alCap').value = Math.round(+al.cap) || 3; $('#alCap').disabled = al.level === 'all';
   $('#alHours').value = Math.max(1, +settings.scanHours || 3);
 }
 function alertWhy(ev){
@@ -6607,6 +6942,7 @@ function alertWhy(ev){
     if(m.rsi != null) why.push('RSI ' + fmtNum(m.rsi, 0));
     if(why.length) out.push(why.join(', ') + '.');
   }
+  if(up && ev.m && 'd63' in ev.m) out.push(candLine(ev.m, ev.type));
   if(ev.kinds.includes('mom')) out.push(t('al_w_mom').replace('{n}', m.above20 || 0).replace('{rsi}', m.rsi != null ? fmtNum(m.rsi, 0) : '–'));
   if(ev.kinds.includes('rule')) out.push(t('al_w_rule'));
   if(ev.kinds.includes('swing') && m.sw){ const p = swPrefs();
@@ -6614,6 +6950,7 @@ function alertWhy(ev){
   return out.join(' ');
 }
 function alertRowHtml(ev){
+  if(ev.pid) return alertSellRowHtml(ev);
   const warn = ev.kinds.includes('warn');
   const inWl = watchlist.some(w => w.sym === ev.sym);
   const now = (scanData.items || {})[ev.sym];
@@ -6624,11 +6961,12 @@ function alertRowHtml(ev){
     <span class="al-ico">${warn ? '▼' : '▲'}</span>
     <div class="mv-id"><b>${escHtml(ev.name)}</b>
       <span>${escHtml(ev.sym)} · ${ev.type === 'etf' ? t('t_etf') : t('t_stock')} · ${escHtml(riskTxt)} · ${escHtml(fmtTime(ev.at))}${ev.bg ? ' · ' + escHtml(t('al_bg')) : ''}</span>
-      <div class="badges" style="margin:6px 0 0">${ev.seen ? '' : `<span class="badge b-new">${escHtml(t('al_new'))}</span>`}${kinds}<span class="badge b-sig s-${escHtml(ev.to)}">${escHtml(LABELS.signal[ev.to][settings.lang])}</span></div>
+      <div class="badges" style="margin:6px 0 0">${ev.seen ? '' : `<span class="badge b-new">${escHtml(t('al_new'))}</span>`}${kinds}<span class="badge b-sig s-${escHtml(ev.to)}">${escHtml(LABELS.signal[ev.to][settings.lang])}</span>${posHeldBadge(ev.sym)}</div>
       <p class="al-why">${escHtml(alertWhy(ev))}</p></div>
     <div class="mv-num"><b>${fmtMoney(ev.p, ev.cur)}</b>
       <span>${since != null ? escHtml(t('al_since')) + ' <b class="' + triCls(since) + '" style="display:inline;font-size:11px">' + fmtPct(since) + '</b>' : ''}</span></div>
     <div class="mv-act">
+      ${warn ? '' : posBuyBtn()}
       <button class="mv-add${inWl ? ' in' : ''}" ${inWl ? 'disabled' : ''} title="${inWl ? t('mv_inwl') : t('mv_add')}">${inWl ? '✓' : '+'}</button>
       ${linkPairHtml(ev.isin, ev.sym)}
     </div></div>`;
@@ -6646,9 +6984,11 @@ function alBestRows(type, al, limit){
     const s = scanScore(m, u.type); if(!s) continue;
     if(SIG_RANK[s.signal] < SIG_RANK[al.min]) continue;
     if(al.risk !== 'any' && RISK_RANK[s.risk] > RISK_RANK[al.risk]) continue;
-    rows.push({u, m, s});
+    if(al.level !== 'all' && !candOk(m, u.type)) continue;            // strict: real candidates only
+    rows.push({u, m, s, q:candQ(m)});
   }
-  rows.sort((a, b) => (b.s.score - a.s.score) || ((b.s.trend === 'steady') - (a.s.trend === 'steady'))
+  if(al.level !== 'all') rows.sort((a, b) => b.q - a.q);
+  else rows.sort((a, b) => (b.s.score - a.s.score) || ((b.s.trend === 'steady') - (a.s.trend === 'steady'))
     || (RISK_RANK[a.s.risk] - RISK_RANK[b.s.risk]) || ((b.m.d63 || 0) - (a.m.d63 || 0)));
   return {rows:rows.slice(0, limit), total:rows.length};
 }
@@ -6657,10 +6997,17 @@ function renderAlerts(){
   alRulesFill(); renderAlertBar(); alMetaRender(); updateAlertBadge();
   $('#alCount').textContent = alerts.length ? '(' + alerts.length + ')' : '';
   $('#alHeadAct').classList.toggle('hidden', !alerts.length);
-  list.innerHTML = alerts.length
-    ? alerts.map(alertRowHtml).join('')
-    : `<div class="plan-empty">${t(scanData.at ? 'al_none' : 'al_meta_never')}</div>`;
-  const al = alPrefs(), best = $('#alBest');
+  const q = (($('#alSearch') || {}).value || '').trim();
+  const shown = alerts.filter(e => (alFilterKind === 'all' || alKindGroup(e) === alFilterKind) && alMatch(q, e.sym, e.name, e.isin));
+  list.innerHTML = shown.length
+    ? shown.map(alertRowHtml).join('')
+    : `<div class="plan-empty">${t(alerts.length ? 'al_none_f' : scanData.at ? 'al_none' : 'al_meta_never')}</div>`;
+  const find = $('#alFind');
+  find.classList.toggle('hidden', q.length < 2);
+  find.innerHTML = q.length < 2 ? '' : `<h3 class="mv-h"><span class="mv-h-t">${escHtml(t('al_find_h'))}</span></h3>` + alFindHtml(q);
+  $$('#alFilter .chip').forEach(c => c.classList.toggle('on', c.dataset.alf === alFilterKind));
+  const al = alPrefs(), best = $('#alBest'), strictB = al.level !== 'all';
+  $('#alBestH').textContent = t(strictB ? 'al_h_best_c' : 'al_h_best');
   const have = Object.keys(scanData.items || {}).length;
   if(!have){ best.innerHTML = ''; $('#alBestSub').textContent = ''; }
   else {
@@ -6672,8 +7019,8 @@ function renderAlerts(){
     best.innerHTML = leagues.map(([type, title]) => {
       const res = alBestRows(type, al, 5);
       res.rows.forEach(x => drawn.push(x));
-      return `<div class="mv-league"><h3 class="mv-h">${escHtml(title)}<span>${res.total ? t('al_best_n').replace('{n}', res.total) : ''}</span></h3>`
-        + (res.rows.length ? res.rows.map(screenRowHtml).join('') : `<div class="plan-empty">${t('al_best_none')}</div>`) + '</div>';
+      return `<div class="mv-league"><h3 class="mv-h">${escHtml(title)}<span>${res.total ? t(strictB ? 'al_best_n_c' : 'al_best_n').replace('{n}', res.total) : ''}</span></h3>`
+        + (res.rows.length ? res.rows.map(screenRowHtml).join('') : `<div class="plan-empty">${t(strictB ? 'al_best_none_c' : 'al_best_none')}</div>`) + '</div>';
     }).join('');
     drawn.forEach(x => {
       const cv = best.querySelector(`.mv-row[data-sym="${CSS.escape(x.u.sym)}"] canvas`);
@@ -6693,6 +7040,7 @@ function bindAlertEvents(){
     alMetaRender();
   });
   $('#btnAlNotify').addEventListener('click', alToggleNotify);
+  $('#btnPushTest').addEventListener('click', pushTest);
   $('#btnAlInstall').addEventListener('click', async () => {
     if(!installEvt) return;
     try{ installEvt.prompt(); await installEvt.userChoice; }catch(e){}
@@ -6704,10 +7052,11 @@ function bindAlertEvents(){
   });
   const save = () => {
     settings.al = {sig:$('#alSig').checked, min:$('#alMin').value, mom:$('#alMom').checked, rule:$('#alRule').checked,
-      warn:$('#alWarn').checked, swing:$('#alSwing').checked, scope:$('#alScope').value, risk:$('#alRisk').value, auto:$('#alAuto').checked};
+      warn:$('#alWarn').checked, swing:$('#alSwing').checked, scope:$('#alScope').value, risk:$('#alRisk').value, auto:$('#alAuto').checked,
+      level:$('#alLevel').value === 'all' ? 'all' : 'strict', cap:clamp(parseInt($('#alCap').value || '3', 10) || 3, 1, 20)};
     saveSettings(); renderAlerts(); bgWriteConfigSoon(); bgRegister(); toast(t('saved'));
   };
-  ['alSig','alMom','alRule','alWarn','alSwing','alAuto','alMin','alScope','alRisk'].forEach(id => $('#' + id).addEventListener('change', save));
+  ['alSig','alMom','alRule','alWarn','alSwing','alAuto','alMin','alScope','alRisk','alLevel','alCap'].forEach(id => $('#' + id).addEventListener('change', save));
   $('#alHours').addEventListener('change', e => {
     settings.scanHours = clamp(parseInt(e.target.value || '3', 10) || 3, 1, 72);
     e.target.value = settings.scanHours;
@@ -6722,6 +7071,15 @@ function bindAlertEvents(){
   const rowClick = box => e => {
     const row = e.target.closest('.mv-row'); if(!row) return;
     const sym = row.dataset.sym;
+    if(row.dataset.pid){                                   // a sell hint
+      if(e.target.closest('.al-sold')){ posDlgOpen('sell', {pid:row.dataset.pid}); return; }
+      if(e.target.closest('.al-gopos')){ openPosTab(); return; }
+      if(e.target.closest('.mv-act')) return;
+    }
+    if(e.target.closest('.pos-buy')){
+      const ev = alerts.find(x => x.sym === sym && !x.pid);
+      posDlgOpen('buy', {sym, src:'alert', kind:ev ? ev.kinds[0] : null}); return;
+    }
     const u = SCAN_LIST().find(x => x.sym === sym) || alerts.find(x => x.sym === sym); if(!u) return;
     const link = e.target.closest('a[data-go]');
     if(link){ e.preventDefault(); openWith(link.dataset.go, link.dataset.isin, link.dataset.sym || sym); return; }
@@ -6731,6 +7089,13 @@ function bindAlertEvents(){
   };
   $('#alList').addEventListener('click', rowClick($('#alList')));
   $('#alBest').addEventListener('click', rowClick($('#alBest')));
+  $('#alFind').addEventListener('click', rowClick($('#alFind')));
+  let alSearchT = null;
+  $('#alSearch').addEventListener('input', () => { clearTimeout(alSearchT); alSearchT = setTimeout(renderAlerts, 160); });
+  $('#alFilter').addEventListener('click', e => {
+    const c = e.target.closest('[data-alf]'); if(!c) return;
+    alFilterKind = c.dataset.alf; renderAlerts();
+  });
   document.addEventListener('click', e => {               // "mehr lesen" under a folded explanation (phone view)
     const b = e.target.closest('.intro-more');
     if(b && b.previousElementSibling) b.previousElementSibling.classList.toggle('open');
@@ -6890,13 +7255,14 @@ function swRowHtml(x, idx, p, need){
     <span class="mv-rank">${idx + 1}</span>
     <div class="mv-id"><b>${escHtml(u.name || u.sym)}</b>
       <span>${escHtml(u.sym)} · ${u.type === 'etf' ? t('t_etf') : t('t_stock')} · ${escHtml(LABELS.risk[risk][settings.lang].replace(/^(Risiko|Risk): /, ''))} · ${escHtml(t(m.sw.age ? 'sw_yday' : 'sw_today'))}</span>
-      <div class="badges" style="margin:6px 0 4px"><span class="badge b-sig s-positive">${escHtml(t('sw_k_' + m.sw.sig))}</span>${verdict}</div>
+      <div class="badges" style="margin:6px 0 4px"><span class="badge b-sig s-positive">${escHtml(t('sw_k_' + m.sw.sig))}</span>${verdict}${posHeldBadge(u.sym)}</div>
       <div class="sw-plan mono"><span>${escHtml(t('sw_target'))} <b class="up">${fmtMoney(tgt, m.cur)} (+${swPct(need.up)})</b></span><span>${escHtml(t('sw_stop'))} <b class="down">${fmtMoney(stop, m.cur)} (−${swPct(need.down)})</b></span><span>${escHtml(t('sw_sellby'))} <b>${escHtml(by)}</b></span></div>
       <span class="mv-extra">${escHtml(rec)}</span></div>
     <canvas class="mv-spark"></canvas>
     <div class="mv-num"><b>${fmtMoney(m.p, m.cur)}</b>
       <span>${settings.lang === 'de' ? '1T' : '1D'} <b class="${triCls(m.d1)}" style="display:inline;font-size:12px">${fmtPct(m.d1)}</b></span></div>
     <div class="mv-act">
+      ${posBuyBtn()}
       <button class="mv-add${inWl ? ' in' : ''}" ${inWl ? 'disabled' : ''} title="${inWl ? t('mv_inwl') : t('mv_add')}">${inWl ? '✓' : '+'}</button>
       ${linkPairHtml(u.isin, u.sym)}
     </div></div>`;
@@ -6997,10 +7363,852 @@ function bindSwingEvents(){
     const sym = row.dataset.sym, u = SCAN_LIST().find(x => x.sym === sym); if(!u) return;
     const link = e.target.closest('a[data-go]');
     if(link){ e.preventDefault(); openWith(link.dataset.go, link.dataset.isin, link.dataset.sym || sym); return; }
+    if(e.target.closest('.pos-buy')){
+      const m = (scanData.items || {})[sym];
+      posDlgOpen('buy', {sym, src:'swing', kind:m && m.sw ? m.sw.sig : null}); return;
+    }
     const add = e.target.closest('.mv-add');
     if(add && !add.disabled){ addAsset({sym:u.sym, name:u.name, isin:u.isin || '', type:u.type}); renderSwing(); return; }
     openAnySym(sym, Array.from(row.parentElement.querySelectorAll('.mv-row')).map(r => r.dataset.sym));
   });
+}
+
+/* =====================================================================
+   CANDIDATES: which signals are worth a message
+   A buy alert used to go out whenever an asset crossed a signal level.
+   With 300 assets that is mostly noise: a stock wobbling around a line
+   rings the bell, and again a few days later. In the strict mode (the
+   default) an asset has to pass every check below at once, it has to be
+   new (no candidate at any time in the last 10 days), assets already
+   bought are left out, and of one day's new candidates only the best few
+   get a message. The same pure functions run in the app, in the service
+   worker and on the server, so all three agree.
+   ===================================================================== */
+const CAND = {m6:{etf:4, stock:10}, r2:0.5, rsiMax:70, ext:{etf:6, stock:10}, turn:1e6, dd:-45, seenDays:10,
+  capKinds:['buy', 'mom', 'swing'], momKeys:['a200', 'golden', 'm3', 'vola', 'dd', 'thin'], swingKeys:['vola', 'dd', 'thin']};
+function candChecks(m, type){
+  const s = scanScore(m, type) || {}, k = type === 'etf' ? 'etf' : 'stock';
+  return [
+    ['a200', m.sma200 != null && m.p > m.sma200],
+    ['golden', m.sma50 != null && m.sma200 != null && m.sma50 > m.sma200],
+    ['m6', m.d126 != null && m.d126 >= CAND.m6[k]],
+    ['m3', m.d63 != null && m.d63 > 0],
+    ['clean', !!(m.lr && m.lr.slope > 0 && m.lr.r2 >= CAND.r2)],
+    ['hot', m.rsi == null || m.rsi <= CAND.rsiMax],
+    ['ext', m.sma50 == null || (m.p / m.sma50 - 1) * 100 <= CAND.ext[k]],
+    ['vola', !!s.risk && s.risk !== 'na' && RISK_RANK[s.risk] <= RISK_RANK.high],
+    ['dd', m.dd == null || m.dd >= CAND.dd],
+    ['thin', k === 'etf' || m.turn == null || m.turn >= CAND.turn]
+  ];
+}
+function candOk(m, type, keys){ return candChecks(m, type).every(c => c[1] || (keys && !keys.includes(c[0]))); }
+/* order among candidates: steady six-month gain per unit of swing */
+function candQ(m){ return (m && m.d126 != null && m.lr) ? m.d126 * Math.max(m.lr.r2, 0) / Math.max(m.vol || 20, 8) : 0; }
+/* the signal level the user asked for and, in the strict mode, every check */
+function alGood(m, type, al){
+  const s = scanScore(m, type);
+  return !!s && SIG_RANK[s.signal] >= SIG_RANK[al.min || 'positive'] && (al.level === 'all' || candOk(m, type));
+}
+function alCapped(kinds){ return kinds.some(k => CAND.capKinds.includes(k)); }
+/* every warning stays; of the rest the best ones up to the daily limit */
+function alCapPick(found, al, used){
+  if(al.level === 'all') return found;
+  const cap = Math.max(1, Math.min(20, Math.round(+al.cap) || 3));
+  const free = found.filter(e => !alCapped(e.kinds));
+  const rest = found.filter(e => alCapped(e.kinds)).sort((a, b) => (b.q || 0) - (a.q || 0));
+  return free.concat(rest.slice(0, Math.max(0, cap - (used || 0))));
+}
+function alDayStart(now, tz){ const loc = now - tz * 60000; return loc - (((loc % 86400000) + 86400000) % 86400000) + tz * 60000; }
+/* assets that already had a limited alert today, read from the cool-down list */
+function alUsedToday(cool, now, tz){
+  const start = alDayStart(now, tz), syms = new Set();
+  for(const k in cool || {}){
+    const i = k.lastIndexOf('|');
+    if(CAND.capKinds.includes(k.slice(i + 1)) && cool[k] >= start) syms.add(k.slice(0, i));
+  }
+  return syms.size;
+}
+
+/* ---------------- in the app: memory, reasons, search ---------------- */
+let alSeen = store.get('alSeen', null);          // sym -> day number when it last passed as a candidate
+let alFilterKind = 'all';
+function alDay(ts){ return Math.floor((ts || Date.now()) / 86400000); }
+function alHeld(){ const h = {}; posOpen().forEach(p => { h[p.sym] = 1; }); return h; }
+/* the first start with this version: today's candidates are known already,
+   so they do not all ring at once on the next check                     */
+function alSeenInit(){
+  if(alSeen) return;
+  alSeen = {};
+  const al = alPrefs(), items = scanData.items || {}, d = alDay();
+  SCAN_LIST().forEach(u => { const m = items[u.sym]; if(m && alGood(m, u.type, Object.assign({}, al, {level:'strict'}))) alSeen[u.sym] = d; });
+  store.set('alSeen', alSeen);
+}
+function alSeenNote(items, syms, al){
+  const d = alDay(), types = new Map(SCAN_LIST().map(u => [u.sym, u.type]));
+  let n = 0;
+  syms.forEach(s => { const m = items[s]; if(m && alGood(m, types.get(s) || 'stock', Object.assign({}, al, {level:'strict'})) && alSeen[s] !== d){ alSeen[s] = d; n++; } });
+  const lim = d - 40;
+  Object.keys(alSeen).forEach(s => { if(alSeen[s] < lim) delete alSeen[s]; });
+  if(n) store.set('alSeen', alSeen);
+}
+function candFailText(key, m, type){
+  const k = type === 'etf' ? 'etf' : 'stock';
+  switch(key){
+    case 'm6': return tpl('cd_f_m6', {x:fmtPct(m.d126, {d:0}), need:fmtPct(CAND.m6[k], {d:0})});
+    case 'm3': return tpl('cd_f_m3', {x:fmtPct(m.d63, {d:0})});
+    case 'clean': return m.lr && m.lr.slope > 0 ? tpl('cd_f_clean', {x:fmtNum(m.lr.r2, 2)}) : t('cd_f_down');
+    case 'hot': return tpl('cd_f_hot', {x:fmtNum(m.rsi, 0)});
+    case 'ext': return tpl('cd_f_ext', {x:fmtPct((m.p / m.sma50 - 1) * 100, {d:0})});
+    case 'dd': return tpl('cd_f_dd', {x:fmtPct(m.dd, {d:0})});
+    case 'thin': return tpl('cd_f_thin', {x:fmtBig(m.turn)});
+    default: return t('cd_f_' + key);
+  }
+}
+/* one line: why it is a candidate, or the first reasons why not */
+function candLine(m, type){
+  if(!m) return t('cd_nodata');
+  const fails = candChecks(m, type).filter(c => !c[1]).map(c => c[0]);
+  if(!fails.length){
+    const parts = [tpl('cd_p_m6', {x:fmtPct(m.d126, {d:0})})];
+    if(m.lr) parts.push(tpl('cd_p_clean', {x:fmtNum(m.lr.r2, 2)}));
+    if(m.rsi != null) parts.push('RSI ' + fmtNum(m.rsi, 0));
+    if(type !== 'etf' && m.turn != null) parts.push(tpl('cd_p_turn', {x:fmtBig(m.turn)}));
+    return tpl('cd_yes', {why:parts.join(', ')});
+  }
+  return tpl('cd_no', {why:fails.slice(0, 3).map(k => candFailText(k, m, type)).join(', ')});
+}
+function alNorm(s){
+  return String(s || '').toLowerCase().replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ß/g, 'ss').replace(/[^a-z0-9.]+/g, ' ').trim();
+}
+function alMatch(q, sym, name, isin){
+  if(!q) return true;
+  const hay = alNorm(sym + ' ' + (name || '') + ' ' + (isin || ''));
+  return alNorm(q).split(' ').every(w => hay.indexOf(w) >= 0);
+}
+/* search hits right in the alerts tab: the same rows as the global search */
+function alFindHtml(q){
+  const hits = findLocal(q).slice(0, 8);
+  return hits.length ? hits.map(findRowHtml).join('') : `<div class="plan-empty">${escHtml(t('al_find_none'))}</div>`;
+}
+function alKindGroup(ev){
+  if(ev.pid) return 'sell';
+  if(ev.kinds.includes('warn')) return 'warn';
+  if(ev.kinds.includes('swing')) return 'swing';
+  return 'buy';
+}
+
+/* =====================================================================
+   SEARCH: any ETF or stock in a few letters, from every tab
+   Local hits come at once (bought, catalogue, watchlist); after a short
+   pause Yahoo Finance's search adds everything else. Every hit shows
+   where it stands right now, whether it is a candidate (and if not, why),
+   and can be opened, put on the watchlist or recorded as bought.
+   ===================================================================== */
+let findTimer = null, findSeq = 0, findRemote = [], findBusy = false;
+function findLocal(q){
+  const nq = alNorm(q); if(!nq) return [];
+  const seen = new Set(), out = [];
+  const add = u => { if(!u || !u.sym || seen.has(u.sym)) return; seen.add(u.sym); out.push(u); };
+  positions.forEach(p => { if(alMatch(q, p.sym, p.name, p.isin)) add({sym:p.sym, name:p.name, isin:p.isin, type:p.type}); });
+  SCAN_LIST().forEach(u => { if(alMatch(q, u.sym, u.name, u.isin)) add(u); });
+  const rank = u => {
+    const s = u.sym.toLowerCase(), n = alNorm(u.name);
+    return (s === nq || s.split('.')[0] === nq || (u.isin || '').toLowerCase() === nq) ? 0 : n.startsWith(nq) ? 1 : s.startsWith(nq) ? 2 : 3;
+  };
+  return out.sort((a, b) => (rank(a) - rank(b)) || String(a.name || '').localeCompare(String(b.name || ''))).slice(0, 12);
+}
+/* what is known about an asset: the catalogue scan, or a chart opened earlier */
+function findMetrics(sym){
+  const m = (scanData.items || {})[sym];
+  if(m) return m;
+  const s = seriesMap[sym];
+  try{ return s && !s.demo && s.c && s.c.length >= 60 ? scanItem(s) : null; }catch(e){ return null; }
+}
+function findRowHtml(u){
+  const m = findMetrics(u.sym), type = u.type === 'etf' ? 'etf' : 'stock';
+  const sc = m ? scanScore(m, type) : null, inWl = watchlist.some(w => w.sym === u.sym), ok = !!m && candOk(m, type);
+  return `<div class="mv-row al-row fd-row" data-sym="${escHtml(u.sym)}" data-name="${escHtml(u.name || u.sym)}" data-type="${type}" data-isin="${escHtml(u.isin || '')}">
+    <span class="al-ico">${ok ? '✓' : '·'}</span>
+    <div class="mv-id"><b>${escHtml(u.name || u.sym)}</b>
+      <span>${escHtml(u.sym)} · ${type === 'etf' ? t('t_etf') : t('t_stock')}${u.exch ? ' · ' + escHtml(u.exch) : ''}${u.isin ? ' · ' + escHtml(u.isin) : ''}</span>
+      <div class="badges" style="margin:6px 0 0">${sc ? `<span class="badge b-sig s-${escHtml(sc.signal)}">${escHtml(LABELS.signal[sc.signal][settings.lang])}</span>` : ''}${ok ? `<span class="badge b-kind">${escHtml(t('cd_badge'))}</span>` : ''}${inWl ? `<span class="badge">${escHtml(t('fd_inwl'))}</span>` : ''}${posHeldBadge(u.sym)}</div>
+      <p class="al-why">${escHtml(m ? candLine(m, type) : t('fd_tap'))}</p></div>
+    <div class="mv-num"><b>${m ? fmtMoney(m.p, m.cur) : '–'}</b><span>${m && m.d126 != null ? '6M ' + fmtPct(m.d126, {d:0}) : ''}</span></div>
+    <div class="mv-act">
+      ${posBuyBtn()}
+      <button class="mv-add${inWl ? ' in' : ''}" ${inWl ? 'disabled' : ''} title="${inWl ? t('mv_inwl') : t('mv_add')}">${inWl ? '✓' : '+'}</button>
+      ${linkPairHtml(u.isin || '', u.sym)}
+    </div></div>`;
+}
+function findRender(){
+  const list = $('#fdList'); if(!list) return;
+  const q = $('#fdInput').value.trim();
+  if(!q){ list.innerHTML = `<div class="plan-empty">${escHtml(t('fd_hint'))}</div>`; $('#fdMeta').textContent = ''; return; }
+  const loc = findLocal(q), have = new Set(loc.map(u => u.sym));
+  const far = findRemote.filter(u => !have.has(u.sym));
+  let html = loc.map(findRowHtml).join('');
+  if(far.length) html += `<h3 class="mv-h"><span class="mv-h-t">${escHtml(t('fd_more'))}</span></h3>` + far.map(findRowHtml).join('');
+  list.innerHTML = html || `<div class="plan-empty">${escHtml(t(findBusy ? 'fd_searching' : 'fd_none'))}</div>`;
+  $('#fdMeta').textContent = findBusy ? t('fd_searching') : '';
+}
+async function findRemoteSearch(q){
+  const seq = ++findSeq;
+  findBusy = true; findRender();
+  let got = [];
+  try{ got = await searchSymbols(q); }catch(e){ got = []; }
+  if(seq !== findSeq) return;                 // the user typed on meanwhile
+  findRemote = got.slice(0, 8); findBusy = false; findRender();
+}
+function findOpen(){
+  if($('#app').classList.contains('hidden')) return;
+  $('#findDlg').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  findRender();
+  setTimeout(() => { try{ const i = $('#fdInput'); if(document.activeElement !== i){ i.focus(); i.select(); } }catch(e){} }, 50);
+}
+function findClose(){
+  $('#findDlg').classList.add('hidden');
+  if($('#detail').classList.contains('hidden') && $('#posDlg').classList.contains('hidden')) document.body.style.overflow = '';
+}
+/* a hit outside the watchlist has no price yet: fetch it, then open the form */
+async function findBuy(u){
+  if(!posPrice(u.sym)){
+    toast(t('d_loading'));
+    try{ seriesMap[u.sym] = await fetchSeries(u.sym); }catch(e){}
+  }
+  posDlgOpen('buy', {sym:u.sym, asset:u, src:'search'});
+}
+function bindFindEvents(){
+  $('#btnFind').addEventListener('click', findOpen);
+  $('#fdClose').addEventListener('click', findClose);
+  $('#findDlg').addEventListener('click', e => { if(e.target.id === 'findDlg') findClose(); });
+  $('#fdInput').addEventListener('input', () => {
+    findRemote = []; findSeq++; findBusy = false; clearTimeout(findTimer);
+    findRender();
+    const q = $('#fdInput').value.trim();
+    if(q.length >= 2) findTimer = setTimeout(() => findRemoteSearch(q), 450);
+  });
+  $('#fdList').addEventListener('click', e => {
+    const row = e.target.closest('.fd-row'); if(!row) return;
+    const u = {sym:row.dataset.sym, name:row.dataset.name, type:row.dataset.type, isin:row.dataset.isin};
+    const link = e.target.closest('a[data-go]');
+    if(link){ e.preventDefault(); openWith(link.dataset.go, link.dataset.isin, link.dataset.sym || u.sym); return; }
+    if(e.target.closest('.pos-buy')){ findBuy(u); return; }
+    const add = e.target.closest('.mv-add');
+    if(add){ if(!add.disabled){ addAsset(u); findRender(); } return; }
+    openAnySym(u.sym, $$('#fdList .fd-row').map(r => r.dataset.sym)).then(() => findRender());
+  });
+  document.addEventListener('keydown', e => {
+    const open = !$('#findDlg').classList.contains('hidden');
+    if(e.key === 'Escape' && open && !detailSym && $('#posDlg').classList.contains('hidden')) findClose();
+    else if(e.key === '/' && !open && !/^(INPUT|SELECT|TEXTAREA)$/.test((document.activeElement || {}).tagName || '')
+            && !detailSym && !$('#app').classList.contains('hidden')){ e.preventDefault(); findOpen(); }
+  });
+}
+
+/* =====================================================================
+   BOUGHT (Gekauft): what the user actually bought, and when to sell
+   A position remembers the buy (amount in €, price in the asset's own
+   currency, date) and its plan: a goal price, a stop price and a last
+   day. Whenever fresh prices arrive the plan is checked; reaching one of
+   the three raises a sell hint once, in the app and as a notification.
+   Money is shown in euros; for assets quoted in other currencies the
+   result is the price change only (exchange-rate moves are left out).
+   ===================================================================== */
+let positions = sanitizePositions(store.get('positions', []));
+let posLastRefresh = 0;
+function sanitizePositions(arr){
+  if(arr && !Array.isArray(arr) && Array.isArray(arr.list)) arr = arr.list;   // the synced form {n, list}
+  if(!Array.isArray(arr)) return [];
+  return arr.filter(p => p && p.id && p.sym && isFinite(+p.buyPx) && +p.buyPx > 0 && isFinite(+p.amt) && +p.amt > 0).map(p => ({
+    id:String(p.id), sym:String(p.sym), name:String(p.name || p.sym), isin:String(p.isin || ''), type:p.type === 'etf' ? 'etf' : 'stock',
+    cur:String(p.cur || 'EUR'), amt:+p.amt, fee:isFinite(+p.fee) && +p.fee >= 0 ? +p.fee : 1, buyPx:+p.buyPx, buyAt:+p.buyAt || Date.now(),
+    tgt:isFinite(+p.tgt) && +p.tgt > 0 ? +p.tgt : null, stop:isFinite(+p.stop) && +p.stop > 0 ? +p.stop : null,
+    until:/^\d{4}-\d{2}-\d{2}$/.test(p.until || '') ? p.until : null, due:+p.due || null, rev:+p.rev || 0,
+    src:String(p.src || 'manual'), kind:p.kind || null, note:Object.assign({}, p.note || {}),
+    sold:p.sold && isFinite(+p.sold.px) && +p.sold.px > 0 ? {px:+p.sold.px, at:+p.sold.at || Date.now()} : null}));
+}
+function posSave(){ store.set('posAt', Date.now()); store.set('positions', positions); }
+function posOpen(){ return positions.filter(p => !p.sold); }
+/* "sell by" means: on that day, from 9:00 local time */
+function posDue(until){
+  if(!until) return null;
+  const [y, m, d] = until.split('-').map(Number);
+  return new Date(y, m - 1, d, 9, 0, 0, 0).getTime();
+}
+function dateInput(ts){ const d = new Date(ts); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function posAddDays(from, n){
+  const d = new Date(from);
+  let k = Math.max(n, 0);
+  while(k > 0){ d.setDate(d.getDate() + 1); const w = d.getDay(); if(w !== 0 && w !== 6) k--; }
+  return d;
+}
+/* the freshest known price: the watchlist history or the catalogue scan */
+function posPrice(sym){
+  const s = seriesMap[sym], m = (scanData.items || {})[sym];
+  let best = null;
+  if(s && !s.demo && s.c && s.c.length) best = {px:s.c[s.c.length - 1], cur:s.cur, at:s.fetchedAt || 0};
+  if(m && m.p != null && (!best || m.at > best.at)) best = {px:m.p, cur:m.cur, at:m.at};
+  return best;
+}
+
+/* ---- pure: the server runs these very functions while the app is closed ---- */
+function posStatus(p, px, now){
+  if(p.sold) return 'sold';
+  if(px == null) return 'old';
+  if(p.tgt != null && px >= p.tgt) return 'tgt';
+  if(p.stop != null && px <= p.stop) return 'stop';
+  if(p.due != null && now >= p.due) return 'time';
+  return 'run';
+}
+/* The amount is everything paid, the buy fee included. Selling costs the
+   fee once more, so at the goal price exactly the planned profit is left. */
+function posPnl(p, px){
+  const inv = p.amt - p.fee, value = inv * px / p.buyPx;
+  const eur = value - p.fee - p.amt;
+  return {eur, pct:eur / p.amt * 100, value};
+}
+function posEvent(p, st, px, now){
+  const r = posPnl(p, px);
+  return {id:'pos|' + p.id + '|' + st + '|' + (p.rev || 0), pid:p.id, rev:p.rev || 0, sym:p.sym, name:p.name, type:p.type, isin:p.isin || '', at:now,
+    kinds:['sell_' + st], p:px, cur:p.cur, buyPx:p.buyPx, buyAt:p.buyAt, amt:p.amt, fee:p.fee, eur:r.eur, pct:r.pct, score:99, to:'neutral', seen:false};
+}
+function fillT(s, map){ s = String(s == null ? '' : s); for(const k in map) s = s.split('{' + k + '}').join(map[k]); return s; }
+function eurS(v, lang){
+  let s;
+  try{ s = Math.abs(v).toLocaleString(lang === 'en' ? 'en-GB' : 'de-DE', {style:'currency', currency:'EUR', minimumFractionDigits:2, maximumFractionDigits:2}); }
+  catch(e){ s = Math.abs(v).toFixed(2) + ' €'; }
+  return (v > 0.004 ? '+' : v < -0.004 ? '−' : '') + s;
+}
+/* title and lines of one notification: sell hints first, then new signals */
+function noteFor(evs, txt){
+  const sells = evs.filter(e => e.pid), sigs = evs.filter(e => !e.pid), lines = [];
+  const what = e => txt[e.kinds[0]] || e.kinds[0];
+  sells.slice(0, 5).forEach(e => lines.push(fillT(txt.sellLine || '{name}: {what} · {res}', {name:e.name || e.sym, what:what(e), res:eurS(e.eur, txt.lang)})));
+  sigs.slice(0, Math.max(0, 5 - lines.length)).forEach(e => lines.push((e.name || e.sym) + ' · ' + e.kinds.map(k => txt[k] || k).join(', ')));
+  const rest = evs.length - lines.length;
+  if(rest > 0) lines.push('+' + rest + ' ' + (txt.more || '…'));
+  const title = sells.length === 1 ? fillT(txt.sellOne || '{name}: {what}', {name:sells[0].name || sells[0].sym, what:what(sells[0])})
+    : sells.length ? fillT(txt.sellN || '{n}', {n:sells.length}) : fillT(txt.title || 'Depot Radar ({n})', {n:sigs.length});
+  return {title, body:lines.join('\n'), url:sells.length ? './#gekauft' : './#signale', tag:sells.length ? 'dr-sell' : 'dr-alerts'};
+}
+
+/* checks every open position against fresh prices; returns the new hints */
+function posCheck(notify){
+  const now = Date.now(), out = [];
+  let changed = false;
+  const have = new Set(alerts.map(e => e.id));
+  posOpen().forEach(p => {
+    const q = posPrice(p.sym); if(!q) return;
+    const st = posStatus(p, q.px, now);
+    if(!['tgt', 'stop', 'time'].includes(st) || p.note[st]) return;
+    p.note[st] = now; changed = true;
+    const ev = posEvent(p, st, q.px, now);
+    if(!have.has(ev.id)) out.push(ev);
+  });
+  if(changed) posSave();
+  if(out.length) alertsAdd(out, notify !== false);
+  posTabBadge();
+  if($('#panel-pos') && $('#panel-pos').classList.contains('on')) renderPos();
+  return out;
+}
+/* what the server already reported while the app was closed */
+function posNoteMerge(list){
+  let n = 0;
+  (list || []).forEach(x => {
+    const p = positions.find(q => q.id === x.pid);
+    if(!p || (x.rev || 0) !== (p.rev || 0) || !['tgt', 'stop', 'time'].includes(x.st)) return;
+    if(!(p.note[x.st] >= x.at)){ p.note[x.st] = x.at; n++; }
+  });
+  if(n){ posSave(); posTabBadge(); }
+  return n;
+}
+/* bought assets get their prices refreshed every 5 minutes while the app is open */
+async function posRefreshTick(){
+  const open = posOpen();
+  if(!open.length || document.visibilityState !== 'visible' || $('#app').classList.contains('hidden')) return;
+  if(Date.now() - posLastRefresh < 5 * 60000) return;
+  posLastRefresh = Date.now();
+  const syms = [...new Set(open.map(p => p.sym))];
+  await runPool(syms, async sym => {
+    try{ const d = await fetchSeries(sym); seriesMap[sym] = d; delete analyses[sym]; return 'ok'; }
+    catch(e){ return e && e.bad ? 'bad' : 'net'; }
+  }, {max:4, breaker:4});
+  posCheck(true);
+}
+function posNeedsAction(p){ const q = posPrice(p.sym); return q ? ['tgt', 'stop', 'time'].includes(posStatus(p, q.px, Date.now())) : false; }
+function posTabBadge(){
+  const tab = document.querySelector('#tabbar [data-tab="pos"]'); if(!tab) return;
+  const n = posOpen().filter(posNeedsAction).length;
+  let b = tab.querySelector('.tab-n');
+  if(n){ if(!b){ b = document.createElement('span'); b.className = 'tab-n'; tab.appendChild(b); } b.textContent = n; }
+  else if(b) b.remove();
+}
+
+/* ---------------- the "Gekauft" page ---------------- */
+function posDay(ts){ return new Date(ts).toLocaleDateString(locale(), {day:'2-digit', month:'2-digit', year:'2-digit'}); }
+function posPlanHtml(p){
+  const parts = [];
+  if(p.tgt != null) parts.push(`<span>${escHtml(t('sw_target'))} <b class="up">${fmtMoney(p.tgt, p.cur)} (${fmtPct((p.tgt / p.buyPx - 1) * 100)})</b></span>`);
+  if(p.stop != null) parts.push(`<span>${escHtml(t('sw_stop'))} <b class="down">${fmtMoney(p.stop, p.cur)} (${fmtPct((p.stop / p.buyPx - 1) * 100)})</b></span>`);
+  if(p.until) parts.push(`<span>${escHtml(t('sw_sellby'))} <b>${escHtml(new Date(posDue(p.until)).toLocaleDateString(locale(), {weekday:'short', day:'2-digit', month:'2-digit'}))}</b></span>`);
+  return parts.length ? `<div class="sw-plan mono">${parts.join('')}</div>` : '';
+}
+function posStatusBadge(st){
+  const cls = st === 'tgt' ? 'b-kind' : (st === 'stop' || st === 'time') ? 'b-minus' : '';
+  return `<span class="badge ${cls}">${escHtml(t('ps_st_' + st))}</span>`;
+}
+function posRowHtml(p){
+  const q = posPrice(p.sym), now = Date.now();
+  const st = q ? posStatus(p, q.px, now) : 'old', r = q ? posPnl(p, q.px) : null;
+  const act = ['tgt', 'stop', 'time'].includes(st);
+  return `<div class="mv-row al-row pos-row${act ? ' al-new' : ''}${st === 'stop' ? ' al-warn' : ''}" data-pid="${escHtml(p.id)}" data-sym="${escHtml(p.sym)}">
+    <span class="al-ico">${st === 'tgt' ? '✓' : st === 'stop' ? '▼' : st === 'time' ? '⏱' : '●'}</span>
+    <div class="mv-id"><b>${escHtml(p.name)}</b>
+      <span>${escHtml(tpl('ps_bought', {sym:p.sym, date:posDay(p.buyAt), px:fmtMoney(p.buyPx, p.cur), amt:fmtEur(p.amt)}))}</span>
+      <div class="badges" style="margin:6px 0 4px">${posStatusBadge(st)}</div>
+      ${posPlanHtml(p)}</div>
+    <div class="mv-num"><b>${q ? fmtMoney(q.px, q.cur) : '–'}</b>
+      <span>${r ? `<b class="${triCls(r.eur)}" style="display:inline;font-size:12px">${fmtEur(r.eur, true)}</b> ${fmtPct(r.pct)}` : ''}</span></div>
+    <div class="mv-act">
+      <button class="pos-sell" title="${escHtml(t('ps_sell_btn'))}">${escHtml(t('ps_sell_short'))}</button>
+      <button class="pos-edit" title="${escHtml(t('ps_edit'))}">✎</button>
+      <button class="pos-del" title="${escHtml(t('ps_del'))}">✕</button>
+    </div></div>`;
+}
+function posClosedRowHtml(p){
+  const r = posPnl(p, p.sold.px);
+  return `<div class="mv-row al-row pos-row" data-pid="${escHtml(p.id)}" data-sym="${escHtml(p.sym)}">
+    <span class="al-ico">${r.eur >= 0 ? '✓' : '▼'}</span>
+    <div class="mv-id"><b>${escHtml(p.name)}</b>
+      <span>${escHtml(tpl('ps_closed_line', {sym:p.sym, d1:posDay(p.buyAt), d2:posDay(p.sold.at), px1:fmtMoney(p.buyPx, p.cur), px2:fmtMoney(p.sold.px, p.cur), amt:fmtEur(p.amt)}))}</span></div>
+    <div class="mv-num"><b class="${triCls(r.eur)}">${fmtEur(r.eur, true)}</b><span>${fmtPct(r.pct)}</span></div>
+    <div class="mv-act"><button class="pos-del" title="${escHtml(t('ps_del'))}">✕</button></div></div>`;
+}
+function renderPos(){
+  const box = $('#posOpen'); if(!box) return;
+  const now = Date.now(), rank = p => { const q = posPrice(p.sym); const st = q ? posStatus(p, q.px, now) : 'old'; return ['tgt', 'stop', 'time'].includes(st) ? 0 : 1; };
+  const open = posOpen().sort((a, b) => (rank(a) - rank(b)) || (b.buyAt - a.buyAt));
+  const closed = positions.filter(p => p.sold).sort((a, b) => b.sold.at - a.sold.at);
+  box.innerHTML = open.length ? open.map(posRowHtml).join('') : `<div class="plan-empty">${escHtml(t('ps_none'))}</div>`;
+  $('#posClosed').innerHTML = closed.length ? closed.map(posClosedRowHtml).join('') : `<div class="plan-empty">${escHtml(t('ps_none_closed'))}</div>`;
+  $('#posOpenN').textContent = open.length ? '(' + open.length + ')' : '';
+  $('#posClosedN').textContent = closed.length ? '(' + closed.length + ')' : '';
+  let inv = 0, val = 0, pnl = 0, priced = 0, fx = false;
+  open.forEach(p => { inv += p.amt; if(p.cur !== 'EUR') fx = true; const q = posPrice(p.sym); if(q){ const r = posPnl(p, q.px); val += r.value; pnl += r.eur; priced++; } });
+  let real = 0, wins = 0;
+  closed.forEach(p => { const r = posPnl(p, p.sold.px); real += r.eur; if(r.eur > 0) wins++; });
+  const lines = [];
+  if(open.length) lines.push(tpl('ps_sum_open', {n:open.length, inv:fmtEur(inv), val:fmtEur(val), pnl:fmtEur(pnl, true)}) + (priced < open.length ? ' ' + t('ps_sum_partial') : ''));
+  if(closed.length) lines.push(tpl('ps_sum_closed', {n:closed.length, w:wins, pnl:fmtEur(real, true)}));
+  if(fx) lines.push(t('ps_fx_note'));
+  const sum = $('#posSum');
+  sum.innerHTML = lines.map(l => `<p>${escHtml(l)}</p>`).join('');
+  sum.classList.toggle('hidden', !lines.length);
+  posTabBadge();
+}
+/* small hint in signal and short-trade rows: this one is already bought */
+function posHeldBadge(sym){
+  const p = posOpen().filter(x => x.sym === sym).sort((a, b) => b.buyAt - a.buyAt)[0];
+  return p ? `<span class="badge b-held">${escHtml(tpl('ps_badge', {date:posDay(p.buyAt)}))}</span>` : '';
+}
+function posBuyBtn(){ return `<button class="pos-buy" title="${escHtml(t('ps_buy_title'))}">${escHtml(t('ps_buy_btn'))}</button>`; }
+
+/* a sell hint in the "Signale" list */
+function alertSellRowHtml(ev){
+  const p = positions.find(x => x.id === ev.pid), open = p && !p.sold;
+  const st = ev.kinds[0].slice(5), warn = st !== 'tgt';
+  return `<div class="mv-row al-row al-sell${ev.seen ? '' : ' al-new'}${warn ? ' al-warn' : ''}" data-sym="${escHtml(ev.sym)}" data-pid="${escHtml(ev.pid)}">
+    <span class="al-ico">${st === 'tgt' ? '✓' : st === 'stop' ? '▼' : '⏱'}</span>
+    <div class="mv-id"><b>${escHtml(ev.name)}</b>
+      <span>${escHtml(tpl('al_sell_line', {sym:ev.sym, date:posDay(ev.buyAt), amt:fmtEur(ev.amt), px:fmtMoney(ev.buyPx, ev.cur)}))} · ${escHtml(fmtTime(ev.at))}</span>
+      <div class="badges" style="margin:6px 0 0">${ev.seen ? '' : `<span class="badge b-new">${escHtml(t('al_new'))}</span>`}<span class="badge ${warn ? 'b-minus' : 'b-kind'}">${escHtml(t('al_k_' + ev.kinds[0]))}</span></div>
+      <p class="al-why">${escHtml(tpl('al_sell_why_' + st, {res:fmtEur(ev.eur, true), pct:fmtPct(ev.pct)}))}</p></div>
+    <div class="mv-num"><b>${fmtMoney(ev.p, ev.cur)}</b><span><b class="${triCls(ev.eur)}" style="display:inline;font-size:11px">${fmtEur(ev.eur, true)}</b></span></div>
+    <div class="mv-act">
+      ${open ? `<button class="al-sold" title="${escHtml(t('ps_sell_btn'))}">${escHtml(t('ps_sell_short'))}</button>` : `<button disabled>${escHtml(t('al_sell_done'))}</button>`}
+      <button class="al-gopos" title="${escHtml(t('tab_pos'))}">${escHtml(t('al_go_pos'))}</button>
+    </div></div>`;
+}
+
+/* ---------------- buy / edit / sell dialog ---------------- */
+let posDlg = null;              // {mode, pid, sym, asset, cur, dirty}
+function posAssetFor(sym){
+  return watchlist.find(w => w.sym === sym) || SCAN_LIST().find(u => u.sym === sym) || positions.find(p => p.sym === sym) || null;
+}
+/* goal and stop from the short-trade settings, scaled to the amount: the
+   settings say "+10 € from 100 €", so 50 € aim for +5 €                   */
+function posDefaultPlan(px, amt, from){
+  const sp = swPrefs(), k = amt / sp.amt;
+  const need = swNeed(Object.assign({}, sp, {amt, gain:sp.gain * k, loss:sp.loss * k}));
+  return {tgt:+(px * (1 + need.up / 100)).toPrecision(6), stop:+(px * (1 - need.down / 100)).toPrecision(6),
+    until:dateInput(posAddDays(from || Date.now(), sp.h).getTime())};
+}
+function posDlgHint(){
+  const sp = swPrefs();
+  $('#pdHint').textContent = posDlg && posDlg.mode === 'sell' ? t('pd_hint_sell')
+    : tpl('pd_hint', {gain:fmtEur(sp.gain), loss:fmtEur(sp.loss), amt:fmtEur(sp.amt), h:sp.h});
+}
+function posDlgOpen(mode, o){
+  o = o || {};
+  const now = Date.now();
+  const p = o.pid ? positions.find(x => x.id === o.pid) : null;
+  if(o.pid && !p){ toast(t('al_sell_done')); return; }
+  const sym = p ? p.sym : o.sym || '';
+  const a = sym ? (posAssetFor(sym) || o.asset || {sym, name:sym, isin:'', type:'stock'}) : null;
+  const q = sym ? posPrice(sym) : null;
+  posDlg = {mode, pid:p ? p.id : null, sym, asset:a, cur:p ? p.cur : (q ? q.cur : 'EUR'), dirty:{}, src:o.src || 'manual', kind:o.kind || null};
+  $('#pdAssetRow').classList.toggle('hidden', !!sym);
+  ['pdAmt', 'pdDate', 'pdTgt', 'pdStop', 'pdUntil', 'pdFee'].forEach(id => $('#' + id).closest('label').classList.toggle('hidden', mode === 'sell'));
+  $('#pdTitle').textContent = t(mode === 'sell' ? 'pd_t_sell' : mode === 'edit' ? 'pd_t_edit' : 'pd_t_buy');
+  $('#pdSave').textContent = t(mode === 'sell' ? 'pd_save_sell' : 'pd_save');
+  $('#pdPxLbl').textContent = tpl(mode === 'sell' ? 'pd_px_sell' : 'pd_px', {cur:posDlg.cur});
+  if(mode === 'buy'){
+    const sp = swPrefs(), px = o.px || (q ? q.px : '');
+    $('#pdAmt').value = sp.amt; $('#pdFee').value = sp.fee; $('#pdPx').value = px ? +(+px).toPrecision(6) : '';
+    $('#pdDate').value = dateInput(now);
+    const plan = px ? posDefaultPlan(+px, sp.amt) : {tgt:'', stop:'', until:dateInput(posAddDays(now, sp.h).getTime())};
+    $('#pdTgt').value = plan.tgt; $('#pdStop').value = plan.stop; $('#pdUntil').value = plan.until;
+  } else if(p){
+    $('#pdAmt').value = p.amt; $('#pdFee').value = p.fee; $('#pdDate').value = dateInput(p.buyAt);
+    $('#pdTgt').value = p.tgt != null ? p.tgt : ''; $('#pdStop').value = p.stop != null ? p.stop : ''; $('#pdUntil').value = p.until || '';
+    $('#pdPx').value = mode === 'sell' ? +(q ? q.px : p.buyPx).toPrecision(6) : p.buyPx;
+    posDlg.dirty = {tgt:true, stop:true, until:true};
+  }
+  if(!sym){
+    $('#pdAsset').value = '';
+    $('#pdAssetList').innerHTML = SCAN_LIST().map(u => `<option value="${escHtml((u.name || u.sym) + ' (' + u.sym + ')')}"></option>`).join('');
+  }
+  $('#pdSub').textContent = a ? (a.name || a.sym) + ' · ' + a.sym + (q ? ' · ' + t('pd_now') + ' ' + fmtMoney(q.px, q.cur) : '') : '';
+  posDlgHint(); posDlgCalc();
+  $('#posDlg').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => {                         // unless a field is in use already
+    if($('#posDlg').contains(document.activeElement) && document.activeElement.tagName === 'INPUT') return;
+    const f = sym ? (mode === 'sell' ? $('#pdPx') : $('#pdAmt')) : $('#pdAsset'); try{ f.focus(); if(f.select) f.select(); }catch(e){}
+  }, 60);
+}
+function posDlgClose(){
+  $('#posDlg').classList.add('hidden'); posDlg = null;
+  if($('#detail').classList.contains('hidden') && $('#findDlg').classList.contains('hidden')) document.body.style.overflow = '';
+}
+function posNum(id){ const v = parseFloat(String($('#' + id).value).replace(',', '.')); return isFinite(v) ? v : null; }
+/* the line under the form: what the plan means in euros */
+function posDlgCalc(){
+  const out = $('#pdCalc'); if(!posDlg){ out.textContent = ''; return; }
+  const px = posNum('pdPx');
+  if(posDlg.mode === 'sell'){
+    const p = positions.find(x => x.id === posDlg.pid);
+    const r = p && px ? posPnl(p, px) : null;
+    out.textContent = r ? tpl('pd_calc_sell', {res:fmtEur(r.eur, true), pct:fmtPct(r.pct)}) : '';
+    return;
+  }
+  const amt = posNum('pdAmt'), fee = posNum('pdFee') ?? 1, tgt = posNum('pdTgt'), stop = posNum('pdStop');
+  if(!px || !amt || amt <= fee){ out.textContent = ''; return; }
+  const fake = {amt, fee, buyPx:px}, parts = [];
+  if(tgt) parts.push(tpl('pd_calc_tgt', {pct:fmtPct((tgt / px - 1) * 100), res:fmtEur(posPnl(fake, tgt).eur, true)}));
+  if(stop) parts.push(tpl('pd_calc_stop', {pct:fmtPct((stop / px - 1) * 100), res:fmtEur(posPnl(fake, stop).eur, true)}));
+  out.textContent = parts.join(' · ');
+}
+/* goal, stop and date follow amount, price and buy date until set by hand */
+function posDlgReplan(){
+  if(!posDlg || posDlg.mode !== 'buy') return;
+  const px = posNum('pdPx'), amt = posNum('pdAmt'), d = $('#pdDate').value;
+  const from = /^\d{4}-\d{2}-\d{2}$/.test(d) ? new Date(d + 'T12:00:00').getTime() : Date.now();
+  if(px && amt){
+    const pl = posDefaultPlan(px, amt, from);
+    if(!posDlg.dirty.tgt) $('#pdTgt').value = pl.tgt;
+    if(!posDlg.dirty.stop) $('#pdStop').value = pl.stop;
+  }
+  if(!posDlg.dirty.until) $('#pdUntil').value = dateInput(posAddDays(from, swPrefs().h).getTime());
+}
+function posDlgSave(){
+  if(!posDlg) return;
+  const mode = posDlg.mode, px = posNum('pdPx');
+  if(!px || px <= 0){ toast(t('pd_err_px')); return; }
+  if(mode === 'sell'){
+    const p = positions.find(x => x.id === posDlg.pid); if(!p) return posDlgClose();
+    p.sold = {px, at:Date.now()};
+    posSave(); posDlgClose(); renderPos(); renderAlerts(); renderSwing();
+    if(detailSym === p.sym) posDetailLine(p.sym);
+    toast(tpl('pd_sold_toast', {res:fmtEur(posPnl(p, px).eur, true)}));
+    return;
+  }
+  let sym = posDlg.sym, a = posDlg.asset;
+  if(!sym){
+    const v = $('#pdAsset').value.trim(), m = v.match(/\(([^()]+)\)\s*$/);
+    const key = (m ? m[1] : v).toUpperCase();
+    const u = SCAN_LIST().find(x => x.sym.toUpperCase() === key || (x.name || '').toLowerCase() === v.toLowerCase() || (x.isin || '') === key);
+    if(!u){ toast(t('pd_err_asset')); return; }
+    sym = u.sym; a = u;
+  }
+  const amt = posNum('pdAmt'), fee = Math.max(posNum('pdFee') ?? 1, 0);
+  if(!amt || amt <= fee){ toast(t('pd_err_amt')); return; }
+  const d = $('#pdDate').value, until = $('#pdUntil').value || null;
+  const buyAt = /^\d{4}-\d{2}-\d{2}$/.test(d) ? (d === dateInput(Date.now()) ? Date.now() : new Date(d + 'T12:00:00').getTime()) : Date.now();
+  const tgt = posNum('pdTgt'), stop = posNum('pdStop');
+  const base = {sym, name:(a && a.name) || sym, isin:(a && a.isin) || '', type:(a && a.type) === 'etf' ? 'etf' : 'stock',
+    cur:posDlg.cur || 'EUR', amt, fee, buyPx:px, buyAt, tgt:tgt > 0 ? tgt : null, stop:stop > 0 ? stop : null,
+    until:/^\d{4}-\d{2}-\d{2}$/.test(until || '') ? until : null};
+  base.due = posDue(base.until);
+  if(mode === 'edit'){
+    const p = positions.find(x => x.id === posDlg.pid);
+    if(p){
+      const planChanged = p.tgt !== base.tgt || p.stop !== base.stop || p.until !== base.until || p.buyPx !== base.buyPx || p.amt !== base.amt || p.fee !== base.fee;
+      Object.assign(p, base);
+      if(planChanged){ p.note = {}; p.rev = (p.rev || 0) + 1; }      // a new plan may raise its hints again
+    }
+  } else {
+    positions.push(Object.assign({id:'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+      src:posDlg.src, kind:posDlg.kind, note:{}, rev:0, sold:null}, base));
+    if(!watchlist.some(w => w.sym === sym)){                  // keeps its price fresh and its chart one tap away
+      watchlist.push({sym, name:base.name, isin:base.isin, type:base.type});
+      store.set('watchlist', watchlist); renderWl(); refreshOne(sym);
+    }
+  }
+  posSave(); posDlgClose();
+  toast(t(mode === 'edit' ? 'saved' : 'pd_saved'));
+  renderPos(); renderAll(); renderSwing(); renderAlerts();
+  if(detailSym === sym) posDetailLine(sym);
+  posCheck(true);
+}
+function bindPosEvents(){
+  $('#pdCancel').addEventListener('click', posDlgClose);
+  $('#posDlg').addEventListener('click', e => { if(e.target === $('#posDlg')) posDlgClose(); });
+  $('#pdSave').addEventListener('click', posDlgSave);
+  $('#posDlg').addEventListener('keydown', e => {
+    if(e.key === 'Escape') posDlgClose();
+    if(e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.id !== 'pdAsset'){ e.preventDefault(); posDlgSave(); }
+  });
+  [['pdTgt', 'tgt'], ['pdStop', 'stop'], ['pdUntil', 'until']].forEach(([id, k]) => $('#' + id).addEventListener('input', () => { if(posDlg) posDlg.dirty[k] = true; posDlgCalc(); }));
+  ['pdAmt', 'pdPx', 'pdDate'].forEach(id => $('#' + id).addEventListener('input', () => { posDlgReplan(); posDlgCalc(); }));
+  $('#pdFee').addEventListener('input', posDlgCalc);
+  $('#pdAsset').addEventListener('change', () => {
+    if(!posDlg) return;
+    const v = $('#pdAsset').value, m = v.match(/\(([^()]+)\)\s*$/);
+    const u = m && SCAN_LIST().find(x => x.sym === m[1]); if(!u) return;
+    const q = posPrice(u.sym);
+    posDlg.cur = q ? q.cur : 'EUR';
+    $('#pdPxLbl').textContent = tpl('pd_px', {cur:posDlg.cur});
+    if(q) $('#pdPx').value = +q.px.toPrecision(6);
+    $('#pdSub').textContent = (u.name || u.sym) + ' · ' + u.sym + (q ? ' · ' + t('pd_now') + ' ' + fmtMoney(q.px, q.cur) : '');
+    posDlgReplan(); posDlgCalc();
+  });
+  $('#btnPosAdd').addEventListener('click', () => posDlgOpen('buy', {}));
+  const list = e => {
+    const row = e.target.closest('.pos-row'); if(!row) return;
+    const pid = row.dataset.pid;
+    if(e.target.closest('.pos-sell')){ posDlgOpen('sell', {pid}); return; }
+    if(e.target.closest('.pos-edit')){ posDlgOpen('edit', {pid}); return; }
+    if(e.target.closest('.pos-del')){
+      if(!confirm(t('ps_del_ask'))) return;
+      positions = positions.filter(p => p.id !== pid); posSave(); renderPos(); renderAlerts(); return;
+    }
+    openAnySym(row.dataset.sym, Array.from(row.parentElement.querySelectorAll('.pos-row')).map(r => r.dataset.sym));
+  };
+  $('#posOpen').addEventListener('click', list);
+  $('#posClosed').addEventListener('click', list);
+  $('#dBuy').addEventListener('click', () => { if(detailSym) posDlgOpen('buy', {sym:detailSym, src:'detail'}); });
+  $('#dPosLine').addEventListener('click', e => { const b = e.target.closest('[data-pid]'); if(b) posDlgOpen('sell', {pid:b.dataset.pid}); });
+}
+function openPosTab(){
+  const b = document.querySelector('#tabbar [data-tab="pos"]');
+  if(b && !$('#app').classList.contains('hidden')){ closeDetail(); b.click(); }
+}
+/* the open position of the asset shown in the detail view, if any */
+function posDetailLine(sym){
+  const el = $('#dPosLine'); if(!el) return;
+  const p = posOpen().filter(x => x.sym === sym).sort((a, b) => b.buyAt - a.buyAt)[0];
+  if(!p){ el.classList.add('hidden'); el.innerHTML = ''; return; }
+  const q = posPrice(sym), r = q ? posPnl(p, q.px) : null;
+  el.innerHTML = escHtml(tpl('ps_detail', {date:posDay(p.buyAt), px:fmtMoney(p.buyPx, p.cur), amt:fmtEur(p.amt)}))
+    + (r ? ' · <b class="' + triCls(r.eur) + '">' + fmtEur(r.eur, true) + ' (' + fmtPct(r.pct) + ')</b>' : '')
+    + ` · <button class="al-lnk" data-pid="${escHtml(p.id)}">${escHtml(t('ps_sell_btn'))}</button>`;
+  el.classList.remove('hidden');
+}
+
+/* =====================================================================
+   PUSH: notifications while the app is closed
+   The own worker keeps a copy of what it needs (open positions, alert
+   rules, the assets to watch) and checks prices every 10 minutes during
+   trading hours. Messages are encrypted by the worker for this phone;
+   the push service of the phone only passes them on.
+   settings.pid   {id, tok}: who this account is on the worker (synced)
+   settings.push  this account uses server push (synced, so a PC also
+                  hands over a buy it records)
+   pushOn         this device itself receives push messages (per device)
+   ===================================================================== */
+let pushInfo = store.get('pushInfo', null), pushTimer = null, pushBusy = false;
+function pushBase(){ if(!ownRoute) return ''; try{ return new URL(ownRoute.replace('{url}', 'x')).origin; }catch(e){ return ''; } }
+function pushIdent(){
+  const ok = settings.pid && /^[A-Za-z0-9_-]{16,40}$/.test(settings.pid.id || '') && (settings.pid.tok || '').length >= 20;
+  if(!ok){
+    const r = n => Array.from(crypto.getRandomValues(new Uint8Array(n)), b => (b % 36).toString(36)).join('');
+    settings.pid = {id:r(20), tok:r(32)}; saveSettings();
+  }
+  return settings.pid;
+}
+function b64uBytes(s){ s = s.replace(/-/g, '+').replace(/_/g, '/'); while(s.length % 4) s += '='; return Uint8Array.from(atob(s), c => c.charCodeAt(0)); }
+function bytesB64u(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+async function pushReg(){
+  if(!('serviceWorker' in navigator)) return null;
+  try{ return await Promise.race([navigator.serviceWorker.ready, sleep(4000).then(() => null)]); }catch(e){ return null; }
+}
+function pushTxt(){
+  return Object.assign(alTxt(), {lang:settings.lang, test_t:t('ps_test_t'), test_b:t('ps_test_b')});
+}
+/* what the worker needs to judge alone: compact, no history.
+   syms: 1 = ETF, 2 = inside the alert scope (watchlist-only and bought
+   assets are watched for warnings and sell hints, not for buy signals) */
+function pushPayload(sub){
+  const al = alPrefs(), id = pushIdent(), wl = new Set(watchlist.map(w => w.sym)), syms = {};
+  const scoped = u => al.scope === 'all' || (al.scope === 'watch' ? wl.has(u.sym) : u.type === al.scope);
+  SCAN_LIST().forEach(u => { const s = scoped(u); if(s || wl.has(u.sym)) syms[u.sym] = (u.type === 'etf' ? 1 : 0) | (s ? 2 : 0); });
+  posOpen().forEach(p => { if(!(p.sym in syms)) syms[p.sym] = p.type === 'etf' ? 1 : 0; });
+  const cool = {}, lim = Date.now() - AL_COOL_MS;
+  Object.keys(alCool).forEach(k => { if(alCool[k] > lim) cool[k] = alCool[k]; });
+  const seen = {}, d0 = alDay() - 12;
+  Object.keys(alSeen || {}).forEach(k => { if(alSeen[k] >= d0) seen[k] = alSeen[k]; });
+  return {id:id.id, tok:id.tok, sub:sub || null, lang:settings.lang, tz:new Date().getTimezoneOffset(),
+    al:{sig:!!al.sig, min:al.min, mom:!!al.mom, warn:!!al.warn, swing:!!al.swing, risk:al.risk, level:al.level, cap:Math.round(+al.cap) || 3},
+    swp:swPrefs(), watch:watchlist.map(w => w.sym), syms, cool, seen, txt:pushTxt(),
+    pos:posOpen().map(p => ({id:p.id, sym:p.sym, name:p.name, type:p.type, cur:p.cur, amt:p.amt, fee:p.fee, buyPx:p.buyPx, buyAt:p.buyAt,
+      tgt:p.tgt, stop:p.stop, due:p.due, rev:p.rev || 0, note:p.note}))};
+}
+async function pushPost(path, body){
+  const base = pushBase(); if(!base) throw Object.assign(new Error('noroute'), {why:'noroute'});
+  let r;
+  try{ r = await fetch(base + path, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)}); }
+  catch(e){ throw Object.assign(new Error('offline'), {why:'net'}); }
+  let j = null; try{ j = await r.json(); }catch(e){}
+  if(!r.ok) throw Object.assign(new Error((j && j.error) || ('HTTP ' + r.status)), {why:(j && j.error) || 'http', status:r.status});
+  return j || {};
+}
+function pushWhy(why){
+  const k = {nokv:'ps_why_nokv', noroute:'ps_why_noroute', nopush:'ps_why_nopush', full:'ps_why_full', denied:'ps_why_denied', net:'ps_why_net', oldworker:'ps_why_old'}[why];
+  return k ? t(k) : tpl('ps_why_err', {why:why || '?'});
+}
+function strHash32(s){ let h = 2166136261; for(let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); }
+/* why it failed stays visible in the status line until it works or push is switched off */
+async function pushSubscribe(){
+  const r = await pushSubscribeTry();
+  if(!r.ok){ pushInfo = Object.assign({}, pushInfo || {}, {err:r.why}); store.set('pushInfo', pushInfo); }
+  return r;
+}
+async function pushSubscribeTry(){
+  if(guestMode) return {ok:false, why:'nopush'};
+  const base = pushBase();
+  if(!base) return {ok:false, why:'noroute'};
+  if(!('PushManager' in window)) return {ok:false, why:'nopush'};
+  const reg = await pushReg();
+  if(!reg || !reg.pushManager) return {ok:false, why:'nopush'};
+  try{
+    let vj = null, vr = null;
+    try{ vr = await fetch(base + '/vapid'); vj = await vr.json(); }catch(e){ return {ok:false, why:'net'}; }
+    /* the worker from before push answers every address as a price request */
+    if(!vr.ok || !vj || !vj.key) return {ok:false, why:(vj && vj.error === 'nokv') ? 'nokv' : vr.status === 400 ? 'oldworker' : (vj && vj.error) || 'http'};
+    let sub = await reg.pushManager.getSubscription();
+    const cur = sub && sub.options && sub.options.applicationServerKey ? bytesB64u(sub.options.applicationServerKey) : null;
+    if(sub && cur !== vj.key){ try{ await sub.unsubscribe(); }catch(e){} sub = null; }
+    if(!sub){
+      try{ sub = await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:b64uBytes(vj.key)}); }
+      catch(e){ return {ok:false, why:Notification.permission === 'denied' ? 'denied' : 'nopush', msg:String(e && e.message || e)}; }
+    }
+    const body = pushPayload(sub.toJSON());
+    const j = await pushPost('/sub', body);
+    store.set('pushOn', true);
+    if(!settings.push){ settings.push = true; saveSettings(); }
+    store.set('pushSent', {h:strHash32(JSON.stringify(body)), at:Date.now()});
+    pushInfo = {at:Date.now(), last:j.last || null, subs:j.subs || 1, err:null}; store.set('pushInfo', pushInfo);
+    pushCfgWrite();
+    return {ok:true, info:j};
+  }catch(e){ return {ok:false, why:e.why || 'http', msg:String(e.message || e)}; }
+}
+async function pushUnsubscribe(){
+  store.set('pushOn', false);
+  try{
+    const reg = await pushReg(), sub = reg && reg.pushManager ? await reg.pushManager.getSubscription() : null;
+    if(sub){
+      const ep = sub.endpoint; try{ await sub.unsubscribe(); }catch(e){}
+      const id = pushIdent(); await pushPost('/unsub', {id:id.id, tok:id.tok, endpoint:ep});
+    }
+  }catch(e){}
+  pushInfo = null; store.del('pushInfo'); store.del('pushSent');
+  pushCfgWrite();
+}
+/* sends the current state to the worker, 20 s after the last change and
+   only when something changed (or once in 12 hours, as a sign of life) */
+function pushSyncSoon(delay){
+  if(!settings.push || !settings.pid || guestMode || !pushBase()) return;
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(() => pushSync(false), delay == null ? 20000 : delay);
+}
+async function pushSync(force){
+  if(pushBusy || !settings.push || !settings.pid || guestMode || !pushBase() || $('#app').classList.contains('hidden')) return;
+  pushBusy = true;
+  try{
+    let sub = null;
+    if(store.get('pushOn', false)){
+      const reg = await pushReg();
+      sub = reg && reg.pushManager ? await reg.pushManager.getSubscription() : null;
+      if(!sub && 'Notification' in window && Notification.permission === 'granted'){ await pushSubscribe(); return; }
+    }
+    const body = pushPayload(sub ? sub.toJSON() : null), h = strHash32(JSON.stringify(body)), last = store.get('pushSent', null);
+    if(!force && last && last.h === h && Date.now() - last.at < 12 * 3600000) return;
+    let j;
+    try{ j = await pushPost('/sub', body); }
+    catch(e){
+      /* the worker forgot this account (all phones gone): only a phone that
+         wants push may register it again                                  */
+      if(e.status === 404 && sub){ await pushSubscribe(); }
+      else if(e.why !== 'net'){ pushInfo = Object.assign({}, pushInfo || {}, {err:e.why}); store.set('pushInfo', pushInfo); alMetaRender(); }
+      return;
+    }
+    store.set('pushSent', {h, at:Date.now()});
+    pushInfo = {at:Date.now(), last:j.last || null, subs:j.subs || 0, err:null}; store.set('pushInfo', pushInfo);
+    if(j.resub && sub){ try{ await sub.unsubscribe(); }catch(e){} await pushSubscribe(); }
+    alMetaRender();
+  } finally { pushBusy = false; }
+}
+async function pushTest(){
+  const btn = $('#btnPushTest'); if(btn) btn.disabled = true;
+  try{
+    await pushSync(true);
+    const id = pushIdent();
+    const j = await pushPost('/test', {id:id.id, tok:id.tok});
+    const ok = (j.sent || []).filter(s => s >= 200 && s < 300).length;
+    toast(ok ? t('ps_test_ok') : tpl('ps_test_fail', {why:(j.sent || []).join(', ') || '–'}));
+  }catch(e){ toast(tpl('ps_test_fail', {why:pushWhy(e.why)})); }
+  finally{ if(btn) btn.disabled = false; }
+}
+/* the service worker needs the address and the account to renew a
+   subscription the push service replaced while the app was closed */
+async function pushCfgWrite(){
+  try{
+    if(!('caches' in window)) return;
+    const c = await caches.open('dr-bg');
+    if(store.get('pushOn', false) && settings.pid && pushBase())
+      await c.put('push', new Response(JSON.stringify({base:pushBase(), id:settings.pid.id, tok:settings.pid.tok}), {headers:{'Content-Type':'application/json'}}));
+    else await c.delete('push');
+  }catch(e){}
+}
+function pushMetaText(){
+  const i = pushInfo || {};
+  if(store.get('pushOn', false)) return i.err ? tpl('ps_meta_err', {why:pushWhy(i.err)})
+    : i.last ? t('ps_meta_on') + ' · ' + tpl('ps_meta_last', {time:fmtTime(i.last)}) : t('ps_meta_wait');
+  return i.err && alNotifyState() === 'on' ? tpl('ps_meta_err', {why:pushWhy(i.err)}) : '';
+}
+function pushResume(){
+  pushCfgWrite();
+  if(guestMode || !pushBase()) return;
+  /* notifications were on but this device has no push yet: right after the
+     update, or after signing in again (signing out stops them)           */
+  if(!store.get('pushOn', false) && alNotifyState() === 'on' && !pushResume.tried){
+    pushResume.tried = true;
+    setTimeout(() => pushSubscribe().then(() => { renderAlertBar(); alMetaRender(); }), 2500);
+    return;
+  }
+  pushSyncSoon(4000);
 }
 
 /* =====================================================================
@@ -7287,6 +8495,8 @@ applyTheme();
 bindEvents();
 bindAlertEvents();
 bindSwingEvents();
+bindPosEvents();
+bindFindEvents();
 routeWait = Promise.race([loadRoute(), sleep(3000)]).finally(() => { routeWait = null; });
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') loadRoute(); });
 applyLang();

@@ -2,8 +2,9 @@
    in the same folder as index.html, or the app cannot register it.
    - keeps a copy of the app so it starts without a connection
    - shows notifications (Android only accepts them from here)
+   - receives push messages from the own server while the app is closed
    - runs the background check the app hands over                */
-const SHELL = 'dr-shell-v2', BG = 'dr-bg';
+const SHELL = 'dr-shell-v3', BG = 'dr-bg';
 const ROOT = new URL('./', self.location).pathname;
 const json = o => new Response(JSON.stringify(o), {headers: {'Content-Type': 'application/json'}});
 
@@ -44,18 +45,72 @@ self.addEventListener('fetch', e => {
   })());
 });
 
+/* a tap opens the app on the page the message is about: sell hints on
+   "Gekauft", new signals on "Signale"                                */
 self.addEventListener('notificationclick', e => {
   e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || './#signale';
+  const tab = url.indexOf('#gekauft') >= 0 ? 'pos' : 'alerts';
   e.waitUntil((async () => {
     const all = await self.clients.matchAll({type: 'window', includeUncontrolled: true});
     for (const c of all) {
       if ('focus' in c) {
         try { await c.focus(); } catch (err) {}
-        c.postMessage({type: 'open-alerts'});
+        c.postMessage({type: 'open-tab', tab});
         return;
       }
     }
-    await self.clients.openWindow('./#signale');
+    await self.clients.openWindow(url);
+  })());
+});
+
+/* A message from the own server (see worker.js). It carries the text to
+   show and the records behind it; those wait in "pending" and "posnote"
+   until the app opens and takes them into its lists.                   */
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; }
+  catch (err) { d = {title: 'Depot Radar', body: e.data ? e.data.text() : ''}; }
+  e.waitUntil((async () => {
+    try {
+      const c = await caches.open(BG);
+      if (Array.isArray(d.ev) && d.ev.length) {
+        const pr = await c.match('pending');
+        const pend = pr ? await pr.json() : [];
+        const have = new Set(pend.map(x => x && x.id));
+        await c.put('pending', json(pend.concat(d.ev.filter(x => x && x.id && !have.has(x.id))).slice(-60)));
+      }
+      if (Array.isArray(d.pn) && d.pn.length) {
+        const nr = await c.match('posnote');
+        const pn = nr ? await nr.json() : [];
+        await c.put('posnote', json(pn.concat(d.pn).slice(-100)));
+      }
+    } catch (err) {}
+    await self.registration.showNotification(d.title || 'Depot Radar', {body: d.body || '', tag: d.tag || 'dr-push',
+      renotify: true, icon: 'icon-192.png', data: {url: d.url || './#signale'}});
+    const wins = await self.clients.matchAll({type: 'window', includeUncontrolled: true});
+    wins.forEach(w => w.postMessage({type: 'push-merge'}));        // an open app takes the news in at once
+  })());
+});
+
+/* The push service replaced the subscription (rare). The new one goes to the
+   server at once, so messages keep arriving before the app is opened again. */
+self.addEventListener('pushsubscriptionchange', e => {
+  e.waitUntil((async () => {
+    try {
+      const c = await caches.open(BG), r = await c.match('push');
+      if (!r) return;
+      const p = await r.json();
+      let sub = e.newSubscription;
+      const old = e.oldSubscription && e.oldSubscription.endpoint;
+      if (!sub) {
+        const key = e.oldSubscription && e.oldSubscription.options && e.oldSubscription.options.applicationServerKey;
+        if (!key) return;
+        sub = await self.registration.pushManager.subscribe({userVisibleOnly: true, applicationServerKey: key});
+      }
+      await fetch(p.base + '/sub', {method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({id: p.id, tok: p.tok, sub: sub.toJSON(), keep: true, old: old || null})});
+    } catch (err) {}
   })());
 });
 
@@ -103,7 +158,8 @@ async function bgCheck(force) {
     out = await (new Function('cfg', 'flush', core + '\nreturn bgRun(cfg, flush);'))(cfg, o => persist(c, cfg, o, st));
   } catch (err) { return {error: String(err)}; }
   await persist(c, cfg, out, st);
-  if (out.note && cfg.notify && self.Notification && Notification.permission === 'granted') {
+  /* with server push on, the server sends the messages; this check only fills the lists */
+  if (out.note && cfg.notify && !cfg.pushOn && self.Notification && Notification.permission === 'granted') {
     await self.registration.showNotification(out.note.title, {body: out.note.body, tag: 'dr-alerts',
       renotify: true, icon: 'icon-192.png', data: {url: './#signale'}});
   }
