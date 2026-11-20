@@ -1945,12 +1945,14 @@ const DEFAULT_SETTINGS = {
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
-  nt_app_hint:'Du nutzt die Android-App. Meldungen kommen direkt von Android, auch wenn die App geschlossen ist: Sie prüft alle 15 Minuten zu Börsenzeiten (Mo–Fr 7–23 Uhr). Dafür beim Anmelden „Angemeldet bleiben“ wählen.',
+  nt_app_hint:'Du nutzt die Android-App. Meldungen kommen direkt von Android, auch wenn die App geschlossen ist: Sie prüft zu Börsenzeiten (Mo–Fr 7–23 Uhr) alle 15 Minuten, immer zur Viertelstunde. Dafür beim Anmelden „Angemeldet bleiben“ wählen.',
   nt_on:'Benachrichtigungen an. Die App prüft jetzt alle 15 Minuten im Hintergrund, auch wenn sie geschlossen ist.',
   nt_blocked:'Android blockiert die Benachrichtigungen. Bitte in den App-Einstellungen unter „Benachrichtigungen“ erlauben.',
   nt_test_b:'So kommen Meldungen an, auch wenn die App geschlossen ist.', nt_test_ok:'Test-Nachricht geschickt.',
   nt_meta_on:'Hintergrundprüfung an: alle 15 Min., Mo–Fr 7–23 Uhr', nt_meta_last:'zuletzt im Hintergrund {time}',
+  nt_meta_next:'nächste {time}',
   nt_meta_locked:'im Hintergrund nicht angemeldet: bitte mit „Angemeldet bleiben“ anmelden',
+  nt_meta_exact:'Android erlaubt der App keine genauen Zeiten: in den App-Einstellungen „Wecker und Erinnerungen“ erlauben',
   nt_meta_battery:'Akku-Optimierung kann die Prüfungen verzögern', nt_battery:'Akku-Optimierung aus',
   tab_pos:'Gekauft',
   ps_intro:'Hier trägst du ein, was du gekauft hast: Betrag, Kurs und Datum. Die App behält deinen Plan im Blick, also Ziel, Stopp und den Tag, an dem du spätestens verkaufen willst, und meldet sich, sobald einer davon erreicht ist. Mit eingeschalteten Benachrichtigungen (Tab „Signale“) kommt die Meldung auch, wenn die App geschlossen ist. Wenn du verkauft hast, tippst du auf „Verkauft“, dann wandert der Kauf in die Liste darunter. Gekauft und verkauft wird nur in deinem Depot, nicht hier.',
@@ -2392,12 +2394,14 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
-  nt_app_hint:'You are using the Android app. Notifications come straight from Android, also while the app is closed: it checks every 15 minutes during trading hours (Mon–Fri 7:00–23:00). For that, choose "Stay signed in" when signing in.',
+  nt_app_hint:'You are using the Android app. Notifications come straight from Android, also while the app is closed: during trading hours (Mon–Fri 7:00–23:00) it checks every 15 minutes, always on the quarter hour. For that, choose "Stay signed in" when signing in.',
   nt_on:'Notifications on. The app now checks every 15 minutes in the background, also while it is closed.',
   nt_blocked:'Android blocks the notifications. Please allow them in the app settings under "Notifications".',
   nt_test_b:'This is how messages arrive, also while the app is closed.', nt_test_ok:'Test message sent.',
   nt_meta_on:'background check on: every 15 min, Mon–Fri 7:00–23:00', nt_meta_last:'last in the background {time}',
+  nt_meta_next:'next {time}',
   nt_meta_locked:'not signed in for the background: please sign in with "Stay signed in"',
+  nt_meta_exact:'Android does not allow the app exact times: allow "Alarms & reminders" in the app settings',
   nt_meta_battery:'battery optimisation may delay the checks', nt_battery:'Battery optimisation off',
   tab_pos:'Bought',
   ps_intro:'Record what you bought here: amount, price and date. The app keeps an eye on your plan, meaning the goal, the stop and the day you want to sell by at the latest, and tells you as soon as one of them is reached. With notifications on (tab "Alerts") the message also comes while the app is closed. Once you have sold, tap "Sold" and the purchase moves to the list below. Buying and selling happens in your broker account only, not here.',
@@ -2961,7 +2965,7 @@ de: `
 </div></details>
 <details><summary>Meldungen bei geschlossener App</summary><div class="sec-body">
 <p>Android lässt eine Web-App im Hintergrund nur selten selbst prüfen, höchstens etwa alle 12 Stunden. Deshalb prüft der eigene Server (der Cloudflare Worker, über den auch die Kurse laufen) während der Börsenzeiten alle 10 Minuten und schickt eine Push-Nachricht. Dafür bekommt er eine Kopie von dem, was er braucht: deine offenen Käufe mit Plan, deine Signal-Regeln und die Liste der Werte. Die Nachrichten sind verschlüsselt, der Push-Dienst von Google sieht nur, dass etwas ankommt.</p>
-<p>In der <strong>Android-App</strong> geht es ohne Server: Die App prüft selbst alle 15 Minuten zu Börsenzeiten im Hintergrund und Android zeigt die Meldung an. Dafür beim Anmelden „Angemeldet bleiben“ wählen und für die App die Akku-Optimierung ausschalten, sonst verschiebt Android die Prüfungen.</p>
+<p>In der <strong>Android-App</strong> geht es ohne Server: Die App prüft selbst zu Börsenzeiten alle 15 Minuten, immer zur Viertelstunde (:00, :15, :30, :45), auch wenn das Handy ruht, und Android zeigt die Meldung an. Dafür beim Anmelden „Angemeldet bleiben“ wählen. Am zuverlässigsten läuft es, wenn die Akku-Nutzung der App auf „Nicht eingeschränkt“ steht.</p>
 <p>Pro Durchgang schaut sich der Server nur eine Handvoll Werte genau an, damit er im kostenlosen Rahmen bleibt. Gekaufte Werte prüft er jedes Mal, die Watchlist reihum etwa alle ein bis zwei Stunden, den übrigen Katalog ein- bis zweimal am Tag. Wer sich abmeldet (Schloss), bekommt auf diesem Gerät keine Meldungen mehr, bis er sich wieder anmeldet.</p>
 </div></details>
 <details><summary>Wichtiger Hinweis</summary><div class="sec-body">
@@ -3072,7 +3076,7 @@ en: `
 </div></details>
 <details><summary>Messages while the app is closed</summary><div class="sec-body">
 <p>Android rarely lets a web app check by itself in the background, about every 12 hours at most. So the own server (the Cloudflare Worker that also delivers the prices) checks every 10 minutes during trading hours and sends a push message. For that it gets a copy of what it needs: your open purchases with their plan, your alert rules and the list of assets. The messages are encrypted; Google's push service only sees that something arrives.</p>
-<p>The <strong>Android app</strong> needs no server for this: it checks by itself every 15 minutes during trading hours in the background and Android shows the message. For that, choose "Stay signed in" when signing in and switch off battery optimisation for the app, otherwise Android postpones the checks.</p>
+<p>The <strong>Android app</strong> needs no server for this: during trading hours it checks by itself every 15 minutes, always on the quarter hour (:00, :15, :30, :45), also while the phone rests, and Android shows the message. For that, choose "Stay signed in" when signing in. It runs most reliably with the app's battery usage set to "Unrestricted".</p>
 <p>Each round the server looks closely at only a handful of assets so it stays within the free plan. Bought assets are checked every time, the watchlist in turn about every one to two hours, the rest of the catalogue once or twice a day. Signing out (lock) stops the messages on this device until you sign in again.</p>
 </div></details>
 <details><summary>Important notice</summary><div class="sec-body">
@@ -8274,11 +8278,11 @@ function pushResume(){
 /* =====================================================================
    ANDROID APP
    Inside the Depot Radar Android app the page gets window.DRNative.
-   Notifications then come from Android itself, and every 15 minutes the
-   app opens this very page invisibly (?bg=1) to check the purchases, the
-   watchlist and the catalogue while the app is closed. No push server is
-   needed for that. In a normal browser NATIVE is null and nothing here
-   changes anything.
+   Notifications then come from Android itself, and at every quarter hour
+   (:00, :15, :30, :45 on trading days) the app opens this very page
+   invisibly (?bg=1) to check the purchases, the watchlist and the
+   catalogue while the app is closed. No push server is needed for that.
+   In a normal browser NATIVE is null and nothing here changes anything.
    ===================================================================== */
 const NATIVE = (() => { try{ return window.DRNative && typeof window.DRNative.version === 'function' ? window.DRNative : null; }catch(e){ return null; } })();
 const NATIVE_BG = !!(NATIVE && (() => { try{ return NATIVE.isBg(); }catch(e){ return false; } })());
@@ -8358,18 +8362,27 @@ function nativeToggle(){
   else { nativePermWait = true; NATIVE.requestPermission(); }
   renderAlertBar(); alMetaRender();
 }
+/* "10:30" today, "Mo. 07:00" on another day of this week, else the full date */
+function nativeClock(ts){
+  const d = new Date(ts), hm = d.toLocaleTimeString(locale(), {hour:'2-digit', minute:'2-digit'});
+  if(d.toDateString() === new Date().toDateString()) return hm;
+  if(Math.abs(ts - Date.now()) < 6 * 86400000) return d.toLocaleDateString(locale(), {weekday:'short'}) + ' ' + hm;
+  return fmtTime(ts);
+}
 function nativeMetaText(){
   if(alNotifyState() !== 'on') return '';
   const i = nativeInfo(), parts = [t('nt_meta_on')];
   let res = {};
   try{ res = JSON.parse(i.res || '{}') || {}; }catch(e){}
-  if(i.last) parts.push(tpl('nt_meta_last', {time:fmtTime(i.last)}));
+  if(i.last) parts.push(tpl('nt_meta_last', {time:nativeClock(i.last)}));
+  if((+i.next || 0) > Date.now() - 300000) parts.push(tpl('nt_meta_next', {time:nativeClock(i.next)}));
   if(res.why === 'locked') parts.push(t('nt_meta_locked'));
+  if(i.exact === false) parts.push(t('nt_meta_exact'));
   if(i.battery === false) parts.push(t('nt_meta_battery'));
   return parts.join(' · ');
 }
 
-/* ---- the invisible check every 15 minutes ----
+/* ---- the invisible check at every quarter hour ----
    The page was opened by the app's background job. The usual start-up
    (sign-in from "stay signed in", the saved data) has run; this does the
    checking: fresh prices for everything bought, then whatever is due in
@@ -8383,7 +8396,7 @@ async function nativeBgRun(){
     out.ms = Date.now() - out.at;
     try{ NATIVE.bgDone(JSON.stringify(out)); }catch(e){}
   };
-  setTimeout(() => { out.why = 'time'; done(); }, 200000);      // the app gives a run four minutes at most
+  setTimeout(() => { out.why = 'time'; done(); }, 150000);      // the app gives a run three minutes at most
   try{
     if(fbAuthOn() && fbSession){ try{ if(await cloudLoad()) analyses = {}; }catch(e){} }
     const syms = [...new Set(posOpen().map(p => p.sym))];
