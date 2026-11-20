@@ -761,6 +761,7 @@ html[data-view="mobile"] .al-filter .chip{padding:7px 12px; font-size:13px}
         <button class="btn primary" id="btnAlCheck" data-i18n="al_check"></button>
         <button class="btn ghost" id="btnAlNotify"></button>
         <button class="btn ghost hidden" id="btnPushTest" data-i18n="ps_test"></button>
+        <button class="btn ghost hidden" id="btnAlBattery" data-i18n="nt_battery"></button>
         <button class="btn ghost hidden" id="btnAlInstall" data-i18n="al_install"></button>
         <span class="spacer"></span>
         <button class="btn ghost" id="btnAlRules" data-i18n="al_rules"></button>
@@ -1944,6 +1945,13 @@ const DEFAULT_SETTINGS = {
 const I18N = {
 de:{
   tagline:'Trend · Risiko · Signal',
+  nt_app_hint:'Du nutzt die Android-App. Meldungen kommen direkt von Android, auch wenn die App geschlossen ist: Sie prüft alle 15 Minuten zu Börsenzeiten (Mo–Fr 7–23 Uhr). Dafür beim Anmelden „Angemeldet bleiben“ wählen.',
+  nt_on:'Benachrichtigungen an. Die App prüft jetzt alle 15 Minuten im Hintergrund, auch wenn sie geschlossen ist.',
+  nt_blocked:'Android blockiert die Benachrichtigungen. Bitte in den App-Einstellungen unter „Benachrichtigungen“ erlauben.',
+  nt_test_b:'So kommen Meldungen an, auch wenn die App geschlossen ist.', nt_test_ok:'Test-Nachricht geschickt.',
+  nt_meta_on:'Hintergrundprüfung an: alle 15 Min., Mo–Fr 7–23 Uhr', nt_meta_last:'zuletzt im Hintergrund {time}',
+  nt_meta_locked:'im Hintergrund nicht angemeldet: bitte mit „Angemeldet bleiben“ anmelden',
+  nt_meta_battery:'Akku-Optimierung kann die Prüfungen verzögern', nt_battery:'Akku-Optimierung aus',
   tab_pos:'Gekauft',
   ps_intro:'Hier trägst du ein, was du gekauft hast: Betrag, Kurs und Datum. Die App behält deinen Plan im Blick, also Ziel, Stopp und den Tag, an dem du spätestens verkaufen willst, und meldet sich, sobald einer davon erreicht ist. Mit eingeschalteten Benachrichtigungen (Tab „Signale“) kommt die Meldung auch, wenn die App geschlossen ist. Wenn du verkauft hast, tippst du auf „Verkauft“, dann wandert der Kauf in die Liste darunter. Gekauft und verkauft wird nur in deinem Depot, nicht hier.',
   ps_add:'Kauf eintragen', ps_h_open:'Offen', ps_h_closed:'Verkauft',
@@ -2384,6 +2392,13 @@ de:{
 },
 en:{
   tagline:'Trend · Risk · Signal',
+  nt_app_hint:'You are using the Android app. Notifications come straight from Android, also while the app is closed: it checks every 15 minutes during trading hours (Mon–Fri 7:00–23:00). For that, choose "Stay signed in" when signing in.',
+  nt_on:'Notifications on. The app now checks every 15 minutes in the background, also while it is closed.',
+  nt_blocked:'Android blocks the notifications. Please allow them in the app settings under "Notifications".',
+  nt_test_b:'This is how messages arrive, also while the app is closed.', nt_test_ok:'Test message sent.',
+  nt_meta_on:'background check on: every 15 min, Mon–Fri 7:00–23:00', nt_meta_last:'last in the background {time}',
+  nt_meta_locked:'not signed in for the background: please sign in with "Stay signed in"',
+  nt_meta_battery:'battery optimisation may delay the checks', nt_battery:'Battery optimisation off',
   tab_pos:'Bought',
   ps_intro:'Record what you bought here: amount, price and date. The app keeps an eye on your plan, meaning the goal, the stop and the day you want to sell by at the latest, and tells you as soon as one of them is reached. With notifications on (tab "Alerts") the message also comes while the app is closed. Once you have sold, tap "Sold" and the purchase moves to the list below. Buying and selling happens in your broker account only, not here.',
   ps_add:'Record a buy', ps_h_open:'Open', ps_h_closed:'Sold',
@@ -2946,6 +2961,7 @@ de: `
 </div></details>
 <details><summary>Meldungen bei geschlossener App</summary><div class="sec-body">
 <p>Android lässt eine Web-App im Hintergrund nur selten selbst prüfen, höchstens etwa alle 12 Stunden. Deshalb prüft der eigene Server (der Cloudflare Worker, über den auch die Kurse laufen) während der Börsenzeiten alle 10 Minuten und schickt eine Push-Nachricht. Dafür bekommt er eine Kopie von dem, was er braucht: deine offenen Käufe mit Plan, deine Signal-Regeln und die Liste der Werte. Die Nachrichten sind verschlüsselt, der Push-Dienst von Google sieht nur, dass etwas ankommt.</p>
+<p>In der <strong>Android-App</strong> geht es ohne Server: Die App prüft selbst alle 15 Minuten zu Börsenzeiten im Hintergrund und Android zeigt die Meldung an. Dafür beim Anmelden „Angemeldet bleiben“ wählen und für die App die Akku-Optimierung ausschalten, sonst verschiebt Android die Prüfungen.</p>
 <p>Pro Durchgang schaut sich der Server nur eine Handvoll Werte genau an, damit er im kostenlosen Rahmen bleibt. Gekaufte Werte prüft er jedes Mal, die Watchlist reihum etwa alle ein bis zwei Stunden, den übrigen Katalog ein- bis zweimal am Tag. Wer sich abmeldet (Schloss), bekommt auf diesem Gerät keine Meldungen mehr, bis er sich wieder anmeldet.</p>
 </div></details>
 <details><summary>Wichtiger Hinweis</summary><div class="sec-body">
@@ -3056,6 +3072,7 @@ en: `
 </div></details>
 <details><summary>Messages while the app is closed</summary><div class="sec-body">
 <p>Android rarely lets a web app check by itself in the background, about every 12 hours at most. So the own server (the Cloudflare Worker that also delivers the prices) checks every 10 minutes during trading hours and sends a push message. For that it gets a copy of what it needs: your open purchases with their plan, your alert rules and the list of assets. The messages are encrypted; Google's push service only sees that something arrives.</p>
+<p>The <strong>Android app</strong> needs no server for this: it checks by itself every 15 minutes during trading hours in the background and Android shows the message. For that, choose "Stay signed in" when signing in and switch off battery optimisation for the app, otherwise Android postpones the checks.</p>
 <p>Each round the server looks closely at only a handful of assets so it stays within the free plan. Bought assets are checked every time, the watchlist in turn about every one to two hours, the rest of the catalogue once or twice a day. Signing out (lock) stops the messages on this device until you sign in again.</p>
 </div></details>
 <details><summary>Important notice</summary><div class="sec-body">
@@ -4273,6 +4290,7 @@ function applyView(){
 }
 function applyTheme(){
   document.documentElement.dataset.theme=settings.theme;
+  nativeBars();
   $('#btnTheme').textContent=settings.theme==='dark'?'☀':'☾';
   renderAll(); renderMovers(); renderAlerts();
   if(planState) drawPlanChart();
@@ -5219,6 +5237,7 @@ function unlock(isGuest){
   for(const asset of watchlist){ const s=seriesMap[asset.sym]; if(s) analyses[asset.sym]=analyze(asset,s); }
   applyLang(); applyGuestUI(); applyRoleUI(); scheduleAuto();
   sessionTouch();          // devices restored from "stay signed in" never registered before
+  if(NATIVE_BG){ alStart(); nativeBgRun(); return; }
   if(fbAuthOn() && fbSession){
     cloudLoad().then(found => {
       if(found){ analyses = {}; applyLang(); renderAll(); }
@@ -5233,6 +5252,7 @@ function lockNow(){
   store.del('authed'); $('#liPw').value=''; currentUser=''; isAdmin=true;
   bgClear();
   if(store.get('pushOn', false)) pushUnsubscribe();
+  if(NATIVE){ try{ NATIVE.setBg(false); }catch(e){} }        // signed out: no checks in the background
   if(guestMode){ endGuest(); return; }
   closeDetail(); showLock();
 }
@@ -6745,6 +6765,11 @@ function alPrune(){
   Object.keys(alCool).forEach(k => { if(!(alCool[k] > lim)) delete alCool[k]; });
 }
 function alertsAdd(found, notify){
+  if(NATIVE){
+    const ids = new Set(alerts.map(e => e.id));
+    (store.get('alerts', []) || []).forEach(e => { if(e && e.id && !ids.has(e.id)){ alerts.push(e); ids.add(e.id); } });
+    alerts.sort((a, b) => b.at - a.at);
+  }
   const have = new Set(alerts.map(e => e.id));
   const fresh = found.filter(e => e && e.id && !have.has(e.id));
   if(!fresh.length) return;
@@ -6792,6 +6817,7 @@ function alDue(){
   return scanQueue(false).length > 0;
 }
 function alTick(){
+  if(nativePaused) return;
   if(alDue()) scanUniverse(false);
   posRefreshTick();
 }
@@ -6814,9 +6840,14 @@ function alStart(){
   bgMerge().then(() => { setTimeout(alTick, 1500); bgWriteConfigSoon(); posCheck(true); });
   bgRegister();
   pushResume();
+  const th = /^#tab=([a-z]+)$/.exec(location.hash || '');
+  if(th){
+    try{ history.replaceState(null, '', location.pathname); }catch(e){}
+    const b = document.querySelector('#tabbar [data-tab="' + th[1] + '"]'); if(b) b.click();
+  }
   if(location.hash === '#signale' || location.hash === '#gekauft'){
     const h = location.hash;
-    try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
+    try{ history.replaceState(null, '', location.pathname + (NATIVE ? '' : location.search)); }catch(e){}
     if(h === '#gekauft') openPosTab(); else openAlertsTab();
   }
 }
@@ -6827,11 +6858,20 @@ function openAlertsTab(){
 
 /* ---------------- system notifications ---------------- */
 function alNotifyState(){
+  if(NATIVE){
+    let p = 'denied';
+    try{ p = NATIVE.permission(); }catch(e){}
+    if(p === 'denied') return 'blocked';
+    return p === 'granted' && store.get('alNotify', false) ? 'on' : 'off';
+  }
   if(!('Notification' in window)) return 'none';
   if(Notification.permission === 'denied') return 'blocked';
   return (Notification.permission === 'granted' && store.get('alNotify', false)) ? 'on' : 'off';
 }
 async function alShow(title, body, url, tag){
+  if(NATIVE){
+    try{ return !!NATIVE.notify(String(title), String(body || ''), url || './#signale', tag || 'dr-alerts'); }catch(e){ return false; }
+  }
   const opt = {body, tag:tag || 'dr-alerts', renotify:true, icon:'icon-192.png', data:{url:url || './#signale'}};
   /* Android refuses "new Notification()" outright; there it has to come
      from the service worker.                                           */
@@ -6852,6 +6892,7 @@ function alNotifySystem(evs){
   alShow(n.title, n.body, n.url, n.tag);
 }
 async function alToggleNotify(){
+  if(NATIVE){ nativeToggle(); return; }
   const st = alNotifyState();
   if(st === 'none'){ toast(t('al_n_unsupported')); return; }
   if(st === 'blocked'){ toast(t('al_n_blocked_hint')); return; }
@@ -6901,6 +6942,14 @@ function renderAlertBar(){
   const standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
   $('#btnAlInstall').classList.toggle('hidden', !installEvt || standalone);
   const pt = $('#btnPushTest'); if(pt) pt.classList.toggle('hidden', !store.get('pushOn', false) || st !== 'on');
+  const bb = $('#btnAlBattery'); if(bb) bb.classList.add('hidden');
+  if(NATIVE){                                    // the Android app: no install, its own test and battery buttons
+    $('#btnAlInstall').classList.add('hidden');
+    if(pt) pt.classList.toggle('hidden', st !== 'on');
+    if(bb) bb.classList.toggle('hidden', st !== 'on' || nativeInfo().battery !== false);
+    $('#alAppHint').textContent = t('nt_app_hint');
+    return;
+  }
   $('#alAppHint').textContent = standalone ? t('al_app_standalone') : (installEvt ? t('al_app_ready') : t('al_app_hint'));
 }
 function alMetaRender(){
@@ -6911,8 +6960,9 @@ function alMetaRender(){
   if(!scanData.at) parts.push(t('al_meta_never'));
   else parts.push(t('al_meta').replace('{time}', fmtTime(scanData.at)).replace('{n}', st ? st.compared : 0));
   parts.push(al.auto ? t('al_meta_auto').replace('{h}', Math.max(1, +settings.scanHours || 3)) : t('al_meta_auto_off'));
-  const pm = pushMetaText();
-  if(swState === 'missing') parts.push(t('al_sw_missing'));
+  const pm = NATIVE ? nativeMetaText() : pushMetaText();
+  if(NATIVE){ if(pm) parts.push(pm); }
+  else if(swState === 'missing') parts.push(t('al_sw_missing'));
   else if(pm) parts.push(pm);
   else if(bgState === 'on') parts.push(t('al_meta_bg_on'));
   else if(alNotifyState() === 'on') parts.push(t('al_meta_bg_off'));
@@ -7041,6 +7091,7 @@ function bindAlertEvents(){
   });
   $('#btnAlNotify').addEventListener('click', alToggleNotify);
   $('#btnPushTest').addEventListener('click', pushTest);
+  $('#btnAlBattery').addEventListener('click', () => { try{ NATIVE.openBattery(); }catch(e){} });
   $('#btnAlInstall').addEventListener('click', async () => {
     if(!installEvt) return;
     try{ installEvt.prompt(); await installEvt.userChoice; }catch(e){}
@@ -7695,6 +7746,7 @@ function noteFor(evs, txt){
 
 /* checks every open position against fresh prices; returns the new hints */
 function posCheck(notify){
+  if(nativePaused) return [];
   const now = Date.now(), out = [];
   let changed = false;
   const have = new Set(alerts.map(e => e.id));
@@ -8091,6 +8143,7 @@ function pushWhy(why){
 function strHash32(s){ let h = 2166136261; for(let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); }
 /* why it failed stays visible in the status line until it works or push is switched off */
 async function pushSubscribe(){
+  if(NATIVE) return {ok:false, why:'native'};
   const r = await pushSubscribeTry();
   if(!r.ok){ pushInfo = Object.assign({}, pushInfo || {}, {err:r.why}); store.set('pushInfo', pushInfo); }
   return r;
@@ -8139,6 +8192,7 @@ async function pushUnsubscribe(){
 /* sends the current state to the worker, 20 s after the last change and
    only when something changed (or once in 12 hours, as a sign of life) */
 function pushSyncSoon(delay){
+  if(NATIVE) return;
   if(!settings.push || !settings.pid || guestMode || !pushBase()) return;
   clearTimeout(pushTimer);
   pushTimer = setTimeout(() => pushSync(false), delay == null ? 20000 : delay);
@@ -8171,6 +8225,11 @@ async function pushSync(force){
   } finally { pushBusy = false; }
 }
 async function pushTest(){
+  if(NATIVE){
+    const ok = await alShow(t('ps_test_t'), t('nt_test_b'), './#signale', 'dr-test');
+    toast(t(ok ? 'nt_test_ok' : 'nt_blocked'));
+    return;
+  }
   const btn = $('#btnPushTest'); if(btn) btn.disabled = true;
   try{
     await pushSync(true);
@@ -8199,6 +8258,7 @@ function pushMetaText(){
   return i.err && alNotifyState() === 'on' ? tpl('ps_meta_err', {why:pushWhy(i.err)}) : '';
 }
 function pushResume(){
+  if(NATIVE){ try{ if(alNotifyState() === 'on') NATIVE.setBg(true); }catch(e){} return; }
   pushCfgWrite();
   if(guestMode || !pushBase()) return;
   /* notifications were on but this device has no push yet: right after the
@@ -8209,6 +8269,139 @@ function pushResume(){
     return;
   }
   pushSyncSoon(4000);
+}
+
+/* =====================================================================
+   ANDROID APP
+   Inside the Depot Radar Android app the page gets window.DRNative.
+   Notifications then come from Android itself, and every 15 minutes the
+   app opens this very page invisibly (?bg=1) to check the purchases, the
+   watchlist and the catalogue while the app is closed. No push server is
+   needed for that. In a normal browser NATIVE is null and nothing here
+   changes anything.
+   ===================================================================== */
+const NATIVE = (() => { try{ return window.DRNative && typeof window.DRNative.version === 'function' ? window.DRNative : null; }catch(e){ return null; } })();
+const NATIVE_BG = !!(NATIVE && (() => { try{ return NATIVE.isBg(); }catch(e){ return false; } })());
+const NATIVE_T0 = Date.now();
+let nativePaused = false, nativePermWait = false;
+if(NATIVE){
+  /* TradingView, Yahoo, Trade Republic and the like open outside the app */
+  window.open = function(u){ try{ NATIVE.openUrl(String(new URL(u, location.href))); }catch(e){} return null; };
+}
+function nativeInfo(){ try{ return JSON.parse(NATIVE.bgInfo() || '{}'); }catch(e){ return {}; } }
+/* a background run saved things after this page was loaded (one that found
+   nobody signed in saved nothing, so it must not send anyone to the login) */
+function nativeStale(){
+  const i = nativeInfo();
+  if(!((+i.last || 0) > NATIVE_T0 + 500)) return false;
+  try{ return JSON.parse(i.res || '{}').ok === true; }catch(e){ return false; }
+}
+function nativeReload(hash){
+  try{ location.replace(location.pathname + '?r=' + Date.now() + (hash || '')); }catch(e){ location.reload(); }
+}
+function nativeTabHash(){ const b = document.querySelector('#tabbar .tab.on'); return b ? '#tab=' + b.dataset.tab : ''; }
+function nativeBars(){
+  if(!NATIVE || typeof NATIVE.setBars !== 'function') return;
+  try{
+    const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+    if(/^#[0-9a-f]{6}$/i.test(bg)) NATIVE.setBars(bg, !dark());
+  }catch(e){}
+}
+
+/* ---- called by the Android app ---- */
+window.drPause = () => { nativePaused = true; try{ if(scanFlush) scanFlush(); }catch(e){} };
+window.drResume = () => {
+  if(nativeStale()){ nativeReload(nativeTabHash()); return; }     // start from what the background check saved
+  nativePaused = false;
+  if(!$('#app').classList.contains('hidden')){ renderAlertBar(); alMetaRender(); setTimeout(alTick, 800); }
+};
+window.drOpenHash = h => {
+  if(nativeStale() || $('#app').classList.contains('hidden')){ nativeReload(h); return; }
+  if(h === '#gekauft') openPosTab(); else openAlertsTab();
+};
+/* the Android back button: close what is open, then go to the overview, then leave */
+window.drBack = () => {
+  if(!$('#posDlg').classList.contains('hidden')){ posDlgClose(); return true; }
+  if(detailSym){ closeDetail(); return true; }
+  if(!$('#findDlg').classList.contains('hidden')){ findClose(); return true; }
+  const on = document.querySelector('#tabbar .tab.on');
+  if(on && on.dataset.tab !== 'overview' && !$('#app').classList.contains('hidden')){
+    const o = document.querySelector('#tabbar [data-tab="overview"]'); if(o){ o.click(); return true; }
+  }
+  return false;
+};
+window.drNativePerm = st => {
+  const wanted = nativePermWait; nativePermWait = false;
+  if(st === 'granted'){ if(wanted) nativeNotifyOn(); }
+  else toast(t('nt_blocked'));
+  renderAlertBar(); alMetaRender();
+};
+
+/* ---- notifications switched on and off in the app ---- */
+function nativeNotifyOn(){
+  store.set('alNotify', true);
+  try{ NATIVE.setBg(true); }catch(e){}
+  alShow(t('al_n_test_t'), t('nt_test_b'), './#signale', 'dr-test');
+  toast(t('nt_on'));
+  renderAlertBar(); alMetaRender();
+}
+function nativeToggle(){
+  const st = alNotifyState();
+  if(st === 'on'){
+    store.set('alNotify', false);
+    try{ NATIVE.setBg(false); }catch(e){}
+    toast(t('al_n_disabled'));
+  } else if(st === 'blocked'){
+    toast(t('nt_blocked'));
+    try{ NATIVE.openAppSettings(); }catch(e){}
+  } else if(NATIVE.permission() === 'granted') nativeNotifyOn();
+  else { nativePermWait = true; NATIVE.requestPermission(); }
+  renderAlertBar(); alMetaRender();
+}
+function nativeMetaText(){
+  if(alNotifyState() !== 'on') return '';
+  const i = nativeInfo(), parts = [t('nt_meta_on')];
+  let res = {};
+  try{ res = JSON.parse(i.res || '{}') || {}; }catch(e){}
+  if(i.last) parts.push(tpl('nt_meta_last', {time:fmtTime(i.last)}));
+  if(res.why === 'locked') parts.push(t('nt_meta_locked'));
+  if(i.battery === false) parts.push(t('nt_meta_battery'));
+  return parts.join(' · ');
+}
+
+/* ---- the invisible check every 15 minutes ----
+   The page was opened by the app's background job. The usual start-up
+   (sign-in from "stay signed in", the saved data) has run; this does the
+   checking: fresh prices for everything bought, then whatever is due in
+   the catalogue, with the same alert rules and limits as in the open app.
+   Android shows what it finds; the results are saved for the next start. */
+async function nativeBgRun(){
+  const out = {at:Date.now(), ok:false, sells:0, alerts:0};
+  let finished = false;
+  const done = () => {
+    if(finished) return; finished = true;
+    out.ms = Date.now() - out.at;
+    try{ NATIVE.bgDone(JSON.stringify(out)); }catch(e){}
+  };
+  setTimeout(() => { out.why = 'time'; done(); }, 200000);      // the app gives a run four minutes at most
+  try{
+    if(fbAuthOn() && fbSession){ try{ if(await cloudLoad()) analyses = {}; }catch(e){} }
+    const syms = [...new Set(posOpen().map(p => p.sym))];
+    if(syms.length) await runPool(syms, async sym => {
+      try{ seriesMap[sym] = await fetchSeries(sym); delete analyses[sym]; return 'ok'; }
+      catch(e){ return e && e.bad ? 'bad' : 'net'; }
+    }, {max:4, breaker:4});
+    out.sells += posCheck(true).length;
+    if(alPrefs().auto && Date.now() >= scanPause.until){
+      const run = scanUniverse(false);
+      if(run) await run;
+    }
+    out.sells += posCheck(true).length;                          // the scan may have brought newer prices
+    out.alerts = alerts.filter(e => !e.pid && e.at >= out.at).length;
+    if(fbAuthOn() && fbSession){ try{ clearTimeout(cloudTimer); await cloudSave(); }catch(e){} }
+    out.ok = true;
+  }catch(e){ out.why = String(e && e.message || e).slice(0, 120); }
+  finally{ done(); }
 }
 
 /* =====================================================================
@@ -8511,6 +8704,10 @@ else {
     else { isAdmin = true; currentUser = 'admin'; }
     unlock();
   } else showLock();
+}
+/* the app's background job found nobody signed in: nothing to check */
+if(NATIVE_BG && $('#app').classList.contains('hidden')){
+  try{ NATIVE.bgDone(JSON.stringify({at:Date.now(), ok:false, why:'locked'})); }catch(e){}
 }
 </script>
 </body>
